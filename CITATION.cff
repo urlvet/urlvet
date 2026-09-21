@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: K P
     given-names: Abhishek
-repository-code: "https://github.com/abhizaik/urlvet"
-url: "https://github.com/abhizaik/urlvet"
+repository-code: "https://github.com/urlvet/urlvet"
+url: "https://github.com/urlvet/urlvet"
 license: AGPL-3.0
 keywords:
   - phishing-detection
@@ -24,4 +24,4 @@ preferred-citation:
       given-names: Abhishek
   title: "url.vet: Phishing Detection"
   year: 2021
-  url: "https://github.com/abhizaik/urlvet"
+  url: "https://github.com/urlvet/urlvet"

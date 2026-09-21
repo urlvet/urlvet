@@ -129,7 +129,7 @@
       <p class="text-base text-gray-500 dark:text-gray-400">
         With help from
         <a
-          href="https://github.com/abhizaik/urlvet/graphs/contributors"
+          href="https://github.com/urlvet/urlvet/graphs/contributors"
           target="_blank"
           rel="noopener noreferrer"
           class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white underline underline-offset-2 transition-colors"
@@ -149,7 +149,7 @@
       <p class="text-base text-gray-600 dark:text-gray-400 mb-5 leading-relaxed">
         The community edition is licensed under
         <a
-          href="https://github.com/abhizaik/urlvet/blob/main/LICENSE"
+          href="https://github.com/urlvet/urlvet/blob/main/LICENSE"
           target="_blank"
           rel="noopener noreferrer"
           class="text-gray-900 dark:text-white underline underline-offset-2">AGPL-3.0</a
@@ -158,7 +158,7 @@
       </p>
       <div class="flex flex-wrap gap-3">
         <a
-          href="https://github.com/abhizaik/urlvet"
+          href="https://github.com/urlvet/urlvet"
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg text-base font-medium hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors"
@@ -171,7 +171,7 @@
           View on GitHub
         </a>
         <a
-          href="https://github.com/abhizaik/urlvet/issues"
+          href="https://github.com/urlvet/urlvet/issues"
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center gap-2 border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:border-gray-500 dark:hover:border-gray-500 transition-colors"

@@ -31,7 +31,7 @@
     alternateName: ["URLvet", "urlvet", "url vet"],
     url: "https://url.vet",
     logo: "https://url.vet/favicon.ico",
-    sameAs: ["https://github.com/abhizaik/urlvet"],
+    sameAs: ["https://github.com/urlvet/urlvet"],
   };
 
   onMount(() => {
@@ -59,7 +59,7 @@
       <!-- Left: GitHub + nav links -->
       <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
         <a
-          href="https://github.com/abhizaik/urlvet"
+          href="https://github.com/urlvet/urlvet"
           target="_blank"
           class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2"
         >
@@ -89,7 +89,7 @@
       <!-- Right: License and author -->
       <p class="text-gray-500 dark:text-gray-400 text-center md:text-right">
         <a
-          href="https://github.com/abhizaik/urlvet/blob/main/LICENSE"
+          href="https://github.com/urlvet/urlvet/blob/main/LICENSE"
           target="_blank"
           class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >AGPL-3.0</a

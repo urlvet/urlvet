@@ -9,8 +9,8 @@
 [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![Svelte](https://img.shields.io/badge/Svelte-5-orange?logo=svelte)](https://svelte.dev)
 [![License](https://img.shields.io/badge/License-AGPL--3-blue.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/abhizaik/urlvet?style=social)](https://github.com/abhizaik/urlvet)
-[![Last Commit](https://img.shields.io/github/last-commit/abhizaik/urlvet)](https://github.com/abhizaik/urlvet/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/urlvet/urlvet?style=social)](https://github.com/urlvet/urlvet)
+[![Last Commit](https://img.shields.io/github/last-commit/urlvet/urlvet)](https://github.com/urlvet/urlvet/commits/main)
 
 [English](./README.md) | 中文
 
@@ -33,7 +33,7 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/abhizaik/urlvet.git
+git clone https://github.com/urlvet/urlvet.git
 cd urlvet
 make start
 ```
@@ -241,8 +241,8 @@ url.vet 采用双重许可：
 
 ## 贡献
 
-- 发现 Bug？→ [提交 Issue](https://github.com/abhizaik/urlvet/issues)
-- 有问题或想法？→ [发起讨论](https://github.com/abhizaik/urlvet/discussions)
+- 发现 Bug？→ [提交 Issue](https://github.com/urlvet/urlvet/issues)
+- 有问题或想法？→ [发起讨论](https://github.com/urlvet/urlvet/discussions)
 - 想贡献代码？→ [CONTRIBUTING.md](.github/CONTRIBUTING.md)
 
 如果这个项目对您有帮助，欢迎点个 Star ⭐

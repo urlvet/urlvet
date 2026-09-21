@@ -32,8 +32,8 @@
       name: "abhizaik",
       url: "https://abhizaik.com",
     },
-    license: "https://github.com/abhizaik/urlvet/blob/main/LICENSE",
-    codeRepository: "https://github.com/abhizaik/urlvet",
+    license: "https://github.com/urlvet/urlvet/blob/main/LICENSE",
+    codeRepository: "https://github.com/urlvet/urlvet",
     featureList: [
       "Real-time URL scanning",
       "Phishing detection",
