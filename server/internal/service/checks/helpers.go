@@ -53,6 +53,9 @@ func IsValidURL(rawURL string) (*url.URL, bool, error) {
 	if parsed.Scheme == "" || parsed.Host == "" {
 		return nil, false, nil
 	}
+	// Hostnames are case-insensitive; normalize so "Google.com" matches rank,
+	// typosquat and cache lookups for "google.com". Path and query keep their case.
+	parsed.Host = strings.ToLower(parsed.Host)
 
 	host := parsed.Hostname()
 	// Allow bare IPs (IPv4 or IPv6)
