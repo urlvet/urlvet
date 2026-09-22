@@ -140,7 +140,9 @@ func GetPageFormInfo(pageURL string) (*PageFormResult, error) {
 					hasTracking = true
 				}
 			case "title":
-				if n.FirstChild != nil {
+				// Inline SVGs carry their own <title> (e.g. logo names); only the
+				// document title counts, and the first one wins.
+				if pageTitle == "" && n.FirstChild != nil && !hasAncestor(n, "svg") {
 					pageTitle = n.FirstChild.Data
 				}
 			}
@@ -435,5 +437,15 @@ func isHidden(n *html.Node, style string, w string, h string) bool {
 		return true
 	}
 
+	return false
+}
+
+// hasAncestor reports whether n is nested inside an element with the given tag.
+func hasAncestor(n *html.Node, tag string) bool {
+	for p := n.Parent; p != nil; p = p.Parent {
+		if p.Type == html.ElementNode && p.Data == tag {
+			return true
+		}
+	}
 	return false
 }
