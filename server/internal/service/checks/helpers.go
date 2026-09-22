@@ -90,11 +90,11 @@ func GetDomainAge(created time.Time) (string, int, error) {
 		case days == 0:
 			return "today", days, nil
 		case days == 1:
-			return "1 day old", days, nil
+			return "1 day", days, nil
 		case days < 30:
-			return fmt.Sprintf("%d days old", days), days, nil
+			return fmt.Sprintf("%d days", days), days, nil
 		default:
-			return "less than a month old", days, nil
+			return "less than a month", days, nil
 		}
 	}
 
