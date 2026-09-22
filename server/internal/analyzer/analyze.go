@@ -106,6 +106,7 @@ func Analyze(ctx context.Context, rawURL string) (Response, []error) {
 	// Reset timer to measure only the actual task execution time
 	start = time.Now()
 	out, errs := runTasks(ctx, in, tasks)
+	applyExceptions(in, out)
 
 	resp := Response{
 		URL:    normalizedURL,
