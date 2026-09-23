@@ -66,6 +66,7 @@ func SetupRouter() *gin.Engine {
 		}
 
 		v1.GET("/analyze", AnalyzeURLHandler)
+		v1.POST("/report", ReportResultHandler)
 		v1.GET("/rank", GetDomainRankHandler)
 		v1.GET("/ip/check", CheckIfUsesIPHandler)
 		v1.GET("/ip/resolve", ResolveIPHandler)
@@ -90,6 +91,8 @@ func SetupRouter() *gin.Engine {
 			admin.GET("/stats", AdminStatsHandler)
 			admin.GET("/recent", AdminRecentHandler)
 			admin.GET("/errors", AdminErrorsHandler)
+			admin.GET("/reports", AdminReportsHandler)
+			admin.DELETE("/reports/:id", AdminDeleteReportHandler)
 			admin.GET("/cache", ListCacheHandler)
 			admin.DELETE("/cache", FlushCacheHandler)
 			admin.DELETE("/cache/*key", DeleteCacheKeyHandler)

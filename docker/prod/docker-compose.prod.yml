@@ -9,6 +9,9 @@ services:
       CACHE_PASSWORD: "${CACHE_PASSWORD}"
       PORT: "8080"
       CHROME_URL: "ws://chrome:9222"
+      REPORTS_FILE: "/app/data/reports.jsonl"
+    volumes:
+      - backend_data:/app/data
     depends_on:
       valkey:
         condition: service_healthy
@@ -65,3 +68,4 @@ networks:
 
 volumes:
   valkey_data:
+  backend_data:

@@ -13,6 +13,7 @@
 # Go workspace stuff
 bin/
 server/tmp/*
+server/data/
 *.prof
 *.log
 *.coverprofile

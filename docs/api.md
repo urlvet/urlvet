@@ -28,13 +28,14 @@ Install the CLI once with: `go install github.com/swaggo/swag/cmd/swag@v1.16.4`
 
 ## Endpoints
 
-All endpoints are under `GET /api/v1/` and accept a `url` query parameter (max 2048 chars).
+All endpoints are under `/api/v1/`. `GET` endpoints accept a `url` query parameter (max 2048 chars).
 
 ### Analysis
 
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/api/v1/analyze` | Full URL analysis — runs all checks in parallel, returns scored report |
+| `POST` | `/api/v1/report` | Report a wrong result. JSON body: `url` (required), `verdict`, `score`, `expected_verdict` (`Safe`/`Suspicious`/`Risky`), `comment` (max 1000 chars). Appended as one JSON line to `REPORTS_FILE` (default `data/reports.jsonl`) |
 
 ### URL Structure
 
