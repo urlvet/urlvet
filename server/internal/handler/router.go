@@ -27,7 +27,10 @@ func allowedOrigins() []string {
 }
 
 func SetupRouter() *gin.Engine {
-	r := gin.Default()
+	// Not gin.Default(): its logger records client IPs and full query strings
+	// (the scanned URL), and its recovery dumps request headers.
+	r := gin.New()
+	r.Use(middleware.Recovery(), middleware.RequestLogger())
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins(),

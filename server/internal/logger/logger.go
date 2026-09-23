@@ -246,7 +246,8 @@ func Init() {
 		})
 	}
 
-	slog.SetDefault(slog.New(handler))
+	// Strip query strings from any URL before it reaches a log (see redact.go).
+	slog.SetDefault(slog.New(&redactingHandler{next: handler}))
 }
 
 // loadTimezone reads LOG_TIMEZONE and returns the matching *time.Location.
