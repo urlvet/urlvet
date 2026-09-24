@@ -29,5 +29,8 @@ const PhishTankTTL = 3 * time.Hour
 // ContentAnalysisTTL - Page content can change, but usually stays consistent for a while
 const ContentAnalysisTTL = 3 * time.Hour
 
+// ScreenshotTTL - Page screenshots on disk are reused, then deleted, after this long
+const ScreenshotTTL = 24 * time.Hour
+
 // AnalyzeResultTTL - Full scan result cache: avoids re-running all 17 tasks for the same URL
 const AnalyzeResultTTL = 24 * time.Hour
