@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+	"github.com/urlvet/urlvet/internal/constants"
 	"github.com/urlvet/urlvet/internal/logger"
 )
 
@@ -21,6 +22,7 @@ import (
 type Service struct {
 	allocCtx    context.Context
 	allocCancel context.CancelFunc
+	stopPrune   chan struct{}
 	mu          sync.RWMutex
 	initialized bool
 }
@@ -55,8 +57,10 @@ func NewService(chromeURL string) (*Service, error) {
 	service := &Service{
 		allocCtx:    allocCtx,
 		allocCancel: allocCancel,
+		stopPrune:   make(chan struct{}),
 		initialized: true,
 	}
+	go service.pruneLoop()
 
 	return service, nil
 }
@@ -78,7 +82,52 @@ func (s *Service) Close() error {
 	if s.allocCancel != nil {
 		s.allocCancel()
 	}
+	if s.stopPrune != nil {
+		close(s.stopPrune)
+		s.stopPrune = nil
+	}
 	return nil
+}
+
+// screenshotDir is where page screenshots are cached on disk.
+var screenshotDir = filepath.Join(".", "tmp", "screenshots")
+
+// pruneLoop deletes expired screenshots on start-up and then every hour.
+func (s *Service) pruneLoop() {
+	ticker := time.NewTicker(time.Hour)
+	defer ticker.Stop()
+	for {
+		PruneScreenshots(screenshotDir, constants.ScreenshotTTL)
+		select {
+		case <-ticker.C:
+		case <-s.stopPrune:
+			return
+		}
+	}
+}
+
+// PruneScreenshots removes screenshot files older than ttl from dir and
+// returns how many were deleted. Screenshots name the pages they show, so
+// they are kept no longer than other cached scan data.
+func PruneScreenshots(dir string, ttl time.Duration) int {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	removed := 0
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil || time.Since(info.ModTime()) < ttl {
+			continue
+		}
+		if os.Remove(filepath.Join(dir, e.Name())) == nil {
+			removed++
+		}
+	}
+	return removed
 }
 
 // normalizeURL normalizes a URL for consistent cache keys
@@ -152,8 +201,7 @@ func sanitizeURL(rawURL string) string {
 func GetScreenshotPath(url string) string {
 	urlStr := sanitizeURL(url)
 	filename := "screenshot-" + urlStr + ".png"
-	dir := filepath.Join(".", "tmp", "screenshots")
-	return filepath.Join(dir, filename)
+	return filepath.Join(screenshotDir, filename)
 }
 
 // validateURL ensures the URL is safe to navigate to
@@ -190,7 +238,8 @@ func (s *Service) TakeScreenshot(rawURL string) ([]byte, error) {
 
 	// Check if cached screenshot exists
 	filePath := GetScreenshotPath(validatedURL)
-	if fileInfo, err := os.Stat(filePath); err == nil && !fileInfo.IsDir() {
+	if fileInfo, err := os.Stat(filePath); err == nil && !fileInfo.IsDir() &&
+		time.Since(fileInfo.ModTime()) < constants.ScreenshotTTL {
 		// File exists, read and return it
 		imageBytes, err := os.ReadFile(filePath)
 		if err == nil {
@@ -285,7 +334,7 @@ func TakeScreenshotAndSave(url string) string {
 	timestamp := time.Now().Format("20060102-150405")
 	urlStr := sanitizeURL(url)
 	filename := "screenshot-" + timestamp + "-" + urlStr + ".png"
-	dir := filepath.Join(".", "tmp", "screenshots") // ./server/tmp/screenshots
+	dir := screenshotDir
 
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		logger.Error("failed to create screenshots directory", "err", err)
@@ -298,6 +347,5 @@ func TakeScreenshotAndSave(url string) string {
 		return ""
 	}
 
-	fmt.Println("Screenshot saved")
 	return fullPath
 }
