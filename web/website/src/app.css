@@ -1,16 +1,16 @@
+@import './lib/styles/fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   font-family:
-    'Inter',
+    'Geist',
+    system-ui,
     -apple-system,
-    BlinkMacSystemFont,
     'Segoe UI',
     Roboto,
-    Helvetica,
-    Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -18,10 +18,10 @@ body {
 
 /* SVG score-ring track: light mode uses a light gray, dark uses a darker gray */
 :root {
-  --ring-track: #e2e8f0;
+  --ring-track: #e6dfd2;
 }
 .dark {
-  --ring-track: #374151;
+  --ring-track: #2a2622;
 }
 
 /* Autofill: only needs overriding in dark mode — browser default works fine in light */
@@ -29,9 +29,9 @@ body {
 .dark input:-webkit-autofill:hover,
 .dark input:-webkit-autofill:focus,
 .dark input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0px 1000px #1f2937 inset;
-  -webkit-text-fill-color: #e5e7eb;
-  caret-color: #e5e7eb;
+  -webkit-box-shadow: 0 0 0px 1000px #1a1714 inset;
+  -webkit-text-fill-color: #f3ede2;
+  caret-color: #f3ede2;
   transition: background-color 9999s ease-in-out 0s;
 }
 

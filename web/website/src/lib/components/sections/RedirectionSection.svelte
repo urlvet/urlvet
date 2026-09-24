@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import { browser } from "$app/environment";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let analysis: any;
@@ -13,22 +14,9 @@
 </script>
 
 {#if analysis}
-  <section
-    id="section-analysis"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-        Redirection & Resolution
-      </h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >HTTP / Redirects</span
-      >
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
+      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
       {#if analysis.redirection_result}
         <div
@@ -84,10 +72,13 @@
             />
           </div>
           {#if analysis.redirection_result.has_domain_jump}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -101,7 +92,7 @@
               text="Shows how many redirect steps the website takes before reaching the final destination."
             />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white"
+          <span class="font-medium text-gray-800 dark:text-white"
             >{analysis.redirection_result.chain_length}</span
           >
         </div>
@@ -122,9 +113,11 @@
                 {#each analysis.redirection_result.chain as url, index}
                   <li class="break-all flex items-center gap-2 mb-1">
                     <span class="text-gray-400">{index + 1}.</span>
-                    <span class="font-medium text-[#424242] dark:text-white">{url}</span>
+                    <span class="font-medium text-gray-800 dark:text-white">{url}</span>
                     {#if !url.includes(domain)}
-                      <span class="text-red-400 text-xs">⚠️</span>
+                      <span class="text-red-400" title="Different domain"
+                        ><StatusIcon kind="warn" /></span
+                      >
                     {/if}
                   </li>
                 {/each}
@@ -140,7 +133,7 @@
                       <span class="text-gray-400">{index + 1}.</span>
                       <button
                         type="button"
-                        class="font-medium text-blue-400 hover:text-blue-300 underline cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1 transition-colors"
+                        class="font-medium text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-950 rounded px-1 transition-colors"
                         on:click={() => openAnalyzeInNewTab(url)}
                         title="Click to analyze this URL in a new tab"
                         aria-label={`Analyze ${url} in a new tab`}
@@ -148,7 +141,9 @@
                         {url}
                       </button>
                       {#if !url.includes(domain)}
-                        <span class="text-red-400 text-xs">⚠️</span>
+                        <span class="text-red-400" title="Different domain"
+                          ><StatusIcon kind="warn" /></span
+                        >
                       {/if}
                     </li>
                   {/each}
@@ -169,7 +164,7 @@
               text="The server response code returned when accessing the URL (e.g., 200 = OK, 404 = Not Found)."
             />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white"
+          <span class="font-medium text-gray-800 dark:text-white"
             >{analysis.http_status.code} {analysis.http_status.text}</span
           >
         </div>
@@ -184,10 +179,13 @@
             />
           </div>
           {#if analysis.http_status.is_redirect}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -204,11 +202,14 @@
             />
           </div>
           {#if analysis.is_hsts_supported}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ Yes</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> Yes</span
             >
           {:else}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ No</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> No</span
+            >
           {/if}
         </div>
       {/if}

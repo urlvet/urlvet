@@ -25,11 +25,7 @@ async function makeRequest<T>(endpoint: string, url: string): Promise<ApiRespons
     const encodedUrl = encodeURIComponent(formattedUrl);
     const fullUrl = `${PUBLIC_BASE_URL}${endpoint}?url=${encodedUrl}`;
 
-    console.log(`Making request to: ${fullUrl}`);
-
     const response = await fetch(fullUrl);
-
-    console.log(`Response status: ${response.status}`);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
@@ -38,7 +34,6 @@ async function makeRequest<T>(endpoint: string, url: string): Promise<ApiRespons
     }
 
     const data = await response.json();
-    console.log(`API Success for ${endpoint}:`, data);
     return { data };
   } catch (error) {
     console.error(`API Error for ${endpoint}:`, error);
@@ -52,11 +47,7 @@ async function makeScreenshotRequest(url: string): Promise<ApiResponse<string | 
     const encodedUrl = encodeURIComponent(formattedUrl);
     const fullUrl = `${PUBLIC_BASE_URL}/screenshot?url=${encodedUrl}`;
 
-    console.log(`Making screenshot request to: ${fullUrl}`);
-
     const response = await fetch(fullUrl);
-
-    console.log(`Screenshot response status: ${response.status}`);
 
     if (!response.ok) {
       console.error(`Screenshot API Error: HTTP ${response.status}`);
@@ -69,7 +60,6 @@ async function makeScreenshotRequest(url: string): Promise<ApiResponse<string | 
       // Convert blob to object URL
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      console.log(`Screenshot received, blob URL created`);
       return { data: blobUrl };
     }
 
@@ -81,7 +71,35 @@ async function makeScreenshotRequest(url: string): Promise<ApiResponse<string | 
   }
 }
 
+export interface ReportPayload {
+  url: string;
+  verdict?: string;
+  score?: number;
+  expected_verdict?: 'Safe' | 'Suspicious' | 'Risky';
+  comment?: string;
+}
+
+async function submitReport(payload: ReportPayload): Promise<ApiResponse<{ status: string }>> {
+  try {
+    const response = await fetch(`${PUBLIC_BASE_URL}/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { error: data.error || `HTTP ${response.status}` };
+    }
+    return { data };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Network error' };
+  }
+}
+
 export const api = {
+  async report(payload: ReportPayload): Promise<ApiResponse<{ status: string }>> {
+    return submitReport(payload);
+  },
   async analyze(url: string): Promise<ApiResponse<any>> {
     return makeRequest<any>('/analyze', url);
   },

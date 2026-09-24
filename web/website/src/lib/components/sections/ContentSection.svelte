@@ -1,369 +1,299 @@
 <script lang="ts">
-  import TooltipIcon from "../TooltipIcon.svelte";
+  import { slide } from "svelte/transition";
+  import StatusIcon from "../StatusIcon.svelte";
   import type { ContentData } from "../../types";
   export let contentData: ContentData | undefined;
+
+  type Kind = "ok" | "warn" | "bad" | "info";
+  type Check = { label: string; value: string; kind: Kind; hint: string };
+
+  let showDetails = false;
+
+  const VALUE_COLOR: Record<Kind, string> = {
+    ok: "text-emerald-700 dark:text-emerald-400",
+    warn: "text-yellow-700 dark:text-yellow-400",
+    bad: "text-red-600 dark:text-red-400",
+    info: "text-gray-700 dark:text-gray-300",
+  };
+
+  $: forms = contentData?.forms ?? [];
+  $: iframes = contentData?.iframes ?? [];
+  $: externalForms = forms.filter((f) => f.is_external).length;
+  $: hiddenForm = forms.some((f) => f.is_hidden);
+  $: brands = contentData?.brand_check?.detected_names ?? [];
+
+  $: checks = contentData
+    ? ([
+        contentData.brand_check?.is_mismatch
+          ? {
+              label: "Brand",
+              value: `Impersonates ${contentData.brand_check.brand_found}`,
+              kind: "bad",
+              hint: "The page mentions a well-known brand but isn't on its official domain.",
+            }
+          : {
+              label: "Brand",
+              value: brands.length ? `Verified: ${brands.join(", ")}` : "No known brands",
+              kind: brands.length ? "ok" : "info",
+              hint: "Checks whether brands named on the page match the domain they're hosted on.",
+            },
+        {
+          label: "Login form",
+          value: contentData.has_login_form ? "Present" : "None",
+          kind: contentData.has_login_form ? "info" : "ok",
+          hint: "Forms with password or username-like fields. Normal on established sites.",
+        },
+        {
+          label: "Payment form",
+          value: contentData.has_payment_form ? "Present" : "None",
+          kind: contentData.has_payment_form ? "warn" : "ok",
+          hint: "Forms asking for card numbers, CVV or billing details.",
+        },
+        {
+          label: "Personal info",
+          value: contentData.has_personal_form ? "Requested" : "None",
+          kind: contentData.has_personal_form ? "info" : "ok",
+          hint: "Forms asking for address, phone number or similar details.",
+        },
+        {
+          label: "Hidden elements",
+          value:
+            contentData.has_hidden_iframe && hiddenForm
+              ? "Hidden iframe & form"
+              : contentData.has_hidden_iframe
+                ? "Hidden iframe"
+                : hiddenForm
+                  ? "Hidden form"
+                  : "None",
+          kind: contentData.has_hidden_iframe || hiddenForm ? "bad" : "ok",
+          hint: "Invisible iframes or forms can run in the background without you noticing.",
+        },
+        {
+          label: "Tracking pixels",
+          value: contentData.has_tracking ? "Present" : "None",
+          kind: contentData.has_tracking ? "info" : "ok",
+          hint: "1×1 images used to track visits or email opens.",
+        },
+      ] as Check[])
+    : [];
+
+  function iconKind(k: Kind): "ok" | "warn" | "bad" {
+    return k === "info" ? "ok" : k;
+  }
 </script>
 
 {#if contentData}
-  <section
-    id="section-content"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Page Content Analysis</h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >DOM Analysis</span
+  <section class="p-4 sm:p-5 space-y-4">
+    <!-- Title -->
+    <div>
+      <p
+        class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"
       >
+        Page title
+      </p>
+      <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white break-words">
+        {contentData.title || "(No title)"}
+      </p>
     </div>
 
-    <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
-    >
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2 first:pt-0"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Page Title:</span>
-          <TooltipIcon text="The title of the page as defined in the HTML <title> tag." />
-        </div>
-        <span class="font-medium text-[#424242] dark:text-white"
-          >{contentData.title || "(No Title)"}</span
+    <!-- Checks -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      {#each checks as check}
+        <div
+          class="flex items-start gap-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2.5"
+          title={check.hint}
         >
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Brand Verification:</span>
-          <TooltipIcon
-            text="Checks if the page content matches well-known brands and verifies if it's hosted on an official domain."
-          />
-        </div>
-        {#if contentData.brand_check?.is_mismatch}
-          <span class="text-red-400 font-medium flex items-center gap-1">
-            ❌ Brand Mismatch ({contentData.brand_check.brand_found})
+          <span
+            class="mt-0.5 {check.kind === 'info'
+              ? 'text-gray-400 dark:text-gray-500'
+              : VALUE_COLOR[check.kind]}"
+          >
+            <StatusIcon kind={iconKind(check.kind)} />
           </span>
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1">
-            ✅ {contentData.brand_check?.detected_names?.length
-              ? "Verified Brands: " + contentData.brand_check.detected_names.join(", ")
-              : "No high-value brands detected"}
-          </span>
-        {/if}
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Forms Detected:</span>
-          <TooltipIcon text="Total number of HTML forms found on the page." />
-        </div>
-        <span class="font-medium text-[#424242] dark:text-white">{contentData.form_count}</span>
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Login Form Presence:</span>
-          <TooltipIcon
-            text="Checks if any forms appear to be for logging in (contain password or username-like fields)."
-          />
-        </div>
-        {#if contentData.has_login_form}
-          <span class="text-red-400 font-medium flex items-center gap-1">Detected</span>
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >None Detected</span
-          >
-        {/if}
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Payment Form Presence:</span>
-          <TooltipIcon
-            text="Checks if any forms appear to be for payments (contain credit card, CVV, or billing fields)."
-          />
-        </div>
-        {#if contentData.has_payment_form}
-          <span class="text-red-400 font-medium flex items-center gap-1">Detected</span>
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >None Detected</span
-          >
-        {/if}
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Personal Info Collection:</span>
-          <TooltipIcon
-            text="Checks if any forms request sensitive personal info like address, phone, or SSN."
-          />
-        </div>
-        {#if contentData.has_personal_form}
-          <span class="text-red-400 font-medium flex items-center gap-1">Detected</span>
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >None Detected</span
-          >
-        {/if}
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Hidden Elements:</span>
-          <TooltipIcon
-            text="Detects forms or iframes that are hidden from view, which can be used for malicious background activities."
-          />
-        </div>
-        {#if contentData.has_hidden_iframe || contentData.forms?.some((f) => f.is_hidden)}
-          <span class="text-red-400 font-medium flex items-center gap-1">
-            ⚠️ {contentData.has_hidden_iframe ? "Hidden Iframe" : ""}
-            {contentData.has_hidden_iframe && contentData.forms?.some((f) => f.is_hidden)
-              ? "&"
-              : ""}
-            {contentData.forms?.some((f) => f.is_hidden) ? "Hidden Form" : ""} Detected
-          </span>
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >None Detected</span
-          >
-        {/if}
-      </div>
-
-      <div
-        class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2"
-      >
-        <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-          <span>Tracking Beacons:</span>
-          <TooltipIcon
-            text="Detects 1x1 or 0x0 pixel images used for background tracking or verifying email opens."
-          />
-        </div>
-        {#if contentData.has_tracking}
-          <span class="text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1"
-            >Detected</span
-          >
-        {:else}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >None Detected</span
-          >
-        {/if}
-      </div>
-
-      {#if contentData.forms && contentData.forms.length > 0}
-        <div class="py-4 last:pb-0">
-          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-            Detailed Form Technicals
-          </h4>
-          <div class="space-y-8">
-            {#each contentData.forms as form, i}
-              <div
-                class="space-y-0 divide-y divide-gray-100 dark:divide-gray-800 border border-gray-300 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900/40"
-              >
-                <div
-                  class="bg-gray-100 dark:bg-gray-800/60 px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center rounded-t-lg"
-                >
-                  <span class="text-xs font-bold text-blue-400 uppercase">Form #{i + 1}</span>
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Submission Method:</span>
-                    <TooltipIcon
-                      text="The HTTP method used to send data (POST is standard, GET can leak data in URLs)."
-                    />
-                  </div>
-                  <span class="font-mono text-gray-700 dark:text-gray-200 uppercase"
-                    >{form.method}</span
-                  >
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Submission Endpoint:</span>
-                    <TooltipIcon text="The destination URL where the form data will be sent." />
-                  </div>
-                  <span class="font-mono text-gray-900 dark:text-white break-all"
-                    >{form.action || "(Current Page)"}</span
-                  >
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Data Flow:</span>
-                    <TooltipIcon
-                      text="Checks if data is being sent to the same website or an external/unrelated domain."
-                    />
-                  </div>
-                  {#if form.is_external}
-                    <span class="text-red-400 font-medium">⚠️ Submits to External Domain</span>
-                  {:else}
-                    <span class="text-emerald-700 dark:text-emerald-400 font-medium"
-                      >✅ Submits to Same Domain</span
-                    >
-                  {/if}
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Security Analysis:</span>
-                    <TooltipIcon
-                      text="Automated check for suspicious form properties or sensitive data collection."
-                    />
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    {#if !form.has_password && !form.has_user_like && !form.has_payment && !form.has_personal && !form.is_hidden}
-                      <span class="text-gray-400 italic">No sensitive flags detected</span>
-                    {/if}
-                    {#if form.is_hidden}
-                      <span class="text-red-400 font-bold">👻 HIDDEN FORM</span>
-                    {/if}
-                    {#if form.has_password}
-                      <span class="text-amber-700 dark:text-amber-400 flex items-center gap-1"
-                        >🔒 Collects Passwords</span
-                      >
-                    {/if}
-                    {#if form.has_user_like}
-                      <span class="text-blue-400 flex items-center gap-1">👤 Identity Fields</span>
-                    {/if}
-                    {#if form.has_payment}
-                      <span class="text-red-400 flex items-center gap-1">💳 Payment Data</span>
-                    {/if}
-                    {#if form.has_personal}
-                      <span class="text-orange-400 flex items-center gap-1">🏠 Personal Info</span>
-                    {/if}
-                  </div>
-                </div>
-
-                {#if form.inputs && form.inputs.length > 0}
-                  <div
-                    class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] gap-2 md:gap-4 px-4 py-2"
-                  >
-                    <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <span>Detected Data Fields:</span>
-                      <TooltipIcon
-                        text="Full technical map of input fields found within this form."
-                      />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                      {#each form.inputs as input}
-                        <span
-                          class="text-[11px] text-gray-600 dark:text-gray-300 font-mono bg-gray-100 dark:bg-gray-800/50 px-2 py-1 rounded border border-gray-300 dark:border-gray-700/30 break-all"
-                        >
-                          {input}
-                        </span>
-                      {/each}
-                    </div>
-                  </div>
-                {/if}
-
-                {#if form.submit_texts && form.submit_texts.length > 0}
-                  <div
-                    class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                  >
-                    <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <span>Submission Buttons:</span>
-                      <TooltipIcon
-                        text="The text labels on buttons that trigger this form's submission."
-                      />
-                    </div>
-                    <div class="flex flex-wrap gap-1 min-w-0">
-                      {#each form.submit_texts as text}
-                        <span
-                          class="px-2 py-0.5 bg-gray-900 text-emerald-400 rounded border border-emerald-900/30 text-xs font-medium break-all"
-                        >
-                          {text}
-                        </span>
-                      {/each}
-                    </div>
-                  </div>
-                {/if}
-              </div>
-            {/each}
+          <div class="min-w-0">
+            <p class="text-xs text-gray-500 dark:text-gray-400">{check.label}</p>
+            <p class="text-sm font-medium break-words {VALUE_COLOR[check.kind]}">{check.value}</p>
           </div>
         </div>
+      {/each}
+    </div>
+
+    <!-- Forms summary -->
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+      {#if forms.length === 0}
+        <span class="text-gray-600 dark:text-gray-400">No forms on this page.</span>
+      {:else if externalForms > 0}
+        <span class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-medium">
+          <StatusIcon kind="bad" />
+          {externalForms} of {forms.length} form{forms.length === 1 ? "" : "s"} send data to another
+          domain
+        </span>
+      {:else}
+        <span
+          class="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium"
+        >
+          <StatusIcon kind="ok" />
+          {forms.length === 1 ? "1 form, submits" : `${forms.length} forms, all submit`} to this site
+        </span>
       {/if}
 
-      {#if contentData.iframes && contentData.iframes.length > 0}
-        <div class="py-4 last:pb-0">
-          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-            Iframe & Third-Party Elements
-          </h4>
-          <div class="space-y-8">
-            {#each contentData.iframes as iframe, i}
-              <div
-                class="space-y-0 divide-y divide-gray-100 dark:divide-gray-800 border border-gray-300 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900/40"
-              >
-                <div
-                  class="bg-gray-100 dark:bg-gray-800/60 px-4 py-2 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center rounded-t-lg"
-                >
-                  <span class="text-xs font-bold text-purple-400 uppercase">Iframe #{i + 1}</span>
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Visibility Status:</span>
-                    <TooltipIcon
-                      text="Indicates if the iframe is visible to the user or hidden in the background."
-                    />
-                  </div>
-                  {#if iframe.is_hidden}
-                    <span class="text-red-400 font-bold flex items-center gap-1">👻 Hidden</span>
-                  {:else}
-                    <span class="text-gray-400 font-medium">Visible</span>
-                  {/if}
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Source (URL):</span>
-                    <TooltipIcon text="The external URL being loaded into this iframe." />
-                  </div>
-                  <span class="font-mono text-gray-900 dark:text-white break-all"
-                    >{iframe.src || "(No Source)"}</span
-                  >
-                </div>
-
-                <div
-                  class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 px-4 py-2"
-                >
-                  <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <span>Dimensions:</span>
-                    <TooltipIcon text="The width and height of the iframe element." />
-                  </div>
-                  <span class="text-gray-600 dark:text-gray-300 font-mono">
-                    {iframe.width || "auto"} x {iframe.height || "auto"}
-                  </span>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
+      {#if forms.length || iframes.length}
+        <button
+          type="button"
+          class="ml-auto inline-flex items-center gap-1 font-mono text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus-visible:underline"
+          aria-expanded={showDetails}
+          on:click={() => (showDetails = !showDetails)}
+        >
+          {showDetails ? "Hide" : "Show"} technical details
+          <svg
+            class="w-3.5 h-3.5 transition-transform duration-200 {showDetails ? 'rotate-180' : ''}"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.188l3.71-3.958a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0l-4.25-4.53a.75.75 0 01.02-1.06z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
       {/if}
     </div>
+
+    {#if showDetails}
+      <div transition:slide={{ duration: 200 }} class="space-y-3">
+        {#each forms as form, i}
+          <div
+            class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+          >
+            <div
+              class="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40"
+            >
+              <span
+                class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                >Form {i + 1}</span
+              >
+              <span
+                class="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold uppercase bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                >{form.method}</span
+              >
+              {#if form.is_hidden}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/30"
+                  >Hidden</span
+                >
+              {/if}
+              {#if form.has_password}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500/30"
+                  >Password</span
+                >
+              {/if}
+              {#if form.has_payment}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/30"
+                  >Payment</span
+                >
+              {/if}
+              {#if form.has_user_like}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700"
+                  >Identity</span
+                >
+              {/if}
+              {#if form.has_personal}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700"
+                  >Personal info</span
+                >
+              {/if}
+            </div>
+            <dl class="px-3 py-2.5 space-y-2 text-sm">
+              <div class="flex flex-col sm:flex-row sm:gap-3">
+                <dt
+                  class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                >
+                  Sends to
+                </dt>
+                <dd class="min-w-0">
+                  <span class="font-mono text-xs text-gray-800 dark:text-gray-200 break-all"
+                    >{form.action || "(this page)"}</span
+                  >
+                  <span
+                    class="ml-1 inline-flex items-center gap-1 text-xs font-medium align-middle {form.is_external
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-emerald-700 dark:text-emerald-400'}"
+                  >
+                    <StatusIcon kind={form.is_external ? "bad" : "ok"} />
+                    {form.is_external ? "External domain" : "Same site"}
+                  </span>
+                </dd>
+              </div>
+              {#if form.submit_texts?.length}
+                <div class="flex flex-col sm:flex-row sm:gap-3">
+                  <dt
+                    class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                  >
+                    Buttons
+                  </dt>
+                  <dd class="flex flex-wrap gap-1 min-w-0">
+                    {#each form.submit_texts as text}
+                      <span
+                        class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300 break-all"
+                        >{text}</span
+                      >
+                    {/each}
+                  </dd>
+                </div>
+              {/if}
+              {#if form.inputs?.length}
+                <div class="flex flex-col sm:flex-row sm:gap-3">
+                  <dt
+                    class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                  >
+                    Fields
+                  </dt>
+                  <dd class="flex flex-col gap-1 min-w-0">
+                    {#each form.inputs as input}
+                      <span class="font-mono text-[11px] text-gray-600 dark:text-gray-400 break-all"
+                        >{input}</span
+                      >
+                    {/each}
+                  </dd>
+                </div>
+              {/if}
+            </dl>
+          </div>
+        {/each}
+
+        {#each iframes as iframe, i}
+          <div
+            class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+          >
+            <div
+              class="flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40"
+            >
+              <span
+                class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                >Iframe {i + 1}</span
+              >
+              {#if iframe.is_hidden}
+                <span
+                  class="px-2 py-0.5 rounded-full border text-[10px] font-semibold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/30"
+                  >Hidden</span
+                >
+              {/if}
+              <span class="ml-auto font-mono text-[11px] text-gray-500 dark:text-gray-400"
+                >{iframe.width || "auto"} × {iframe.height || "auto"}</span
+              >
+            </div>
+            <p class="px-3 py-2.5 font-mono text-xs text-gray-800 dark:text-gray-200 break-all">
+              {iframe.src || "(no source)"}
+            </p>
+          </div>
+        {/each}
+      </div>
+    {/if}
   </section>
 {/if}

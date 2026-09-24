@@ -1,24 +1,14 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let infrastructure: any;
   export let isHostingPlatform: boolean = false;
 </script>
 
 {#if infrastructure}
-  <section
-    id="section-infrastructure"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Server Details</h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >Network</span
-      >
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
+      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
       {#if infrastructure.ip_addresses?.length}
         <div
@@ -53,15 +43,17 @@
           />
         </div>
         {#if infrastructure.nameservers_valid}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >✅ Detected</span
+          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="ok" /> Detected</span
           >
         {:else if isHostingPlatform}
-          <span class="text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1"
+          <span class="text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5"
             >Managed by hosting platform</span
           >
         {:else}
-          <span class="text-red-400 font-medium flex items-center gap-1">❌ Not Detected</span>
+          <span class="text-red-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="bad" /> Not Detected</span
+          >
         {/if}
       </div>
 
@@ -96,15 +88,17 @@
           />
         </div>
         {#if infrastructure.mx_records_valid}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >✅ Detected</span
+          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="ok" /> Detected</span
           >
         {:else if isHostingPlatform}
-          <span class="text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1"
+          <span class="text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5"
             >Not applicable</span
           >
         {:else}
-          <span class="text-red-400 font-medium flex items-center gap-1">❌ Not Detected</span>
+          <span class="text-red-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="bad" /> Not Detected</span
+          >
         {/if}
       </div>
 

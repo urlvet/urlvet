@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { VERDICT_COPY, verdictCopy } from "../../verdict";
   import { onMount } from "svelte";
 
   export let verdict: string | undefined;
@@ -43,34 +44,34 @@
     }
   > = {
     Safe: {
-      border: "border-emerald-300 dark:border-emerald-500/30",
-      bg: "bg-emerald-50 dark:bg-emerald-950/30",
+      border: "border-emerald-200 dark:border-emerald-900/70",
+      bg: "bg-emerald-50/70 dark:bg-emerald-950/25",
       shadow: "shadow-emerald-500/10",
       badge:
         "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30",
-      label: "Trusted",
+      label: VERDICT_COPY.Safe.label,
       ringColor: "#10b981",
       scoreText: "text-emerald-600 dark:text-emerald-400",
       pulse: "verdict-safe",
     },
     Risky: {
-      border: "border-red-300 dark:border-red-500/30",
-      bg: "bg-red-50 dark:bg-red-950/30",
+      border: "border-red-200 dark:border-red-900/70",
+      bg: "bg-red-50/70 dark:bg-red-950/25",
       shadow: "shadow-red-500/10",
       badge:
         "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-500/30",
-      label: "High Risk",
+      label: VERDICT_COPY.Risky.label,
       ringColor: "#ef4444",
       scoreText: "text-red-600 dark:text-red-400",
       pulse: "verdict-risky",
     },
     Suspicious: {
-      border: "border-yellow-300 dark:border-yellow-500/30",
-      bg: "bg-amber-50 dark:bg-yellow-950/30",
+      border: "border-yellow-200 dark:border-yellow-900/70",
+      bg: "bg-amber-50/70 dark:bg-yellow-950/25",
       shadow: "shadow-yellow-500/10",
       badge:
         "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-500/30",
-      label: "Be Cautious",
+      label: VERDICT_COPY.Suspicious.label,
       ringColor: "#eab308",
       scoreText: "text-yellow-600 dark:text-yellow-400",
       pulse: "verdict-suspicious",
@@ -80,19 +81,14 @@
   const R = 36;
   const CIRC = 2 * Math.PI * R;
 
-  const CONTEXT: Record<string, string> = {
-    Safe: "Typical safe sites score above 75",
-    Risky: "Scores below 40 indicate high threat likelihood",
-    Suspicious: "May be safe, but use caution for score 40-75",
-  };
-
   $: style = STYLES[verdict ?? ""] ?? STYLES.Suspicious;
   $: dashOffset = ringReady ? CIRC - ((finalScore ?? 0) / 100) * CIRC : CIRC;
-  $: context = CONTEXT[verdict ?? ""] ?? CONTEXT.Suspicious;
+  $: copy = verdictCopy(verdict);
+  $: quip = copy.quip;
 </script>
 
 <div
-  class={`flex flex-row items-center gap-4 p-4 sm:gap-6 sm:p-6 rounded-xl border shadow-lg ${style.border} ${style.bg} ${style.shadow} ${style.pulse}`}
+  class={`flex flex-row items-center gap-4 p-5 sm:gap-6 sm:p-7 rounded-2xl border ${style.border} ${style.bg}`}
 >
   <!-- Verdict -->
   <div class="flex-1 flex flex-col gap-1.5 min-w-0">
@@ -100,20 +96,18 @@
       class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"
       >Verdict</span
     >
-    <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex items-center gap-3 flex-wrap">
       <span
-        class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight"
+        class="font-serif text-5xl sm:text-6xl font-normal text-gray-900 dark:text-gray-100 tracking-[-0.01em] leading-none"
         >{verdict ?? "—"}</span
       >
       <span
-        class={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wide whitespace-nowrap ${style.badge}`}
+        class={`px-2.5 py-0.5 rounded-full font-mono text-[10px] sm:text-[11px] uppercase tracking-wider whitespace-nowrap ${style.badge}`}
       >
         {style.label}
       </span>
     </div>
-    <p class="text-[10px] sm:text-[11px] text-gray-600 dark:text-gray-500 leading-relaxed">
-      {context}
-    </p>
+    <p class="mt-1 text-[15px] sm:text-base text-gray-700 dark:text-gray-300">{quip}</p>
     {#if unreachable}
       <p class="text-[10px] sm:text-[11px] text-red-400/80">
         Site may be unreachable or returning no content.
@@ -129,14 +123,14 @@
     >
     <div class="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
       <svg class="w-full h-full -rotate-90" viewBox="0 0 88 88">
-        <circle cx="44" cy="44" r={R} fill="none" stroke="var(--ring-track)" stroke-width="7" />
+        <circle cx="44" cy="44" r={R} fill="none" stroke="var(--ring-track)" stroke-width="5" />
         <circle
           cx="44"
           cy="44"
           r={R}
           fill="none"
           stroke={style.ringColor}
-          stroke-width="7"
+          stroke-width="5"
           stroke-linecap="round"
           stroke-dasharray={CIRC}
           stroke-dashoffset={dashOffset}
@@ -144,7 +138,8 @@
         />
       </svg>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
-        <span class={`text-xl font-extrabold leading-none ${style.scoreText}`}
+        <span
+          class={`${(finalScore ?? 0) >= 100 ? "text-lg sm:text-2xl" : "text-xl sm:text-2xl"} font-medium tabular-nums leading-none ${style.scoreText}`}
           >{finalScore !== undefined ? displayedScore : "—"}</span
         >
         <span class="block w-5 border-t border-gray-500 my-0.5"></span>
