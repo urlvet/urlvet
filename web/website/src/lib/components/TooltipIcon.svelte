@@ -48,8 +48,8 @@
 <div class="relative inline-flex items-center" bind:this={iconEl}>
   <div
     class="w-4 h-4 flex items-center justify-center rounded-full
-           bg-gray-400 dark:bg-gray-700 text-white dark:text-gray-200 text-[10px] font-bold cursor-pointer
-           hover:bg-gray-500 dark:hover:bg-gray-600 transition-colors duration-150 select-none"
+           border border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-500 font-serif italic text-[11px] cursor-pointer
+           hover:border-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-150 select-none"
     role="button"
     tabindex="0"
     aria-label={text}
@@ -68,13 +68,13 @@
     bind:this={tooltipEl}
     role="tooltip"
     class="fixed w-max max-w-[85vw] md:max-w-xs
-           bg-gray-800 text-gray-100 text-xs px-3 py-1.5 rounded-lg shadow-lg
-           border border-gray-700 pointer-events-none z-[99999] whitespace-normal"
+           bg-gray-900 text-gray-100 text-xs leading-relaxed px-3 py-2 rounded-xl shadow-xl shadow-black/20
+           border border-gray-800 pointer-events-none z-[99999] whitespace-normal"
     style="left: {tipLeft}px; top: {tipTop}px;"
   >
     {text}
     <div
-      class="absolute top-full w-2 h-2 bg-gray-800 border-b border-r border-gray-700"
+      class="absolute top-full w-2 h-2 bg-gray-900 border-b border-r border-gray-800"
       style="left: {arrowLeft}; transform: translateX(-50%) rotate(45deg);"
     ></div>
   </div>

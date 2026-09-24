@@ -38,7 +38,7 @@
   {:else if screenshotUrl}
     <button
       type="button"
-      class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
       on:click={() => (showModal = true)}
       aria-label="View full-size screenshot"
     >
@@ -101,7 +101,7 @@
       <h4 class="text-sm font-semibold text-gray-300 mb-2">Website Screenshot</h4>
       <button
         type="button"
-        class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
         on:click={() => (showModal = true)}
         aria-label="View full-size screenshot"
       >

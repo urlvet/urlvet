@@ -1,25 +1,12 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import type { PhishingResult } from "../../types";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let phishing: PhishingResult | undefined;
 </script>
 
 {#if phishing}
-  <section
-    id="section-threatintel"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Threat Intel</h3>
-      <div class="flex items-center gap-2">
-        <span
-          class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >
-          PhishTank
-        </span>
-      </div>
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
       class="{phishing.in_database && phishing.valid
         ? 'border-red-700/60 bg-red-950/20'
@@ -37,14 +24,14 @@
         <p
           class="text-sm text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-2"
         >
-          ✅ Not found in PhishTank database.
+          <StatusIcon kind="ok" /> Not found in PhishTank database.
         </p>
       {:else if phishing.verified && !phishing.valid}
         <!-- In database, reviewed, and confirmed NOT phishing -->
         <p
           class="text-sm text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-2"
         >
-          ✅ Reviewed by PhishTank community, confirmed not phishing.
+          <StatusIcon kind="ok" /> Reviewed by PhishTank community, confirmed not phishing.
         </p>
         {#if phishing.phish_id}
           <p class="text-xs text-gray-500 mt-1">
@@ -65,7 +52,7 @@
       {:else}
         <!-- In database and valid=true (phishing) or not yet reviewed -->
         <div
-          class="space-y-0 divide-y divide-gray-100 dark:divide-gray-700/50 text-sm text-[#424242] dark:text-gray-200"
+          class="space-y-0 divide-y divide-gray-100 dark:divide-gray-700/50 text-sm text-gray-800 dark:text-gray-200"
         >
           <!-- in_database -->
           <div
@@ -122,7 +109,7 @@
                 <span>Reviewed At:</span>
                 <TooltipIcon text="When the PhishTank community reviewed this report." />
               </div>
-              <span class="font-medium text-[#424242] dark:text-white">{phishing.verified_at}</span>
+              <span class="font-medium text-gray-800 dark:text-white">{phishing.verified_at}</span>
             </div>
           {/if}
 
@@ -135,7 +122,7 @@
                 <span>Impersonation Target:</span>
                 <TooltipIcon text="The brand or service this phishing URL is impersonating." />
               </div>
-              <span class="font-medium text-[#424242] dark:text-white">{phishing.target}</span>
+              <span class="font-medium text-gray-800 dark:text-white">{phishing.target}</span>
             </div>
           {/if}
 
@@ -153,7 +140,7 @@
                   href={phishing.phish_detail_page}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="font-mono text-sm text-blue-400 hover:text-blue-300 underline"
+                  class="font-mono text-sm text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current"
                   >#{phishing.phish_id}</a
                 >
               {:else}

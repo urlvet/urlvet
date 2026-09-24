@@ -245,3 +245,4 @@ export function formatUrlForShare(url: string): string {
     return url.replace(/\./g, '[.]');
   }
 }
+

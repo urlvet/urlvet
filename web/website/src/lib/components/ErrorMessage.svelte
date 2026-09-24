@@ -3,11 +3,13 @@
 </script>
 
 <div class="max-w-2xl mx-auto mb-6" role="alert">
-  <div class="bg-red-900/30 border border-red-700 rounded-md p-4">
+  <div
+    class="rounded-2xl border border-red-200 dark:border-red-900/70 bg-red-50/70 dark:bg-red-950/25 p-4"
+  >
     <div class="flex">
       <div class="flex-shrink-0">
         <svg
-          class="h-5 w-5 text-red-400"
+          class="h-5 w-5 text-red-500"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -20,7 +22,7 @@
         </svg>
       </div>
       <div class="ml-3">
-        <p class="text-sm text-red-200">{message}</p>
+        <p class="text-sm text-red-700 dark:text-red-300">{message}</p>
       </div>
     </div>
   </div>

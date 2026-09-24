@@ -80,37 +80,41 @@
 {#if loading || done}
   <div class="max-w-lg mx-auto mt-6 select-none" in:fade={{ duration: 200 }}>
     <div
-      class="rounded-2xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-gray-900/60 overflow-hidden"
+      class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
     >
       <!-- Header -->
       <div
-        class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-gray-800/80"
+        class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800"
       >
         <div class="flex items-center gap-2">
           {#if activeStep < STEPS.length}
             <span class="relative flex h-2 w-2">
               <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60"
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-light dark:bg-accent-dark opacity-60"
               ></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              <span
+                class="relative inline-flex rounded-full h-2 w-2 bg-accent-light dark:bg-accent-dark"
+              ></span>
             </span>
-            <span class="text-xs font-medium text-gray-400 tracking-widest uppercase">Scanning</span
+            <span class="font-mono text-[11px] text-gray-500 tracking-wider uppercase"
+              >Scanning</span
             >
           {:else}
             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            <span class="text-xs font-medium text-emerald-400 tracking-widest uppercase"
+            <span
+              class="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 tracking-wider uppercase"
               >Complete</span
             >
           {/if}
         </div>
-        <span class="text-xs font-mono text-gray-600">{elapsedStr}</span>
+        <span class="text-xs font-mono text-gray-500">{elapsedStr}</span>
       </div>
 
       <!-- Active step (prominent) -->
       <div class="px-5 pt-5 pb-4 min-h-[3.5rem] flex items-center">
         {#key activeStep}
           <p
-            class="text-base font-medium text-gray-900 dark:text-white leading-snug"
+            class="font-serif text-2xl text-gray-900 dark:text-gray-100 leading-snug"
             in:fly={{ y: 6, duration: 180 }}
           >
             {#if activeStep >= 0 && activeStep < STEPS.length}
@@ -127,13 +131,13 @@
       <!-- Progress bar -->
       <div class="px-5 pb-5">
         <div class="flex justify-end mb-1.5">
-          <span class="text-[10px] font-mono text-gray-600">{progress}%</span>
+          <span class="text-[10px] font-mono text-gray-500">{progress}%</span>
         </div>
         <div class="h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
           <div
             class="h-full rounded-full transition-all duration-500 ease-out {progress === 100
               ? 'bg-emerald-500'
-              : 'bg-gradient-to-r from-blue-500 to-indigo-500'}"
+              : 'bg-gray-900 dark:bg-gray-100'}"
             style="width: {progress}%"
           ></div>
         </div>

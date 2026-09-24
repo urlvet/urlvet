@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import type { SSLInfo, TLSInfo } from "../../types";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let sslInfo: SSLInfo | undefined;
@@ -6,21 +7,9 @@
 </script>
 
 {#if sslInfo || tlsInfo}
-  <section
-    id="section-security"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Security & Encryption</h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-      >
-        SSL / TLS
-      </span>
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
+      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
       {#if sslInfo}
         <div
@@ -31,11 +20,14 @@
             <TooltipIcon text="Checks if the website supports secure HTTPS connections." />
           </div>
           {#if sslInfo.HasTLS}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ Enabled</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> Enabled</span
             >
           {:else}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Disabled</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Disabled</span
+            >
           {/if}
         </div>
 
@@ -51,12 +43,12 @@
             </div>
             {#if sslInfo.ChainValid}
               <span
-                class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-                >✅ Valid</span
+                class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+                ><StatusIcon kind="ok" /> Valid</span
               >
             {:else}
-              <span class="text-red-400 font-medium flex items-center gap-1"
-                >❌ Invalid / Self-signed</span
+              <span class="text-red-400 font-medium flex items-center gap-1.5"
+                ><StatusIcon kind="bad" /> Invalid / Self-signed</span
               >
             {/if}
           </div>
@@ -68,7 +60,7 @@
               <span>Certificate Issuer:</span>
               <TooltipIcon text="The organization that issued the SSL certificate." />
             </div>
-            <span class="font-medium text-[#424242] dark:text-white">{sslInfo.Issuer || "-"}</span>
+            <span class="font-medium text-gray-800 dark:text-white">{sslInfo.Issuer || "-"}</span>
           </div>
 
           <div
@@ -80,7 +72,7 @@
                 text="How many days ago the certificate was issued. Recently issued certificates on new domains can be suspicious."
               />
             </div>
-            <span class="font-medium text-[#424242] dark:text-white">{sslInfo.AgeDays} days</span>
+            <span class="font-medium text-gray-800 dark:text-white">{sslInfo.AgeDays} days</span>
           </div>
 
           <div
@@ -90,7 +82,7 @@
               <span>Valid From:</span>
               <TooltipIcon text="The date this certificate first became active." />
             </div>
-            <span class="font-medium text-[#424242] dark:text-white">{sslInfo.NotBefore}</span>
+            <span class="font-medium text-gray-800 dark:text-white">{sslInfo.NotBefore}</span>
           </div>
 
           <div
@@ -100,7 +92,7 @@
               <span>Expiry Date:</span>
               <TooltipIcon text="When the current SSL certificate will expire." />
             </div>
-            <span class="font-medium text-[#424242] dark:text-white">{sslInfo.NotAfter}</span>
+            <span class="font-medium text-gray-800 dark:text-white">{sslInfo.NotAfter}</span>
           </div>
 
           <div
@@ -112,12 +104,12 @@
             </div>
             {#if !sslInfo.IsSuspicious}
               <span
-                class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-                >✅ Low Risk</span
+                class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+                ><StatusIcon kind="ok" /> Low Risk</span
               >
             {:else}
-              <span class="text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1"
-                >⚠️ Suspicious</span
+              <span class="text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1.5"
+                ><StatusIcon kind="warn" /> Suspicious</span
               >
             {/if}
           </div>
@@ -162,7 +154,7 @@
             <span>TLS Issuer (Connection):</span>
             <TooltipIcon text="The certificate issuer detected during the live connection." />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white">{tlsInfo.Issuer || "-"}</span>
+          <span class="font-medium text-gray-800 dark:text-white">{tlsInfo.Issuer || "-"}</span>
         </div>
 
         <div
@@ -175,11 +167,14 @@
             />
           </div>
           {#if !tlsInfo.HostnameMismatch}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ Match</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> Match</span
             >
           {:else}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Mismatch</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Mismatch</span
+            >
           {/if}
         </div>
       {/if}

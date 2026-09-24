@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import type { DomainRandomness, TyposquatResult } from "../../types";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let features: any;
@@ -7,20 +8,9 @@
 </script>
 
 {#if features}
-  <section
-    id="section-features"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">URL Signals</h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >URL / TLD</span
-      >
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
+      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
       {#if features.tld}
         <div
@@ -32,7 +22,7 @@
               text="The last part of a domain name (like .com, .org, .io). It can hint at the site's trust level or purpose."
             />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white">.{features.tld.tld}</span>
+          <span class="font-medium text-gray-800 dark:text-white">.{features.tld.tld}</span>
         </div>
 
         <div
@@ -45,11 +35,14 @@
             />
           </div>
           {#if features.tld.is_trusted_tld}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ Yes</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> Yes</span
             >
           {:else}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ No</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> No</span
+            >
           {/if}
         </div>
 
@@ -63,10 +56,13 @@
             />
           </div>
           {#if features.tld.is_risky_tld}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -81,15 +77,18 @@
             />
           </div>
           {#if features.tld.is_icann}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ Yes</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> Yes</span
             >
           {:else if features.tld.is_hosting_platform}
-            <span class="text-yellow-600 dark:text-yellow-400 font-medium flex items-center gap-1"
+            <span class="text-yellow-600 dark:text-yellow-400 font-medium flex items-center gap-1.5"
               >Hosting Platform</span
             >
           {:else}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ No</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> No</span
+            >
           {/if}
         </div>
       {/if}
@@ -105,10 +104,13 @@
             />
           </div>
           {#if features.url.url_shortener}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -123,10 +125,13 @@
             />
           </div>
           {#if features.url.uses_ip}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -141,10 +146,13 @@
             />
           </div>
           {#if features.url.contains_punycode}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -159,10 +167,13 @@
             />
           </div>
           {#if features.url.too_long}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -177,10 +188,13 @@
             />
           </div>
           {#if features.url.too_deep}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -195,10 +209,13 @@
             />
           </div>
           {#if features.url.has_homoglyph}
-            <span class="text-red-400 font-medium flex items-center gap-1">❌ Yes</span>
+            <span class="text-red-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="bad" /> Yes</span
+            >
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No</span
             >
           {/if}
         </div>
@@ -212,7 +229,7 @@
               text="Shows how many subdomains (like shop.example.com) are used. Too many can hint at suspicious or temporary setups."
             />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white"
+          <span class="font-medium text-gray-800 dark:text-white"
             >{features.url.subdomain_count}</span
           >
         </div>
@@ -229,7 +246,7 @@
             />
           </div>
           <div class="flex items-center gap-2">
-            <span class="font-medium text-[#424242] dark:text-white"
+            <span class="font-medium text-gray-800 dark:text-white"
               >{domainRandomness.entropy.toFixed(2)}</span
             >
             {#if domainRandomness.entropy > 3.8}
@@ -255,7 +272,9 @@
           {#if typosquatResult.is_suspicious}
             {#if typosquatResult.is_combo_squat}
               <span class="text-red-400 font-medium flex flex-col gap-0.5">
-                ❌ Combo-squatting — contains brand name
+                <span class="inline-flex items-center gap-1"
+                  ><StatusIcon kind="bad" /> Combo-squatting — contains brand name</span
+                >
                 <span class="text-xs text-red-300 font-normal">
                   Contains "<span class="font-mono">{typosquatResult.matched_brand}</span>"
                   (official: {typosquatResult.matched_domain})
@@ -263,17 +282,21 @@
               </span>
             {:else}
               <span class="text-red-400 font-medium flex flex-col gap-0.5">
-                ❌ Typosquat, {typosquatResult.distance} character{typosquatResult.distance === 1
-                  ? ""
-                  : "s"} away from the known brand
+                <span class="inline-flex items-center gap-1"
+                  ><StatusIcon kind="bad" /> Typosquat, {typosquatResult.distance} character{typosquatResult.distance ===
+                  1
+                    ? ""
+                    : "s"} away from the known brand</span
+                >
                 <span class="text-xs text-red-300 font-normal">
                   <span class="font-mono">{typosquatResult.matched_domain}</span>
                 </span>
               </span>
             {/if}
           {:else}
-            <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-              >✅ No match found</span
+            <span
+              class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+              ><StatusIcon kind="ok" /> No match found</span
             >
           {/if}
         </div>

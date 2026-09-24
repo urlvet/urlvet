@@ -1,24 +1,14 @@
 <script lang="ts">
+  import StatusIcon from "../StatusIcon.svelte";
   import TooltipIcon from "../TooltipIcon.svelte";
   export let domainInfo: any;
   export let rank: number | undefined;
 </script>
 
 {#if domainInfo}
-  <section
-    id="section-domain"
-    class="bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all scroll-mt-20"
-  >
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Domain Information</h3>
-      <span
-        class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded"
-        >{domainInfo.source}</span
-      >
-    </div>
-
+  <section class="p-4 sm:p-5">
     <div
-      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-[#424242] dark:text-gray-200 max-w-4xl w-full mx-auto"
+      class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
       <div
         class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2 first:pt-0 last:pb-0"
@@ -29,7 +19,7 @@
             text="The registered name of the website — what users type in the browser to visit it."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.domain}</span>
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.domain}</span>
       </div>
 
       {#if rank !== undefined}
@@ -42,7 +32,7 @@
               text="A rough estimate of the website's global popularity, lower numbers mean more visitors. Derived from traffic and engagement data."
             />
           </div>
-          <span class="font-medium text-[#424242] dark:text-white"
+          <span class="font-medium text-gray-800 dark:text-white"
             >{rank === 0 ? "Unranked" : rank}</span
           >
         </div>
@@ -57,8 +47,7 @@
             text="The company or organization that manages the registration of this domain (e.g., GoDaddy, Namecheap, Google Domains)."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.registrar || "-"}</span
-        >
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.registrar || "-"}</span>
       </div>
 
       <div
@@ -70,7 +59,7 @@
             text="How long ago the domain was first registered. Older domains often suggest more established or legitimate websites."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.age_human}</span>
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.age_human}</span>
       </div>
 
       <div
@@ -83,11 +72,13 @@
           />
         </div>
         {#if domainInfo.dnssec}
-          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1"
-            >✅ Yes</span
+          <span class="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="ok" /> Yes</span
           >
         {:else}
-          <span class="text-red-400 font-medium flex items-center gap-1">❌ No</span>
+          <span class="text-red-400 font-medium flex items-center gap-1.5"
+            ><StatusIcon kind="bad" /> No</span
+          >
         {/if}
       </div>
 
@@ -100,7 +91,7 @@
             text="The date when this domain was first registered and became active on the internet."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.created}</span>
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.created}</span>
       </div>
 
       <div
@@ -112,7 +103,7 @@
             text="The last date the domain registration information was modified (e.g., contact change or nameserver update)."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.updated}</span>
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.updated}</span>
       </div>
 
       <div
@@ -124,7 +115,7 @@
             text="The date when this domain's registration will expire unless renewed by the owner."
           />
         </div>
-        <span class="font-medium text-[#424242] dark:text-white">{domainInfo.expiry}</span>
+        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.expiry}</span>
       </div>
 
       {#if domainInfo.nameservers?.length}
