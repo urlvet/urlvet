@@ -1,197 +1,225 @@
+<script lang="ts">
+  import { PILL_OUTLINE, PILL_SOLID } from "$lib/ui/buttons";
+
+  const REPO = "https://github.com/urlvet/urlvet";
+  const GITHUB_PATH =
+    "M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.387 7.872 10.905.576.106.784-.25.784-.556 0-.274-.01-1-.016-1.974-3.2.694-3.876-1.544-3.876-1.544-.522-1.33-1.276-1.683-1.276-1.683-1.042-.714.08-.699.08-.699 1.152.08 1.756 1.183 1.756 1.183 1.024 1.754 2.688 1.246 3.344.952.104-.742.4-1.246.728-1.532-2.554-.292-5.238-1.276-5.238-5.674 0-1.252.448-2.274 1.184-3.076-.12-.292-.512-1.468.112-3.064 0 0 .964-.308 3.16 1.176.916-.254 1.9-.382 2.876-.388.976.006 1.96.134 2.876.388 2.192-1.484 3.156-1.176 3.156-1.176.624 1.596.232 2.772.112 3.064.736.802 1.184 1.824 1.184 3.076 0 4.408-2.69 5.38-5.25 5.664.412.354.78 1.05.78 2.118 0 1.532-.014 2.768-.014 3.144 0 .308.2.672.788.556C20.708 21.385 24 17.084 24 12c0-6.352-5.148-11.5-12-11.5z";
+
+  const LINK =
+    "text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current transition-colors";
+
+  const PRINCIPLES = [
+    {
+      title: "Explainable results",
+      desc: "A verdict you can't explain can't be trusted. Every signal is shown, along with how it led to the final verdict.",
+    },
+    {
+      title: "Built for everyone",
+      desc: "Detailed enough for security folks, plain enough for your parents. Same scan, read at whatever depth you like.",
+    },
+    {
+      title: "Fully open source",
+      desc: "Security tools should be open to inspection. The detection engine, scoring and website are all on GitHub, free to read, audit and self-host.",
+    },
+    {
+      title: "Checked live, not from a list",
+      desc: "Phishing pages appear and vanish within hours. url.vet checks the link the moment you ask, so it catches pages that blocklists haven't added yet.",
+    },
+    {
+      title: "Private by design",
+      desc: "No account, no ads, no trackers, no data sold. We don't log who you are or what you scan.",
+    },
+  ];
+</script>
+
 <svelte:head>
   <title>About — url.vet (URLvet)</title>
   <meta
     name="description"
-    content="url.vet (URLvet) is an open-source phishing detection engine built to make the web a little safer. Free, transparent, and fully explainable."
+    content="url.vet (URLvet) tells you whether a link is safe, and why. Open source, private by design, and built for experts and everyone else."
   />
   <link rel="canonical" href="https://url.vet/about" />
 </svelte:head>
 
-<div class="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-  <div class="max-w-3xl mx-auto px-6 py-16">
-    <!-- Back link -->
-    <a
-      href="/"
-      class="inline-flex items-center gap-2 text-base text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-10"
-    >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-      </svg>
-      url.vet
-    </a>
+<div class="max-w-3xl mx-auto px-6 pt-16 md:pt-24 pb-20 text-gray-900 dark:text-gray-100">
+  <p class="font-mono text-xs uppercase tracking-wider text-gray-500">About</p>
+  <h1 class="mt-4 font-serif text-5xl md:text-6xl leading-[1.02] tracking-[-0.015em]">
+    Doubt, <span class="italic">made useful.</span>
+  </h1>
+  <p class="mt-6 text-xl leading-relaxed text-gray-700 dark:text-gray-300">
+    Paste any link and url.vet tells you whether it's safe, and why. Detailed enough for experts,
+    plain enough for everyone else.
+  </p>
 
-    <h1 class="text-3xl font-bold tracking-tight mb-3">About</h1>
-    <p class="text-gray-500 dark:text-gray-400 text-lg mb-12">
-      A fully open-source phishing detection engine that runs multiple checks in real time and
-      explains exactly what it found. No accounts, no hidden algorithms. Built for people who want
-      to understand why a link is safe, not just be told it is.
-    </p>
-
-    <!-- Origin -->
-    <section class="mb-14">
-      <h2 class="text-xl font-semibold mb-4">Why this exists</h2>
-      <div class="space-y-4 text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-        <p>
-          Phishing links show up in emails, DMs, QR codes, and shortened URLs. Most people either
-          click and hope, or avoid the link entirely. Neither is good. Existing tools don't close
-          that gap: quick scanners return a pass/fail with no explanation, thorough crawlers take
-          too long and bury results in raw technical data. Nothing is both fast and legible.
-        </p>
-        <p>
-          url.vet (also known as URLvet, previously SafeSurf) is that middle ground. Paste a link,
-          get a trust score, a verdict, and a full breakdown in seconds. No guesswork, no signup,
-          nothing hidden.
-        </p>
-        <p>
-          It runs 18 checks: URL structure, DNS, TLS, domain age, typosquatting, page content, and
-          live threat feeds. Each produces a plain-language reason, so you always know what moved
-          the score.
-        </p>
-      </div>
-    </section>
-
-    <!-- Philosophy -->
-    <section class="mb-14">
-      <h2 class="text-xl font-semibold mb-5">Philosophy</h2>
-      <div class="grid sm:grid-cols-2 gap-4">
-        {#each [{ title: "Explainability over security theater", desc: "A verdict you can't explain is a verdict you can't trust. Every signal is shown, whether it helped or hurt the score." }, { title: "Live over cached", desc: "Phishing pages spin up and disappear in hours. Scanning at request time catches what static databases miss." }, { title: "Open source by default", desc: "Security tools should be auditable. The entire detection engine is on GitHub under AGPL-3.0." }, { title: "No friction", desc: "No account, no ads, no API key. Paste a URL, get an answer." }] as item}
-          <div
-            class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4"
-          >
-            <p class="font-medium text-base mb-1.5">{item.title}</p>
-            <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed">{item.desc}</p>
-          </div>
-        {/each}
-      </div>
-    </section>
-
-    <!-- Team -->
-    <section class="mb-14">
-      <h2 class="text-xl font-semibold mb-6">Team</h2>
-      <div
-        class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl mb-4"
+  <!-- Maker: the why, in first person -->
+  <section class="mt-20">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Who made this</h2>
+    <figure class="mt-6">
+      <!-- A letter, not a pull quote: upright serif reads better at this length. -->
+      <blockquote
+        class="max-w-[36rem] space-y-5 font-serif text-[1.3rem] md:text-[1.45rem] leading-[1.5] text-gray-800 dark:text-gray-200"
       >
+        <p>
+          I'd often get a link and wonder if it was safe to open. I tried a few online link
+          scanners. Some just said “safe” or “risky” and nothing else. Others gave me pages of
+          technical data to dig through myself. I wasn't really happy with either.
+        </p>
+        <p>
+          Then I started noticing it at home. My parents would open and forward links from WhatsApp
+          without really knowing if they were real (and most of the time they weren't). Friends
+          would send me “hot deals” that didn't even go to the shopping website they claimed to.
+        </p>
+        <p>
+          I wanted something I could use myself and also hand to my parents. A straight answer for
+          them, and the reasons behind it for anyone who wants to look.
+        </p>
+        <p>
+          I'm a pretty private person, and I don't like how most apps treat their users today:
+          tracking everything, collecting all your data, selling it to advertisers. I found all of
+          it irritating and wanted something that does things the right way.
+        </p>
+        <p class="italic">That's how the idea for url.vet started.</p>
+      </blockquote>
+      <figcaption class="mt-8 flex items-center gap-4">
         <img
-          src="https://avatars.githubusercontent.com/u/65501471?v=4"
-          alt="abhizaik"
-          class="w-14 h-14 rounded-full flex-shrink-0"
+          src="/team/abhizaik.jpg"
+          alt=""
+          class="w-11 h-11 rounded-full flex-shrink-0 grayscale-[30%]"
           loading="lazy"
         />
-        <div>
-          <a
-            href="https://abhizaik.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="font-semibold hover:underline">abhizaik</a
-          >
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">
-            Creator &amp; maintainer
-          </p>
-          <p class="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-            Got one too many suspicious links with no good way to check them, so built url.vet.
-          </p>
-          <div class="flex items-center gap-4 mt-3">
+        <div class="min-w-0">
+          <p class="text-[15px]">
             <a
-              href="https://github.com/abhizaik"
+              href="https://abhizaik.com"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.387 7.872 10.905.576.106.784-.25.784-.556 0-.274-.01-1-.016-1.974-3.2.694-3.876-1.544-3.876-1.544-.522-1.33-1.276-1.683-1.276-1.683-1.042-.714.08-.699.08-.699 1.152.08 1.756 1.183 1.756 1.183 1.024 1.754 2.688 1.246 3.344.952.104-.742.4-1.246.728-1.532-2.554-.292-5.238-1.276-5.238-5.674 0-1.252.448-2.274 1.184-3.076-.12-.292-.512-1.468.112-3.064 0 0 .964-.308 3.16 1.176.916-.254 1.9-.382 2.876-.388.976.006 1.96.134 2.876.388 2.192-1.484 3.156-1.176 3.156-1.176.624 1.596.232 2.772.112 3.064.736.802 1.184 1.824 1.184 3.076 0 4.408-2.69 5.38-5.25 5.664.412.354.78 1.05.78 2.118 0 1.532-.014 2.768-.014 3.144 0 .308.2.672.788.556C20.708 21.385 24 17.084 24 12c0-6.352-5.148-11.5-12-11.5z"
-                />
-              </svg>
-              @abhizaik
-            </a>
-            <a
-              href="mailto:hi@url.vet"
-              class="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <svg
-                class="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-              hi@url.vet
-            </a>
-          </div>
+              class="font-medium hover:underline underline-offset-4">abhizaik</a
+            ><span class="text-gray-500">, creator &amp; maintainer</span>
+          </p>
+          <a
+            href="https://github.com/abhizaik"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-1 inline-flex items-center gap-1.5 font-mono text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          >
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d={GITHUB_PATH} />
+            </svg>
+            @abhizaik
+          </a>
         </div>
-      </div>
-      <p class="text-base text-gray-500 dark:text-gray-400">
-        With help from
-        <a
-          href="https://github.com/urlvet/urlvet/graphs/contributors"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white underline underline-offset-2 transition-colors"
-          >friends</a
-        > on GitHub.
-      </p>
-    </section>
+      </figcaption>
+    </figure>
+  </section>
 
-    <!-- Open source -->
-    <section class="mb-14">
-      <h2 class="text-xl font-semibold mb-4">Open source</h2>
-      <p class="text-base text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
-        url.vet is fully open source. A lot of projects call themselves open source but only publish
-        the frontend while keeping the actual engine private. Here, everything is publicly
-        available. The detection engine, scoring logic, API, and frontend. Nothing hidden.
-      </p>
-      <p class="text-base text-gray-600 dark:text-gray-400 mb-5 leading-relaxed">
-        The community edition is licensed under
-        <a
-          href="https://github.com/urlvet/urlvet/blob/main/LICENSE"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-gray-900 dark:text-white underline underline-offset-2">AGPL-3.0</a
-        >. Free to use, self-host, and modify. Found a bug or want to contribute? Pull requests are
-        welcome.
-      </p>
-      <div class="flex flex-wrap gap-3">
-        <a
-          href="https://github.com/urlvet/urlvet"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg text-base font-medium hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors"
-        >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.387 7.872 10.905.576.106.784-.25.784-.556 0-.274-.01-1-.016-1.974-3.2.694-3.876-1.544-3.876-1.544-.522-1.33-1.276-1.683-1.276-1.683-1.042-.714.08-.699.08-.699 1.152.08 1.756 1.183 1.756 1.183 1.024 1.754 2.688 1.246 3.344.952.104-.742.4-1.246.728-1.532-2.554-.292-5.238-1.276-5.238-5.674 0-1.252.448-2.274 1.184-3.076-.12-.292-.512-1.468.112-3.064 0 0 .964-.308 3.16 1.176.916-.254 1.9-.382 2.876-.388.976.006 1.96.134 2.876.388 2.192-1.484 3.156-1.176 3.156-1.176.624 1.596.232 2.772.112 3.064.736.802 1.184 1.824 1.184 3.076 0 4.408-2.69 5.38-5.25 5.664.412.354.78 1.05.78 2.118 0 1.532-.014 2.768-.014 3.144 0 .308.2.672.788.556C20.708 21.385 24 17.084 24 12c0-6.352-5.148-11.5-12-11.5z"
-            />
-          </svg>
-          View on GitHub
-        </a>
-        <a
-          href="https://github.com/urlvet/urlvet/issues"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:border-gray-500 dark:hover:border-gray-500 transition-colors"
-        >
-          Report an issue
-        </a>
-      </div>
-    </section>
+  <!-- Principles -->
+  <section class="mt-24">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Philosophy</h2>
+    <dl class="mt-8 grid sm:grid-cols-2 gap-x-10 gap-y-8">
+      {#each PRINCIPLES as item}
+        <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
+          <dt class="font-serif text-[1.45rem] leading-tight">{item.title}</dt>
+          <dd class="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
+            {item.desc}
+          </dd>
+        </div>
+      {/each}
+    </dl>
+  </section>
 
-    <!-- Contact -->
-    <section>
-      <h2 class="text-xl font-semibold mb-4">Get in touch</h2>
-      <p class="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-        Feedback, false positives, or just to say hi. Reach out at
+  <!-- Open source + help -->
+  <section class="mt-24">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">
+      Open, <span class="italic">all of it.</span>
+    </h2>
+    <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <p>
+        Plenty of projects call themselves open source but only publish the website. Here the
+        detection engine, the scoring, the API and the website are all public under <a
+          href="{REPO}/blob/main/LICENSE"
+          target="_blank"
+          rel="noopener noreferrer"
+          class={LINK}>AGPL-3.0</a
+        >. Read it, audit it, or host it yourself.
+      </p>
+      <p>
+        Want to help? Start with a <a
+          href="{REPO}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+          target="_blank"
+          rel="noopener noreferrer"
+          class={LINK}>good first issue</a
+        >
+        or read the
         <a
-          href="mailto:hi@url.vet"
-          class="text-gray-900 dark:text-white underline underline-offset-2 hover:no-underline transition-all"
-          >hi@url.vet</a
+          href="{REPO}/blob/main/.github/CONTRIBUTING.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          class={LINK}>contributing guide</a
         >.
       </p>
-    </section>
-  </div>
+    </div>
+    <a
+      href={REPO}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="mt-7 {PILL_OUTLINE} px-5 py-2.5"
+    >
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path d={GITHUB_PATH} />
+      </svg>
+      View on GitHub
+    </a>
+  </section>
+
+  <!-- Contact -->
+  <section class="mt-24">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Get in touch</h2>
+    <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
+      <p>
+        Feedback, ideas, or just to say hi: <a
+          href="mailto:hi@url.vet"
+          class="font-mono text-base {LINK}">hi@url.vet</a
+        >.
+      </p>
+      <p>
+        Think a verdict is wrong? The Report button on any result is the fastest way. A human reads
+        every report. Found a security issue? Please follow the <a
+          href="{REPO}/blob/main/.github/SECURITY.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          class={LINK}>security policy</a
+        >.
+      </p>
+    </div>
+  </section>
+
+  <!-- Back to the product -->
+  <section
+    class="mt-24 pt-12 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+  >
+    <p class="font-serif text-3xl md:text-4xl tracking-[-0.01em] leading-tight">
+      Got a link you're <span class="italic">unsure about?</span>
+    </p>
+    <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto flex-shrink-0">
+      Check it on url.vet
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+        />
+      </svg>
+    </a>
+  </section>
+
+  <p class="mt-16 font-mono text-[11px] text-gray-400">
+    url.vet is also known as URLvet, and was previously called SafeSurf.
+  </p>
 </div>
