@@ -1,6 +1,8 @@
 <script lang="ts">
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
   import { page } from "$app/stores";
+  import Guide from "$lib/components/guide/Guide.svelte";
+  import { vettyMemory } from "$lib/components/guide/store";
   import { theme } from "$lib/theme";
   import { onMount } from "svelte";
   import "../app.css";
@@ -94,11 +96,15 @@
     <slot />
   </main>
 
+  {#if !isAdmin}
+    <Guide />
+  {/if}
+
   <footer class="text-gray-500 dark:text-gray-400 py-8">
     <div
       class="max-w-5xl mx-auto px-6 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:justify-between items-center gap-4 text-sm"
     >
-      <!-- Left: site links, then GitHub -->
+      <!-- Left: site links, then GitHub, then (if hidden) Vetty -->
       <nav
         aria-label="Footer"
         class="flex flex-wrap items-center justify-center md:justify-start gap-x-5 sm:gap-x-4 gap-y-2"
@@ -121,6 +127,17 @@
             {link.label}
           </a>
         {/each}
+        {#if $vettyMemory.hidden}
+          <span class="hidden sm:inline text-gray-300 dark:text-gray-700" aria-hidden="true">·</span
+          >
+          <button
+            type="button"
+            on:click={() => vettyMemory.set({ hidden: false })}
+            class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          >
+            Show Vetty 📎
+          </button>
+        {/if}
       </nav>
 
       <!-- Right: License and author -->

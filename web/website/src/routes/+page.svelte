@@ -9,6 +9,7 @@
   import LandingExtras from "../lib/components/home/LandingExtras.svelte";
   import PageMeta from "../lib/components/home/PageMeta.svelte";
   import SearchBar from "../lib/components/home/SearchBar.svelte";
+  import { scanState } from "../lib/components/guide/store";
   import ResultSection from "../lib/components/ResultSection.svelte";
   import ScanProgress from "../lib/components/ScanProgress.svelte";
   import Shoutouts from "../lib/components/Shoutouts.svelte";
@@ -39,6 +40,7 @@
   $: shareDomain = scanResult?.domain || data.queryDomain;
 
   function clearResult() {
+    scanState.set({ status: "idle" });
     scanResult = null;
     input = "";
     error = null;
@@ -72,6 +74,7 @@
     }
     screenshotLoading = true;
     screenshotFailed = false;
+    scanState.set({ status: "scanning" });
 
     try {
       api
@@ -91,8 +94,10 @@
       const res = await api.analyze(url);
       if (res.error) {
         error = res.error;
+        scanState.set({ status: "error", message: res.error });
       } else {
         scanResult = res.data as AnalyzeResult;
+        scanState.set({ status: "done", result: scanResult });
         const share = new URL(window.location.href);
         share.searchParams.set("q", url);
         if (scanResult.result?.verdict)
@@ -103,6 +108,7 @@
       }
     } catch {
       error = "Analyze request failed";
+      scanState.set({ status: "error", message: error });
     } finally {
       loading = false;
       scanDone = true;
@@ -111,6 +117,8 @@
   }
 
   onMount(() => {
+    // Start fresh so Vetty doesn't react to a result from an earlier visit to this page.
+    scanState.set({ status: "idle" });
     const q = new URLSearchParams(window.location.search).get("q");
     if (q) {
       input = q;
