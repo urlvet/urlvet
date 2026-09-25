@@ -1,0 +1,214 @@
+/* Shared look + motion for the helper characters. Colours follow the site palette. */
+.guide-char {
+  --ink: #3f3a33;
+  --knock: #faf7f2;
+  --eye: #ffffff;
+  --accent: #3461c9;
+  --tint: rgba(52, 97, 201, 0.08);
+  overflow: visible;
+}
+.dark .guide-char {
+  --ink: #d3cab9;
+  --knock: #0f0d0b;
+  --eye: #f3ede2;
+  --accent: #8eb0ff;
+  --tint: rgba(142, 176, 255, 0.1);
+}
+.guide-char .ink {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.guide-char .knock {
+  fill: none;
+  stroke: var(--knock);
+  stroke-linecap: round;
+}
+.guide-char .eye {
+  fill: var(--eye);
+  stroke: var(--ink);
+}
+.guide-char .pupil {
+  fill: var(--ink);
+}
+.guide-char .glint {
+  fill: var(--accent);
+}
+.guide-char .knockout .ink {
+  stroke: var(--knock);
+  stroke-width: 4.5px;
+}
+.guide-char .tint {
+  fill: var(--tint);
+}
+
+/* idle motion: float + sway, blinks, glances, brow raises, and a hop on mood change */
+.guide-char .body {
+  animation: guide-float 3.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.guide-char .hop {
+  animation: guide-hop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.guide-char .blink {
+  animation: guide-blink 4.2s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.guide-char .look-around {
+  animation: guide-look 7s ease-in-out infinite;
+}
+.guide-char .brow-raise {
+  animation: guide-brow 6s ease-in-out infinite;
+}
+.guide-char .wave-arm {
+  animation: guide-wave 1.1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+}
+
+@keyframes guide-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+@keyframes guide-hop {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  35% {
+    transform: translateY(-7px) scale(0.96, 1.05);
+  }
+  70% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@keyframes guide-blink {
+  0%,
+  44%,
+  48%,
+  88%,
+  92%,
+  96%,
+  100% {
+    transform: scaleY(1);
+  }
+  46%,
+  90%,
+  94% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes guide-look {
+  0%,
+  30%,
+  100% {
+    transform: translate(0, 0);
+  }
+  38%,
+  55% {
+    transform: translate(1.6px, 0.3px);
+  }
+  63%,
+  80% {
+    transform: translate(-1.6px, 0.3px);
+  }
+}
+@keyframes guide-brow {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  76%,
+  84% {
+    transform: translateY(-1.6px);
+  }
+}
+@keyframes guide-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-char .body,
+  .guide-char .hop,
+  .guide-char .blink,
+  .guide-char .look-around,
+  .guide-char .brow-raise,
+  .guide-char .wave-arm {
+    animation: none;
+  }
+}
+
+/* paperclip: metallic wire */
+.guide-char.clip {
+  --wire-lo: #7d828b;
+  --wire-hi: #e4e7eb;
+  --wire-edge: #4b4f56;
+}
+.dark .guide-char.clip {
+  --wire-lo: #8d939c;
+  --wire-hi: #f1f3f5;
+  --wire-edge: #2c2f34;
+}
+.guide-char .wire,
+.guide-char .wire-edge,
+.guide-char .wire-shine {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.guide-char .wire-edge {
+  stroke: var(--wire-edge);
+}
+.guide-char .wire-shine {
+  stroke: rgba(255, 255, 255, 0.55);
+}
+/* the paperclip's eyes always have dark pupils, in both themes */
+.guide-char.clip .eye .pupil,
+.guide-char.clip circle.pupil {
+  fill: #1a1714;
+}
+
+/* Clippo-style face is printed on silver: dark features in both themes. The cut-out
+   behind brows/mouth is wire-coloured, not page-coloured. Arms keep the theme ink. */
+.guide-char.clip {
+  --face: #1f1c19;
+  --face-knock: #e6e9ec;
+  --face-eye: #ffffff;
+}
+.guide-char.clip .face .ink {
+  stroke: var(--face);
+}
+.guide-char.clip .face .eye {
+  stroke: var(--face);
+  fill: var(--face-eye);
+}
+.guide-char.clip .face .knockout .ink {
+  stroke: var(--face-knock);
+}
+/* The mouth sits between the wire legs, over the page itself: it follows the theme
+   like the arms, and needs no cut-out. */
+.guide-char.clip .face .mouth .ink {
+  stroke: var(--ink);
+}
+.guide-char.clip .face .knockout .mouth {
+  display: none;
+}
