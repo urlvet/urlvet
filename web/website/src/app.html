@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%sveltekit.assets%/favicon.ico" />
+    <!-- Installable on phones; Android adds url.vet to the share menu (see share_target). -->
+    <link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="%sveltekit.assets%/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0d0b" media="(prefers-color-scheme: dark)" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Fonts are self-hosted (src/lib/styles/fonts.css); preload the two the hero needs first. -->
     <link

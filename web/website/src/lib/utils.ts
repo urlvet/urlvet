@@ -246,3 +246,29 @@ export function formatUrlForShare(url: string): string {
   }
 }
 
+/** Characters that end a sentence rather than a link, e.g. "visit example.com." */
+const LINK_TRAILING = /[.,;:!?'"’”)\]}>»]+$/u;
+const LINK_PATTERN =
+  /(?:https?:\/\/)?(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+\p{L}{2,}(?::\d+)?(?:[/?#][^\s<>"]*)?/giu;
+
+/**
+ * Finds the links in a block of text, such as a forwarded WhatsApp message,
+ * in order and without duplicates. Email addresses are skipped. If any link
+ * has a scheme (or starts with www.), bare "word.word" matches are dropped,
+ * since in a message those are more often typos than links.
+ */
+export function extractLinks(text: string): string[] {
+  const found: { link: string; explicit: boolean }[] = [];
+  const seen = new Set<string>();
+  for (const m of text.matchAll(LINK_PATTERN)) {
+    const before = m.index ? text[m.index - 1] : '';
+    if (before && /[@\p{L}\p{N}_]/u.test(before)) continue; // email or part of a word
+    const link = m[0].replace(LINK_TRAILING, '');
+    const key = link.toLowerCase().replace(/^https?:\/\//, '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    found.push({ link, explicit: /^(https?:\/\/|www\.)/i.test(link) });
+  }
+  const explicit = found.filter((f) => f.explicit);
+  return (explicit.length ? explicit : found).map((f) => f.link);
+}
