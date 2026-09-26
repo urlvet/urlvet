@@ -14,7 +14,7 @@
   import ScanProgress from "../lib/components/ScanProgress.svelte";
   import Shoutouts from "../lib/components/Shoutouts.svelte";
   import type { AnalyzeResult } from "../lib/types";
-  import { encodeVerdict, formatUrl, isValidUrl } from "../lib/utils";
+  import { encodeVerdict, extractLinks, formatUrl, isValidUrl } from "../lib/utils";
 
   // Page load data from +page.ts — runs server-side so bots get correct OG meta tags.
   export let data: {
@@ -34,8 +34,13 @@
   let screenshotLoading = false;
   let screenshotFailed = false;
   let scanDone = false;
+  /** Links found in a pasted message, when there's more than one to choose from. */
+  let linkChoices: string[] = [];
 
   $: isLanding = !scanResult && !loading && !error && !formError;
+  // Choices belong to the text they came from; editing it dismisses them.
+  let choicesFor = "";
+  $: if (linkChoices.length && input !== choicesFor) linkChoices = [];
   $: currentUrl = browser ? window.location.href : "";
   $: shareDomain = scanResult?.domain || data.queryDomain;
 
@@ -55,6 +60,35 @@
     setTimeout(() => {
       (document.getElementById("url-input") as HTMLInputElement | null)?.focus();
     }, 50);
+  }
+
+  // Accepts a link, or a whole message with links in it (e.g. forwarded from WhatsApp).
+  function submit(raw: string) {
+    linkChoices = [];
+    const text = raw.trim();
+    if (/\s/.test(text) || !isValidUrl(formatUrl(text))) {
+      const links = extractLinks(text);
+      if (links.length > 1) {
+        choicesFor = raw;
+        linkChoices = links;
+        return;
+      }
+      if (links.length === 1) {
+        input = links[0];
+        return runAnalyze(links[0]);
+      }
+      if (/\s/.test(text)) {
+        formError = "No link found in that text";
+        return;
+      }
+    }
+    runAnalyze(text);
+  }
+
+  function chooseLink(link: string) {
+    linkChoices = [];
+    input = link;
+    runAnalyze(link);
   }
 
   async function runAnalyze(q: string) {
@@ -99,6 +133,8 @@
         scanResult = res.data as AnalyzeResult;
         scanState.set({ status: "done", result: scanResult });
         const share = new URL(window.location.href);
+        // Drop anything the share menu passed in: the original message stays private.
+        for (const k of ["url", "text", "title"]) share.searchParams.delete(k);
         share.searchParams.set("q", url);
         if (scanResult.result?.verdict)
           share.searchParams.set("v", encodeVerdict(scanResult.result.verdict));
@@ -119,10 +155,20 @@
   onMount(() => {
     // Start fresh so Vetty doesn't react to a result from an earlier visit to this page.
     scanState.set({ status: "idle" });
-    const q = new URLSearchParams(window.location.search).get("q");
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    // Shared from another app via the phone's share menu (share_target in manifest.webmanifest).
+    const shared = ["url", "text", "title"]
+      .map((k) => params.get(k))
+      .filter(Boolean)
+      .join(" ");
     if (q) {
       input = q;
       runAnalyze(q);
+    } else if (shared) {
+      // The scan swaps these params for ?q= once it finishes.
+      input = shared;
+      submit(shared);
     } else {
       (document.getElementById("url-input") as HTMLInputElement | null)?.focus();
     }
@@ -169,11 +215,38 @@
       bind:formError
       {loading}
       {isLanding}
-      onSubmit={runAnalyze}
+      onSubmit={submit}
       onPaste={() => (error = null)}
     />
 
-    {#if isLanding}
+    {#if linkChoices.length}
+      <div class="mt-5 w-full max-w-2xl mx-auto text-left" role="group" aria-label="Links found">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Found {linkChoices.length} links in that message. Which one should we check?
+        </p>
+        <ul
+          class="mt-3 divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800"
+        >
+          {#each linkChoices as link}
+            <li>
+              <button
+                type="button"
+                on:click={() => chooseLink(link)}
+                class="group w-full flex items-center gap-3 py-3 text-left font-mono text-[13px] text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
+              >
+                <span class="flex-1 min-w-0 truncate">{link}</span>
+                <span
+                  class="flex-shrink-0 font-sans text-xs text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
+                  >Check →</span
+                >
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+
+    {#if isLanding && !linkChoices.length}
       <LandingExtras
         onTry={(url) => {
           input = url;
