@@ -21,6 +21,7 @@ import (
 //	@Param			url	query		string	true	"URL to analyse (max 2048 chars)"
 //	@Success		200	{object}	analyzer.Response
 //	@Failure		400	{object}	map[string]string
+//	@Failure		422	{object}	map[string]string
 //	@Router			/analyze [get]
 func AnalyzeURLHandler(c *gin.Context) {
 	url := strings.TrimSpace(c.Query("url"))
@@ -47,6 +48,12 @@ func AnalyzeURLHandler(c *gin.Context) {
 		for _, e := range errs {
 			logger.Warn("analyzer error", "origin", origin, "err", e)
 		}
+	}
+	// No verdict means the analysis never ran (e.g. the URL has no usable
+	// domain). Say so, rather than send an empty result as a success.
+	if resp.Result.Verdict == "" {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "ERROR", "error": "could not analyze this URL"})
+		return
 	}
 	c.JSON(http.StatusOK, resp)
 }
