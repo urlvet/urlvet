@@ -106,8 +106,14 @@ func CheckTyposquatting(domain string) TyposquatResult {
 
 	for _, entry := range topEntries {
 		// --- Levenshtein check ---
+		// Two edits is a lot for a short name ("hdfc" is two from "htsc"), so
+		// allow it only when both names are long enough for it to look alike.
+		maxDist := 1
+		if len(inputSLD) >= 6 && len(entry.sld) >= 6 {
+			maxDist = 2
+		}
 		dist := levenshtein(inputSLD, entry.sld)
-		if dist >= 1 && dist <= 2 {
+		if dist >= 1 && dist <= maxDist {
 			return TyposquatResult{
 				IsSuspicious:  true,
 				MatchedDomain: entry.domain,

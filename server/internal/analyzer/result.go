@@ -151,8 +151,12 @@ func GenerateResult(resp Response) Result {
 
 	// --- 7. Redirection Analysis ---
 	if resp.Analysis.RedirectionResult.IsRedirected {
-		if resp.Analysis.RedirectionResult.ChainLength > 3 {
-			badReasons = append(badReasons, fmt.Sprintf("Excessive redirection chain detected (%d hops).", resp.Analysis.RedirectionResult.ChainLength))
+		// ChainLength counts URLs, including the one scanned. Long chains only
+		// matter when they leave the site: hopping www → locale → home on one
+		// domain is normal, while phishing bounces through other domains.
+		hops := resp.Analysis.RedirectionResult.ChainLength - 1
+		if hops > 3 && resp.Analysis.RedirectionResult.HasDomainJump {
+			badReasons = append(badReasons, fmt.Sprintf("Excessive redirection chain detected (%d hops).", hops))
 			riskScore += 40
 		}
 
@@ -246,9 +250,17 @@ func GenerateResult(resp Response) Result {
 
 		if resp.ContentData.HasForms {
 			for _, form := range resp.ContentData.Forms {
+				// Where a form sends its data only matters for what it collects:
+				// site search often posts to a search service on another domain.
 				if form.ExternalAction {
-					badReasons = append(badReasons, "CRITICAL: Form submits data to a different domain (common phishing tactic).")
-					riskScore += 80
+					switch {
+					case form.ContainsPassword || form.ContainsPayment || form.ContainsPersonal:
+						badReasons = append(badReasons, "CRITICAL: Form submits data to a different domain (common phishing tactic).")
+						riskScore += 80
+					case form.ContainsUserLike:
+						badReasons = append(badReasons, "Form sends an email address or username to a different domain.")
+						riskScore += 20
+					}
 				}
 				if form.ContainsPassword && !resp.SSLInfo.HasTLS {
 					badReasons = append(badReasons, "DANGEROUS: Password form detected over insecure connection!")

@@ -208,19 +208,19 @@ var HighValueBrands = map[string]BrandEntry{
 	// ── Banking — India ───────────────────────────────────────────────────────
 	"SBI": {
 		TitleKeywords:   []string{"sbi", "state bank of india", "sbi net banking"},
-		OfficialDomains: []string{"onlinesbi.sbi", "sbi.co.in", "sbicard.com"},
+		OfficialDomains: []string{"onlinesbi.sbi", "sbi.co.in", "sbicard.com", "sbi.bank.in"},
 	},
 	"HDFC": {
 		TitleKeywords:   []string{"hdfc", "hdfc bank", "hdfc net banking"},
-		OfficialDomains: []string{"hdfcbank.com", "hdfc.com"},
+		OfficialDomains: []string{"hdfcbank.com", "hdfc.com", "hdfc.bank.in"},
 	},
 	"ICICI": {
 		TitleKeywords:   []string{"icici", "icici bank"},
-		OfficialDomains: []string{"icicibank.com"},
+		OfficialDomains: []string{"icicibank.com", "icici.bank.in"},
 	},
 	"Axis Bank": {
 		TitleKeywords:   []string{"axis bank", "axis net banking"},
-		OfficialDomains: []string{"axisbank.com"},
+		OfficialDomains: []string{"axisbank.com", "axis.bank.in"},
 	},
 	"Kotak": {
 		TitleKeywords:   []string{"kotak", "kotak mahindra"},

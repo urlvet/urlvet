@@ -2,6 +2,8 @@ package checks
 
 import (
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/urlvet/urlvet/internal/constants"
 )
@@ -31,7 +33,7 @@ func CheckBrandMismatch(domain string, pageTitle string) BrandResult {
 
 	for brand, entry := range constants.HighValueBrands {
 		for _, kw := range entry.TitleKeywords {
-			if strings.Contains(pageTitle, kw) {
+			if containsWord(pageTitle, kw) {
 				res.DetectedNames = append(res.DetectedNames, brand)
 				if !isOfficialDomain(domain, entry.OfficialDomains) {
 					res.BrandFound = brand
@@ -43,4 +45,23 @@ func CheckBrandMismatch(domain string, pageTitle string) BrandResult {
 	}
 
 	return res
+}
+
+// containsWord reports whether kw appears in s as a whole word or phrase, so
+// "netbank" (Commonwealth Bank) doesn't match "NetBanking" on another bank's page.
+func containsWord(s, kw string) bool {
+	isWordChar := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) }
+	for i := 0; ; {
+		j := strings.Index(s[i:], kw)
+		if j < 0 {
+			return false
+		}
+		start, end := i+j, i+j+len(kw)
+		before, _ := utf8.DecodeLastRuneInString(s[:start])
+		after, _ := utf8.DecodeRuneInString(s[end:])
+		if (start == 0 || !isWordChar(before)) && (end == len(s) || !isWordChar(after)) {
+			return true
+		}
+		i = start + 1
+	}
 }

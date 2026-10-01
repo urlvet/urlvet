@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"time"
 )
@@ -59,9 +60,15 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 		TLSHandshakeTimeout: 300 * time.Millisecond, // TLS handshake timeout
 	}
 
+	// Keep cookies across hops, like a browser: some sites set one and redirect,
+	// and without it they bounce between the same pages. The jar lives only for
+	// this scan.
+	jar, _ := cookiejar.New(nil)
+
 	client := &http.Client{
 		Timeout:   5 * time.Second, // Overall timeout (shouldn't be reached with header timeout)
 		Transport: transport,
+		Jar:       jar,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			redirects = append(redirects, req.URL.String())
 			if len(via) >= 10 { // Max 10 redirects
@@ -84,8 +91,10 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 	var usedGET bool
 	resp, err := client.Do(req)
 	if err != nil {
-		// Fallback to GET if HEAD fails
+		// Fallback to GET if HEAD fails. Start the chain over, so hops from the
+		// failed HEAD attempt aren't counted twice.
 		usedGET = true
+		redirects = nil
 		req, err = http.NewRequestWithContext(ctx, "GET", checkURL, nil)
 		if err != nil {
 			return result, fmt.Errorf("failed to create GET request: %v", err)
@@ -114,7 +123,7 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 	hasJump := false
 	for _, u := range chain[1:] {
 		urlDomain, _ := GetDomain(u)
-		if urlDomain != origDomain {
+		if !sameSite(urlDomain, origDomain) {
 			hasJump = true
 			break
 		}

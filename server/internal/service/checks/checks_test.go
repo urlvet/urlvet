@@ -53,3 +53,45 @@ func TestHasAncestor_SVGTitle(t *testing.T) {
 		t.Errorf("hasAncestor(title, svg) = %v, want [false true]", titles)
 	}
 }
+
+func TestGetDomain_PublicSuffixHost(t *testing.T) {
+	tests := map[string]string{
+		"https://gov.uk/":           "gov.uk",
+		"https://www.gov.uk/":       "www.gov.uk",
+		"https://www.hdfc.bank.in/": "hdfc.bank.in",
+		"https://Example.COM/a":     "example.com",
+	}
+	for in, want := range tests {
+		got, err := GetDomain(in)
+		if err != nil || got != want {
+			t.Errorf("GetDomain(%q) = %q, %v; want %q", in, got, err, want)
+		}
+	}
+}
+
+func TestCheckBrandMismatch_WholeWords(t *testing.T) {
+	// HDFC's title mentions "NetBanking"; Commonwealth Bank's keyword is "netbank".
+	if r := CheckBrandMismatch("hdfcbank.com", "HDFC Bank: Personal Banking Services | NetBanking"); r.IsMismatch {
+		t.Errorf("NetBanking matched as %q", r.BrandFound)
+	}
+	if r := CheckBrandMismatch("commbank-verify.xyz", "CommBank NetBank - Log on"); !r.IsMismatch || r.BrandFound != "Commonwealth Bank" {
+		t.Errorf("lookalike CommBank page = %+v, want a Commonwealth Bank mismatch", r)
+	}
+}
+
+func TestSameSite(t *testing.T) {
+	tests := []struct {
+		a, b string
+		want bool
+	}{
+		{"paypal.com", "paypal.com", true},
+		{"gov.uk", "www.gov.uk", true},
+		{"zoom.us", "zoom.com", false},
+		{"paypal.com", "evilpaypal.com", false},
+	}
+	for _, tt := range tests {
+		if got := sameSite(tt.a, tt.b); got != tt.want {
+			t.Errorf("sameSite(%q, %q) = %v, want %v", tt.a, tt.b, got, tt.want)
+		}
+	}
+}

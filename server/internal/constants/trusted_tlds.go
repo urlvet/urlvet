@@ -13,6 +13,10 @@ var TrustedTLDs = map[string]struct{}{
 	"museum":      {},
 	"resbank":     {},
 
+	// Restricted by the Reserve Bank of India to regulated entities
+	"bank.in": {}, //  Banks
+	"fin.in":  {}, //  Non-bank financial companies
+
 	// Academic and Educational Entities
 	"ac.at":  {}, //  Austria
 	"ac.bd":  {}, //  Bangladesh

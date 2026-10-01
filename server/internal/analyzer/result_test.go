@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/urlvet/urlvet/internal/service/checks"
@@ -142,14 +143,17 @@ func TestGenerateResult_Verdict(t *testing.T) {
 			wantRiskMin: 50,
 		},
 		{
-			name: "long redirect chain",
+			// 4 hops across domains: excessive chain (+40) and domain jump (+50).
+			name: "long cross-domain redirect chain",
 			modify: func(r *Response) {
 				r.Analysis.RedirectionResult = checks.RedirectionResult{
-					IsRedirected: true,
-					ChainLength:  5,
+					IsRedirected:  true,
+					ChainLength:   5,
+					HasDomainJump: true,
+					FinalURLHost:  "evil.com",
 				}
 			},
-			wantRiskMin: 40,
+			wantRiskMin: 90,
 		},
 		{
 			// valid=true + verified=true → confirmed phishing, max risk.
@@ -255,14 +259,24 @@ func TestGenerateResult_Verdict(t *testing.T) {
 			wantRiskMin: 40,
 		},
 		{
-			name: "form submits to external domain",
+			name: "password form submits to external domain",
 			modify: func(r *Response) {
 				r.ContentData = &checks.PageFormResult{
 					HasForms: true,
-					Forms:    []checks.FormInfo{{ExternalAction: true}},
+					Forms:    []checks.FormInfo{{ExternalAction: true, ContainsPassword: true}},
 				}
 			},
 			wantRiskMin: 80,
+		},
+		{
+			name: "email-only form submits to external domain",
+			modify: func(r *Response) {
+				r.ContentData = &checks.PageFormResult{
+					HasForms: true,
+					Forms:    []checks.FormInfo{{ExternalAction: true, ContainsUserLike: true}},
+				}
+			},
+			wantRiskMin: 20,
 		},
 	}
 
@@ -333,5 +347,38 @@ func TestGenerateResult_VerdictBoundaries(t *testing.T) {
 	safeResp.Analysis.SupportsHSTS = true
 	if r := GenerateResult(safeResp); r.Verdict != "Safe" {
 		t.Errorf("expected Safe, got %s (final=%d)", r.Verdict, r.FinalScore)
+	}
+}
+
+func TestGenerateResult_SameSiteRedirectChainIsFine(t *testing.T) {
+	// paypal.com → www.paypal.com → /in/home → … all on one domain.
+	resp := safeBase()
+	resp.Analysis.RedirectionResult = checks.RedirectionResult{
+		IsRedirected: true,
+		ChainLength:  5,
+		FinalURLHost: "www.paypal.com",
+	}
+	base := GenerateResult(safeBase())
+	got := GenerateResult(resp)
+	if got.RiskScore != base.RiskScore {
+		t.Errorf("same-site redirect chain added risk: %d, want %d", got.RiskScore, base.RiskScore)
+	}
+	for _, r := range got.Reasons.BadReasons {
+		if strings.Contains(r, "redirection chain") {
+			t.Errorf("unexpected bad reason %q", r)
+		}
+	}
+}
+
+func TestGenerateResult_ExternalSearchFormIsFine(t *testing.T) {
+	// login.gov's site search sends the query to search.usa.gov.
+	resp := safeBase()
+	resp.ContentData = &checks.PageFormResult{
+		HasForms: true,
+		Forms:    []checks.FormInfo{{ExternalAction: true, Method: "GET", Action: "https://search.usa.gov/search"}},
+	}
+	base := GenerateResult(safeBase())
+	if got := GenerateResult(resp); got.RiskScore != base.RiskScore {
+		t.Errorf("external search form added risk: %d, want %d", got.RiskScore, base.RiskScore)
 	}
 }
