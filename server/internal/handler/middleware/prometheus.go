@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/metrics"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/metrics"
 )
 
 // PrometheusMiddleware records per-request latency and request counts.

@@ -3,10 +3,10 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/service/checks"
-	"github.com/abhizaik/urlvet/internal/service/rank"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/service/checks"
+	"github.com/urlvet/urlvet/internal/service/rank"
 )
 
 type domainRequest struct {

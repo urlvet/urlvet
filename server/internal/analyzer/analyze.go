@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/constants"
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/metrics"
-	"github.com/abhizaik/urlvet/internal/service/cache"
-	"github.com/abhizaik/urlvet/internal/service/checks"
-	"github.com/abhizaik/urlvet/internal/service/threatfeeds"
-	"github.com/abhizaik/urlvet/internal/store"
+	"github.com/urlvet/urlvet/internal/constants"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/metrics"
+	"github.com/urlvet/urlvet/internal/service/cache"
+	"github.com/urlvet/urlvet/internal/service/checks"
+	"github.com/urlvet/urlvet/internal/service/threatfeeds"
+	"github.com/urlvet/urlvet/internal/store"
 )
 
 // buildPhishingResult converts the internal PhishTankResult into the public PhishingResult.

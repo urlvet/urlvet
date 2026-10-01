@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/store"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/store"
 )
 
 // AdminStatsHandler returns live scan metrics derived from the in-memory ring buffer.

@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/service/checks"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/service/checks"
 )
 
 // CheckStatusCodeHandler fetches the URL and returns its HTTP status code.

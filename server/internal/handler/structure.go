@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/service/checks"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/service/checks"
 )
 
 // CheckUrlLengthHandler checks whether the URL exceeds the safe length threshold.

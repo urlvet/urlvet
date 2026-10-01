@@ -1,6 +1,6 @@
 package checks
 
-import "github.com/abhizaik/urlvet/internal/constants"
+import "github.com/urlvet/urlvet/internal/constants"
 
 func IsRiskyTld(domain string) (bool, bool, string) {
 	tld, icann := GetTld(domain)

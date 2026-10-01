@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/admintoken"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/admintoken"
 	"golang.org/x/crypto/argon2"
 )
 

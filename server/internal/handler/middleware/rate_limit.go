@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/service/cache"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/service/cache"
 )
 
 // RateLimiter returns a Gin middleware that limits requests per IP

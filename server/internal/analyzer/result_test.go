@@ -3,8 +3,8 @@ package analyzer
 import (
 	"testing"
 
-	"github.com/abhizaik/urlvet/internal/service/checks"
-	"github.com/abhizaik/urlvet/internal/service/domaininfo"
+	"github.com/urlvet/urlvet/internal/service/checks"
+	"github.com/urlvet/urlvet/internal/service/domaininfo"
 )
 
 // safeBase returns a minimal Response that should produce verdict "Safe".

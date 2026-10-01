@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/abhizaik/urlvet/internal/service/cache"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/service/cache"
 )
 
 // cacheEntry is the per-key payload returned by ListCacheHandler.

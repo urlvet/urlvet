@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/metrics"
-	"github.com/abhizaik/urlvet/internal/store"
+	"github.com/urlvet/urlvet/internal/metrics"
+	"github.com/urlvet/urlvet/internal/store"
 )
 
 // runTasks runs all tasks in parallel, collects timings and non-fatal errors

@@ -1,4 +1,4 @@
-module github.com/abhizaik/urlvet
+module github.com/urlvet/urlvet
 
 go 1.25.0
 

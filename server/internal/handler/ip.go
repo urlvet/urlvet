@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/service/checks"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/service/checks"
 )
 
 // CheckIfUsesIPHandler checks whether the URL uses a raw IP address instead of a domain.

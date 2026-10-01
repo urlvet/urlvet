@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/analyzer"
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/service/checks"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/analyzer"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/service/checks"
 )
 
 // AnalyzeURLHandler runs a full safety analysis on the given URL.

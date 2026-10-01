@@ -5,12 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/handler/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/urlvet/urlvet/internal/handler/middleware"
 )
 
 // allowedOrigins reads CORS_ALLOWED_ORIGINS (comma-separated) from the environment.

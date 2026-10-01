@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/service/checks"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/service/checks"
 )
 
 // CheckHSTSHandler checks whether the URL's host enforces HSTS.

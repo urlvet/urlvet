@@ -27,14 +27,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/abhizaik/urlvet/internal/admintoken"
-	_ "github.com/abhizaik/urlvet/internal/docs" // swagger docs registration
-	"github.com/abhizaik/urlvet/internal/handler"
-	"github.com/abhizaik/urlvet/internal/logger"
-	"github.com/abhizaik/urlvet/internal/service/rank"
-	"github.com/abhizaik/urlvet/internal/service/screenshot"
-	"github.com/abhizaik/urlvet/internal/service/typosquat"
 	"github.com/joho/godotenv"
+	"github.com/urlvet/urlvet/internal/admintoken"
+	_ "github.com/urlvet/urlvet/internal/docs" // swagger docs registration
+	"github.com/urlvet/urlvet/internal/handler"
+	"github.com/urlvet/urlvet/internal/logger"
+	"github.com/urlvet/urlvet/internal/service/rank"
+	"github.com/urlvet/urlvet/internal/service/screenshot"
+	"github.com/urlvet/urlvet/internal/service/typosquat"
 )
 
 func main() {

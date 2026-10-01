@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/abhizaik/urlvet/internal/constants"
-	"github.com/abhizaik/urlvet/internal/service/rank"
+	"github.com/urlvet/urlvet/internal/constants"
+	"github.com/urlvet/urlvet/internal/service/rank"
 	"golang.org/x/net/publicsuffix"
 )
 

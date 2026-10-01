@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/abhizaik/urlvet/internal/service/checks"
-	"github.com/abhizaik/urlvet/internal/service/screenshot"
 	"github.com/gin-gonic/gin"
+	"github.com/urlvet/urlvet/internal/service/checks"
+	"github.com/urlvet/urlvet/internal/service/screenshot"
 )
 
 func ScreenshotHandler(c *gin.Context) {

@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/logger"
 	"github.com/chromedp/chromedp"
+	"github.com/urlvet/urlvet/internal/logger"
 )
 
 // Service manages screenshot operations with a shared browser allocator

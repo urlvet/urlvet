@@ -4,13 +4,13 @@ import (
 	"context"
 	"strings"
 
-	"github.com/abhizaik/urlvet/internal/constants"
-	"github.com/abhizaik/urlvet/internal/service/checks"
-	"github.com/abhizaik/urlvet/internal/service/domaininfo"
-	"github.com/abhizaik/urlvet/internal/service/rank"
-	"github.com/abhizaik/urlvet/internal/service/threatfeeds"
-	"github.com/abhizaik/urlvet/internal/service/typosquat"
 	"github.com/redis/go-redis/v9"
+	"github.com/urlvet/urlvet/internal/constants"
+	"github.com/urlvet/urlvet/internal/service/checks"
+	"github.com/urlvet/urlvet/internal/service/domaininfo"
+	"github.com/urlvet/urlvet/internal/service/rank"
+	"github.com/urlvet/urlvet/internal/service/threatfeeds"
+	"github.com/urlvet/urlvet/internal/service/typosquat"
 )
 
 // Rank

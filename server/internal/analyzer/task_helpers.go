@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/abhizaik/urlvet/internal/metrics"
 	"github.com/redis/go-redis/v9"
+	"github.com/urlvet/urlvet/internal/metrics"
 )
 
 // cachedTask executes a task with caching support
