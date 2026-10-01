@@ -3,6 +3,7 @@ package checks
 import (
 	"errors"
 	"net/http"
+	"net/http/cookiejar"
 	"time"
 )
 
@@ -18,9 +19,13 @@ type RedirectionResult struct {
 func CheckRedirects(rawURL string) (RedirectionResult, error) {
 	var redirects []string
 
+	// Keep cookies across hops, like a browser (see CheckHTTPCombined).
+	jar, _ := cookiejar.New(nil)
+
 	client := &http.Client{
 		Timeout:   5 * time.Second,
 		Transport: newSafeTransport(),
+		Jar:       jar,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			redirects = append(redirects, req.URL.String())
 			if len(via) >= 10 {
@@ -47,7 +52,7 @@ func CheckRedirects(rawURL string) (RedirectionResult, error) {
 
 	for _, u := range chain[1:] {
 		urlDomain, _ := GetDomain(u)
-		if urlDomain != origDomain {
+		if !sameSite(urlDomain, origDomain) {
 			hasJump = true
 			break
 		}

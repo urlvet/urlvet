@@ -23,9 +23,14 @@ func GetDomain(rawURL string) (string, error) {
 		return "", err
 	}
 
-	host := parsedURL.Hostname()
+	host := strings.ToLower(parsedURL.Hostname())
 	domain, err := publicsuffix.EffectiveTLDPlusOne(host)
 	if err != nil {
+		// A host that is itself a public suffix (gov.uk, github.io) has no
+		// registrable domain above it; the host is the closest thing to one.
+		if ps, _ := publicsuffix.PublicSuffix(host); host != "" && ps == host {
+			return host, nil
+		}
 		return "", err
 	}
 	return domain, nil
@@ -198,4 +203,11 @@ func newSafeTransport() *http.Transport {
 		ResponseHeaderTimeout: 5 * time.Second,
 		TLSHandshakeTimeout:   5 * time.Second,
 	}
+}
+
+// sameSite reports whether two registrable domains (from GetDomain) belong to
+// the same site. They usually match exactly; the exception is a host that is
+// itself a public suffix, like gov.uk, whose pages live on www.gov.uk.
+func sameSite(a, b string) bool {
+	return a == b || strings.HasSuffix(a, "."+b) || strings.HasSuffix(b, "."+a)
 }

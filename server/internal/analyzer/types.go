@@ -133,9 +133,15 @@ type CacheInterface interface {
 	SetJSON(ctx context.Context, key string, value interface{}, ttl time.Duration) error
 }
 
+// Output collects task results. Tasks write to it concurrently, under mu.
 type Output struct {
 	mu sync.Mutex
+	OutputData
+}
 
+// OutputData is the result data itself, kept apart from the lock so a
+// consistent copy can be taken (see runTasks).
+type OutputData struct {
 	Timings map[string]string
 
 	// features
