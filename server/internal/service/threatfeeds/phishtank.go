@@ -3,6 +3,7 @@ package threatfeeds
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -68,6 +69,10 @@ type PhishTankResult struct {
 	RawResponse     json.RawMessage `json:"raw_response,omitempty"`
 }
 
+// ErrRateLimited means PhishTank refused the lookup because we've made too
+// many recently. The link simply wasn't checked against PhishTank this time.
+var ErrRateLimited = errors.New("phishtank: rate limited")
+
 func CheckPhishTank(targetURL string) (*PhishTankResult, error) {
 	apiKey := os.Getenv("PHISHTANK_API_KEY")
 	userAgent := os.Getenv("PHISHTANK_USER_AGENT")
@@ -97,6 +102,9 @@ func CheckPhishTank(targetURL string) (*PhishTankResult, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusTooManyRequests {
+		return nil, ErrRateLimited
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("phishtank api returned status: %d", resp.StatusCode)
 	}

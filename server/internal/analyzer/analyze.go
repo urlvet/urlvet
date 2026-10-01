@@ -2,6 +2,8 @@ package analyzer
 
 import (
 	"context"
+	"errors"
+	"slices"
 	"time"
 
 	"github.com/urlvet/urlvet/internal/constants"
@@ -170,12 +172,7 @@ func Analyze(ctx context.Context, rawURL string) (Response, []error) {
 	metrics.RiskScore.Observe(float64(result.RiskScore))
 	metrics.TrustScore.Observe(float64(result.TrustScore))
 
-	if len(errs) > 0 {
-		resp.Incomplete = true
-		for _, e := range errs {
-			resp.Errors = append(resp.Errors, e.Error())
-		}
-	}
+	resp.Incomplete, resp.IncompleteChecks, resp.Errors = summarizeErrors(errs)
 
 	// Only cache complete results — incomplete scans may be missing signals.
 	if cacheInstance != nil && !resp.Incomplete {
@@ -202,4 +199,27 @@ func Analyze(ctx context.Context, rawURL string) (Response, []error) {
 	}
 
 	return resp, errs
+}
+
+// summarizeErrors turns task errors into the response's incomplete flag, the
+// names of the checks that didn't finish, and the raw messages.
+func summarizeErrors(errs []error) (incomplete bool, checks []string, messages []string) {
+	for _, e := range errs {
+		messages = append(messages, e.Error())
+		var taskErr *TaskError
+		var timeout *TimeoutError
+		switch {
+		case errors.As(e, &timeout):
+			checks = append(checks, timeout.Tasks...)
+		case errors.As(e, &taskErr):
+			checks = append(checks, taskErr.Task)
+		}
+		// PhishTank rate limits come and go with traffic; a scan missing only
+		// that lookup is still worth caching rather than retrying all day.
+		if !errors.Is(e, threatfeeds.ErrRateLimited) {
+			incomplete = true
+		}
+	}
+	slices.Sort(checks)
+	return incomplete, slices.Compact(checks), messages
 }

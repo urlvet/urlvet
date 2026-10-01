@@ -28,8 +28,13 @@ type Response struct {
 	Phishing         *PhishingResult               `json:"phishing"`
 	Performance      Performance                   `json:"performance"`
 	Result           Result                        `json:"result"`
-	Incomplete       bool                          `json:"incomplete"`
-	Errors           []string                      `json:"errors"`
+	// Incomplete means signals are missing in a way that a rescan could fix, so
+	// the result isn't cached. IncompleteChecks names every task that didn't
+	// finish, including ones that don't make the result incomplete (a PhishTank
+	// rate limit), so the UI can say what wasn't checked.
+	Incomplete       bool     `json:"incomplete"`
+	IncompleteChecks []string `json:"incomplete_checks,omitempty"`
+	Errors           []string `json:"errors"`
 }
 
 // PhishingResult is the unified phishing-check output exposed in the API response.
