@@ -88,7 +88,7 @@
 </script>
 
 <div
-  class={`flex flex-row items-center gap-4 p-5 sm:gap-6 sm:p-7 rounded-2xl border ${style.border} ${style.bg}`}
+  class={`flex flex-row items-center gap-4 p-5 sm:gap-6 sm:p-7 rounded-2xl border ${style.border} ${style.bg} ${style.pulse}`}
 >
   <!-- Verdict -->
   <div class="flex-1 flex flex-col gap-1.5 min-w-0">
@@ -96,7 +96,8 @@
       class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"
       >Verdict</span
     >
-    <div class="flex items-center gap-3 flex-wrap">
+    <!-- The verdict lands like a stamp: Risky hits hard, Suspicious wobbles, Safe settles. -->
+    <div class="stamp stamp-{(verdict ?? '').toLowerCase()} flex items-center gap-3 flex-wrap">
       <span
         class="font-serif text-5xl sm:text-6xl font-normal text-gray-900 dark:text-gray-100 tracking-[-0.01em] leading-none"
         >{verdict ?? "—"}</span
@@ -176,11 +177,77 @@
       box-shadow: 0 0 0 16px rgba(234, 179, 8, 0);
     }
   }
+  .stamp {
+    transform-origin: 30% 60%;
+  }
+  .stamp-risky {
+    animation: stamp-hard 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.1s both;
+  }
+  .stamp-suspicious {
+    animation: stamp-wobble 0.7s ease-out 0.1s both;
+  }
+  .stamp-safe {
+    animation: stamp-settle 0.5s ease-out 0.1s both;
+  }
+  @keyframes stamp-hard {
+    0% {
+      transform: scale(1.9) rotate(-9deg);
+      opacity: 0;
+    }
+    55% {
+      transform: scale(0.94) rotate(-1deg);
+      opacity: 1;
+    }
+    75% {
+      transform: scale(1.03) rotate(-2deg);
+    }
+    100% {
+      transform: scale(1) rotate(0);
+    }
+  }
+  @keyframes stamp-wobble {
+    0% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+    40% {
+      transform: scale(1) rotate(-3deg);
+      opacity: 1;
+    }
+    60% {
+      transform: rotate(2.5deg);
+    }
+    80% {
+      transform: rotate(-1deg);
+    }
+    100% {
+      transform: rotate(0);
+    }
+  }
+  @keyframes stamp-settle {
+    0% {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stamp,
+    .verdict-safe,
+    .verdict-risky,
+    .verdict-suspicious {
+      animation: none !important;
+    }
+  }
+
   .verdict-safe {
-    animation: pulse-safe 0.7s ease-out 0.3s both;
+    animation: pulse-safe 0.7s ease-out 0.35s both;
   }
   .verdict-risky {
-    animation: pulse-risky 0.7s ease-out 0.3s both;
+    animation: pulse-risky 0.7s ease-out 0.33s both;
   }
   .verdict-suspicious {
     animation: pulse-suspicious 0.7s ease-out 0.3s both;
