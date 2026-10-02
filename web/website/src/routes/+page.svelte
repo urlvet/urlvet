@@ -14,7 +14,13 @@
   import ScanProgress from "../lib/components/ScanProgress.svelte";
   import Shoutouts from "../lib/components/Shoutouts.svelte";
   import type { AnalyzeResult } from "../lib/types";
-  import { encodeVerdict, extractLinks, formatUrl, isValidUrl } from "../lib/utils";
+  import {
+    encodeVerdict,
+    extractLinks,
+    formatUrl,
+    getDomainFromUrl,
+    isValidUrl,
+  } from "../lib/utils";
 
   // Page load data from +page.ts — runs server-side so bots get correct OG meta tags.
   export let data: {
@@ -38,6 +44,21 @@
   let linkChoices: string[] = [];
 
   $: isLanding = !scanResult && !loading && !error && !formError;
+  // The browser tab follows the scan too: "Checking …" while it runs, then the
+  // verdict with a coloured dot as the icon.
+  const VERDICT_TAB: Record<string, string> = {
+    Safe: "#10b981",
+    Suspicious: "#eab308",
+    Risky: "#ef4444",
+  };
+  $: verdictNow = scanResult?.result?.verdict;
+  $: liveTitle = loading
+    ? `Checking ${getDomainFromUrl(formatUrl(input)) || "link"}… · url.vet`
+    : scanResult && verdictNow && VERDICT_TAB[verdictNow]
+      ? `${verdictNow} — ${scanResult.domain} · url.vet`
+      : undefined;
+  $: verdictDot = !loading && verdictNow ? VERDICT_TAB[verdictNow] : undefined;
+
   // The logo dot mirrors the scan: blinking while it runs, then the verdict's colour.
   $: heroDot = loading
     ? ("scanning" as const)
@@ -204,6 +225,8 @@
   score={scanResult?.result?.final_score ?? (data.score ? Number(data.score) : undefined)}
   queryUrl={data.queryUrl}
   {currentUrl}
+  {liveTitle}
+  liveDot={verdictDot}
 />
 
 <section class="relative overflow-x-clip">
