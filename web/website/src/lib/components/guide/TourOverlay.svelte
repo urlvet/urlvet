@@ -100,7 +100,7 @@
     tabindex="-1"
     role="dialog"
     aria-label="Tour step {index + 1} of {steps.length}"
-    class="absolute rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl shadow-black/20 p-5 focus:outline-none"
+    class="absolute rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl shadow-black/20 dark:shadow-black/60 p-5 focus:outline-none"
     style="top:{card.top}px;left:{card.left}px;width:min({CARD_W}px, calc(100vw - 32px));transition:top .25s, left .25s"
   >
     <p class="font-mono text-[11px] uppercase tracking-wider text-gray-500">
@@ -118,7 +118,11 @@
       >
       <div class="flex gap-2">
         {#if index > 0}
-          <button type="button" class="{PILL_OUTLINE} px-4 py-2" on:click={back}>Back</button>
+          <button
+            type="button"
+            class="{PILL_OUTLINE} dark:!border-gray-600 px-4 py-2"
+            on:click={back}>Back</button
+          >
         {/if}
         <button type="button" class="{PILL_SOLID} px-4 py-2" on:click={next}>
           {last ? "Done" : "Next"}
@@ -136,5 +140,12 @@
       left 0.25s,
       width 0.25s,
       height 0.25s;
+  }
+  /* On a dark page a light dim barely shows, so dim harder and outline the
+     spotlit area so it reads as lifted out. */
+  :global(.dark) .spotlight {
+    box-shadow:
+      0 0 0 1.5px rgba(255, 255, 255, 0.22),
+      0 0 0 9999px rgba(0, 0, 0, 0.72);
   }
 </style>
