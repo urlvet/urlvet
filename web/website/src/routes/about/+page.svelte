@@ -53,32 +53,36 @@
 
   <!-- Maker: the why, in first person -->
   <section class="mt-20">
-    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Who made this</h2>
+    <h2 class="mt-2 font-serif text-3xl md:text-4xl tracking-[-0.01em]">Why I built it</h2>
     <figure class="mt-6">
-      <!-- A letter, not a pull quote: upright serif reads better at this length. -->
+      <!-- A letter: body text in the page's sans, with only the sign-off in serif. -->
       <blockquote
-        class="max-w-[36rem] space-y-5 font-serif text-[1.3rem] md:text-[1.45rem] leading-[1.5] text-gray-800 dark:text-gray-200"
+        class="max-w-[36rem] space-y-5 text-[17px] md:text-lg leading-relaxed text-gray-800 dark:text-gray-200"
       >
         <p>
-          I'd often get a link and wonder if it was safe to open. I tried a few online link
+          I’d often get a link and wonder if it was safe to open. I tried a few online link
           scanners. Some just said “safe” or “risky” and nothing else. Others gave me pages of
-          technical data to dig through myself. I wasn't really happy with either.
+          technical data to dig through myself. I wasn’t really happy with either.
         </p>
         <p>
           Then I started noticing it at home. My parents would open and forward links from WhatsApp
-          without really knowing if they were real (and most of the time they weren't). Friends
-          would send me “hot deals” that didn't even go to the shopping website they claimed to.
+          without really knowing if they were real (and most of the time they weren’t). Friends
+          would send me “hot deals” that didn’t even go to the shopping website they claimed to.
         </p>
         <p>
           I wanted something I could use myself and also hand to my parents. A straight answer for
           them, and the reasons behind it for anyone who wants to look.
         </p>
         <p>
-          I'm a pretty private person, and I don't like how most apps treat their users today:
+          I’m a pretty private person, and I don’t like how most apps treat their users today:
           tracking everything, collecting all your data, selling it to advertisers. I found all of
           it irritating and wanted something that does things the right way.
         </p>
-        <p class="italic">That's how the idea for url.vet started.</p>
+        <p
+          class="pt-1 font-serif italic text-2xl md:text-[1.7rem] leading-snug text-gray-900 dark:text-gray-100"
+        >
+          That’s how the idea for url.vet started.
+        </p>
       </blockquote>
       <figcaption class="mt-8 flex items-center gap-4">
         <img
@@ -100,7 +104,7 @@
             href="https://github.com/abhizaik"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-1 inline-flex items-center gap-1.5 font-mono text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            class="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d={GITHUB_PATH} />
