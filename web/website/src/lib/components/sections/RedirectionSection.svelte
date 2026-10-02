@@ -1,16 +1,10 @@
 <script lang="ts">
   import StatusIcon from "../StatusIcon.svelte";
-  import { browser } from "$app/environment";
   import TooltipIcon from "../TooltipIcon.svelte";
+  import RedirectPath from "./RedirectPath.svelte";
   export let analysis: any;
   export let domain: string;
-
-  function openAnalyzeInNewTab(url: string) {
-    if (!browser) return;
-    const analyzeUrl = new URL(window.location.origin);
-    analyzeUrl.searchParams.set("q", url);
-    window.open(analyzeUrl.toString(), "_blank");
-  }
+  export let verdict: string | undefined = undefined;
 </script>
 
 {#if analysis}
@@ -18,6 +12,12 @@
     <div
       class="space-y-0 divide-y divide-gray-300 dark:divide-gray-800 text-sm text-gray-800 dark:text-gray-200 max-w-4xl w-full mx-auto"
     >
+      {#if analysis.redirection_result?.is_redirected && analysis.redirection_result.chain?.length > 1}
+        <div class="pb-5">
+          <RedirectPath chain={analysis.redirection_result.chain} {domain} {verdict} />
+        </div>
+      {/if}
+
       {#if analysis.redirection_result}
         <div
           class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] md:items-center gap-2 md:gap-4 py-2 first:pt-0 last:pb-0"
@@ -96,62 +96,6 @@
             >{analysis.redirection_result.chain_length}</span
           >
         </div>
-
-        {#if analysis.redirection_result.chain?.length}
-          <div
-            class="flex flex-col md:grid md:grid-cols-[minmax(0,280px),1fr] gap-2 md:gap-4 py-2 first:pt-0 last:pb-0"
-          >
-            <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-              <span>Redirection Chain:</span>
-              <TooltipIcon
-                text="A step-by-step list of all URLs in the redirection path. Warning icons highlight jumps to unexpected domains. Click any URL to analyze it in a new tab."
-              />
-            </div>
-
-            {#if !analysis.redirection_result.has_domain_jump}
-              <ul class="text-sm text-gray-700 dark:text-gray-100 list-none">
-                {#each analysis.redirection_result.chain as url, index}
-                  <li class="break-all flex items-center gap-2 mb-1">
-                    <span class="text-gray-400">{index + 1}.</span>
-                    <span class="font-medium text-gray-800 dark:text-white">{url}</span>
-                    {#if !url.includes(domain)}
-                      <span class="text-red-400" title="Different domain"
-                        ><StatusIcon kind="warn" /></span
-                      >
-                    {/if}
-                  </li>
-                {/each}
-              </ul>
-            {:else}
-              <div class="flex flex-col gap-2">
-                <p class="text-sm text-gray-600 dark:text-gray-300 italic">
-                  Click on the URLs to perform a safe scan on them
-                </p>
-                <ul class="text-sm text-gray-700 dark:text-gray-100 list-none">
-                  {#each analysis.redirection_result.chain as url, index}
-                    <li class="break-all flex items-center gap-2 mb-1">
-                      <span class="text-gray-400">{index + 1}.</span>
-                      <button
-                        type="button"
-                        class="font-medium text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-950 rounded px-1 transition-colors"
-                        on:click={() => openAnalyzeInNewTab(url)}
-                        title="Click to analyze this URL in a new tab"
-                        aria-label={`Analyze ${url} in a new tab`}
-                      >
-                        {url}
-                      </button>
-                      {#if !url.includes(domain)}
-                        <span class="text-red-400" title="Different domain"
-                          ><StatusIcon kind="warn" /></span
-                        >
-                      {/if}
-                    </li>
-                  {/each}
-                </ul>
-              </div>
-            {/if}
-          </div>
-        {/if}
       {/if}
 
       {#if analysis.http_status}
