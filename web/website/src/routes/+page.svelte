@@ -14,6 +14,7 @@
   import ScanProgress from "../lib/components/ScanProgress.svelte";
   import Shoutouts from "../lib/components/Shoutouts.svelte";
   import type { AnalyzeResult } from "../lib/types";
+  import { localAddressMessage } from "../lib/results/eastereggs";
   import {
     encodeVerdict,
     extractLinks,
@@ -118,6 +119,11 @@
   }
 
   async function runAnalyze(q: string) {
+    const local = localAddressMessage(q.trim());
+    if (local) {
+      formError = local;
+      return;
+    }
     const url = formatUrl(q);
     if (!isValidUrl(url)) {
       formError = "Please enter a valid URL";

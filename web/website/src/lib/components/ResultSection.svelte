@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { easterEgg } from "../results/eastereggs";
+  import { vettyMemory } from "./guide/store";
   import { incompleteNote } from "../results/incomplete";
   import type { AnalyzeResult } from "../types";
   import { PILL_OUTLINE } from "../ui/buttons";
@@ -25,6 +27,8 @@
 
   $: primary = data?.result;
   $: note = data ? incompleteNote(data.incomplete_checks, data.incomplete) : null;
+  // Vetty says this himself when he's around; otherwise it's a quiet line here.
+  $: egg = data && $vettyMemory.hidden ? easterEgg(data.url) : null;
 
   onDestroy(() => {
     if (screenshotUrl) URL.revokeObjectURL(screenshotUrl);
@@ -69,6 +73,12 @@
       {screenshotLoading}
       {screenshotFailed}
     />
+
+    {#if egg}
+      <p class="-mt-4 font-serif italic text-lg leading-snug text-gray-700 dark:text-gray-300">
+        {egg}
+      </p>
+    {/if}
 
     {#if note}
       <p
