@@ -50,7 +50,11 @@
       expanded={expanded.analysis}
       onToggle={() => toggle("analysis")}
     >
-      <RedirectionSection analysis={data.analysis} domain={data.domain} />
+      <RedirectionSection
+        analysis={data.analysis}
+        domain={data.domain}
+        verdict={data.result?.verdict}
+      />
     </AccordionSection>
   {/if}
 

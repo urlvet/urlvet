@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { ICON } from "../../ui/icons";
   import { formatUrl, stripTrackers } from "../../utils";
   import Icon from "../Icon.svelte";
@@ -10,6 +11,35 @@
   export let isLanding = true;
   export let onSubmit: (value: string) => void;
   export let onPaste: (() => void) | undefined = undefined;
+
+  // The longest hint that fits the box in full; mentions whole messages when there's room.
+  const HINTS = [
+    "Paste a link, or a whole WhatsApp message",
+    "Paste a link or a message",
+    "Paste link or message",
+    "Paste a link",
+  ];
+  let inputEl: HTMLInputElement;
+  let placeholder = HINTS[HINTS.length - 1];
+
+  function fitPlaceholder() {
+    if (!inputEl) return;
+    const cs = getComputedStyle(inputEl);
+    const room = inputEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx) return;
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    placeholder = HINTS.find((h) => ctx.measureText(h).width <= room) ?? HINTS[HINTS.length - 1];
+  }
+
+  onMount(() => {
+    fitPlaceholder();
+    // Fonts may arrive after first paint; re-measure then, and whenever the box resizes.
+    document.fonts?.ready.then(fitPlaceholder);
+    const ro = new ResizeObserver(fitPlaceholder);
+    ro.observe(inputEl);
+    return () => ro.disconnect();
+  });
 
   let justPasted = false;
   let trackerCopied = false;
@@ -60,7 +90,8 @@
       id="url-input"
       type="text"
       class="flex-1 min-w-0 bg-transparent py-2.5 text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
-      placeholder="Paste a link"
+      bind:this={inputEl}
+      {placeholder}
       bind:value={input}
       on:input={() => {
         if (formError) formError = null;

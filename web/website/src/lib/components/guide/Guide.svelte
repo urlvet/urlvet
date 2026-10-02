@@ -4,6 +4,7 @@
   import { onDestroy, onMount, tick } from "svelte";
   import { fly, scale } from "svelte/transition";
   import { EXAMPLES } from "../../data/examples";
+  import { easterEgg } from "../../results/eastereggs";
   import { ICON } from "../../ui/icons";
   import Icon from "../Icon.svelte";
   import CharacterClip from "./CharacterClip.svelte";
@@ -35,6 +36,9 @@
   let view: View = "menu";
   let tourSteps: TourStep[] | null = null;
   let nudge = false;
+  /** An easter-egg line about the link just scanned (see results/eastereggs.ts). */
+  let quip: string | null = null;
+  let quipFor = "";
   let greeting = "";
   let tip = "";
   let waving = false;
@@ -167,6 +171,7 @@
   // ── open / close ───────────────────────────────────────────────────────────
   async function toggle() {
     nudge = false;
+    quip = null;
     if (open) return close();
     view = "menu";
     greeting = $vettyMemory.introduced ? pick(GREETINGS[context] ?? GREETINGS.home) : "";
@@ -182,6 +187,22 @@
   function close() {
     open = false;
     view = "menu";
+  }
+
+  // Special links get a quip, once per result, after the verdict has landed. When
+  // Vetty is hidden the results page shows the same line instead.
+  $: if (!result) quip = null;
+  $: if (result && result.url !== quipFor && !$vettyMemory.hidden) {
+    quipFor = result.url;
+    const line = easterEgg(result.url);
+    if (line) {
+      later(() => {
+        if (open || tourSteps || $vettyMemory.hidden) return;
+        nudge = false;
+        quip = line;
+        later(() => quip === line && (quip = null), 8000);
+      }, 1100);
+    }
   }
 
   // Changing page closes the bubble.
@@ -340,6 +361,18 @@
             </button>
           {/if}
         </div>
+      </div>
+    {:else if quip}
+      <!-- An aside, not a question: no buttons. Tap it (or wait) to make it go away. -->
+      <div role="status" transition:fly={{ y: 8, duration: 200 }} class="pointer-events-auto">
+        <button
+          type="button"
+          class="bubble relative max-w-[280px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
+          title="Dismiss"
+          on:click={() => (quip = null)}
+        >
+          {quip}
+        </button>
       </div>
     {:else if nudge}
       <div

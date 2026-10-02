@@ -14,7 +14,14 @@
   import ScanProgress from "../lib/components/ScanProgress.svelte";
   import Shoutouts from "../lib/components/Shoutouts.svelte";
   import type { AnalyzeResult } from "../lib/types";
-  import { encodeVerdict, extractLinks, formatUrl, isValidUrl } from "../lib/utils";
+  import { localAddressMessage } from "../lib/results/eastereggs";
+  import {
+    encodeVerdict,
+    extractLinks,
+    formatUrl,
+    getDomainFromUrl,
+    isValidUrl,
+  } from "../lib/utils";
 
   // Page load data from +page.ts — runs server-side so bots get correct OG meta tags.
   export let data: {
@@ -38,6 +45,26 @@
   let linkChoices: string[] = [];
 
   $: isLanding = !scanResult && !loading && !error && !formError;
+  // The browser tab follows the scan too: "Checking …" while it runs, then the
+  // verdict with a coloured dot as the icon.
+  const VERDICT_TAB: Record<string, string> = {
+    Safe: "#10b981",
+    Suspicious: "#eab308",
+    Risky: "#ef4444",
+  };
+  $: verdictNow = scanResult?.result?.verdict;
+  $: liveTitle = loading
+    ? `Checking ${getDomainFromUrl(formatUrl(input)) || "link"}… · url.vet`
+    : scanResult && verdictNow && VERDICT_TAB[verdictNow]
+      ? `${verdictNow} — ${scanResult.domain} · url.vet`
+      : undefined;
+  $: verdictDot = !loading && verdictNow ? VERDICT_TAB[verdictNow] : undefined;
+
+  // The logo dot mirrors the scan: blinking while it runs, then the verdict's colour.
+  $: heroDot = loading
+    ? ("scanning" as const)
+    : ((scanResult?.result?.verdict as "Safe" | "Suspicious" | "Risky" | undefined) ??
+      ("idle" as const));
   // Choices belong to the text they came from; editing it dismisses them.
   let choicesFor = "";
   $: if (linkChoices.length && input !== choicesFor) linkChoices = [];
@@ -92,6 +119,11 @@
   }
 
   async function runAnalyze(q: string) {
+    const local = localAddressMessage(q.trim());
+    if (local) {
+      formError = local;
+      return;
+    }
     const url = formatUrl(q);
     if (!isValidUrl(url)) {
       formError = "Please enter a valid URL";
@@ -199,6 +231,8 @@
   score={scanResult?.result?.final_score ?? (data.score ? Number(data.score) : undefined)}
   queryUrl={data.queryUrl}
   {currentUrl}
+  {liveTitle}
+  liveDot={verdictDot}
 />
 
 <section class="relative overflow-x-clip">
@@ -208,7 +242,7 @@
   <div
     class={`relative max-w-5xl mx-auto px-6 ${isLanding ? "flex flex-col items-center text-center pt-8 min-[400px]:pt-12 sm:pt-16 md:pt-24 pb-12" : "pt-10 md:pt-12 pb-12"}`}
   >
-    <Hero {isLanding} />
+    <Hero {isLanding} dot={heroDot} />
 
     <SearchBar
       bind:input
