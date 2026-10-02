@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { incompleteNote } from "../results/incomplete";
+  import type { AnalyzeResult } from "../types";
   import { PILL_OUTLINE } from "../ui/buttons";
   import { ICON } from "../ui/icons";
-  import type { AnalyzeResult } from "../types";
   import Icon from "./Icon.svelte";
   import PerformanceToggle from "./results/PerformanceToggle.svelte";
   import ReportPanel from "./results/ReportPanel.svelte";
@@ -23,6 +24,7 @@
   let reportOpen = false;
 
   $: primary = data?.result;
+  $: note = data ? incompleteNote(data.incomplete_checks, data.incomplete) : null;
 
   onDestroy(() => {
     if (screenshotUrl) URL.revokeObjectURL(screenshotUrl);
@@ -67,6 +69,16 @@
       {screenshotLoading}
       {screenshotFailed}
     />
+
+    {#if note}
+      <p
+        class="-mt-4 flex items-start gap-2 text-[13px] leading-snug text-gray-600 dark:text-gray-400"
+        role="note"
+      >
+        <span class="mt-[0.45em] w-1.5 h-1.5 flex-shrink-0 rounded-full bg-yellow-500"></span>
+        {note}
+      </p>
+    {/if}
 
     <div data-guide="flags" class="animate-fadeIn delay-200">
       <FlagsGrid reasons={primary?.reasons} />
