@@ -29,6 +29,8 @@ export interface AnalyzeResult {
   typosquat_result?: TyposquatResult;
   phishing?: PhishingResult;
   incomplete?: boolean;
+  /** Checks that didn't finish (task names), e.g. "phishtank_check". */
+  incomplete_checks?: string[];
   errors?: any;
 }
 

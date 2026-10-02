@@ -23,20 +23,15 @@
       <div
         class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 sm:p-6"
       >
-        <div class="flex items-center justify-between gap-3">
-          <h3
-            class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider {g.items
-              .length
-              ? g.title
-              : 'text-gray-500'}"
-          >
-            <span class="w-1.5 h-1.5 rounded-full {g.items.length ? g.dot : 'bg-gray-400'}"></span>
-            {g.label}
-          </h3>
-          <span class="font-mono text-xs text-gray-400 dark:text-gray-500 tabular-nums"
-            >{g.items.length}</span
-          >
-        </div>
+        <h3
+          class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider {g.items
+            .length
+            ? g.title
+            : 'text-gray-500'}"
+        >
+          <span class="w-1.5 h-1.5 rounded-full {g.items.length ? g.dot : 'bg-gray-400'}"></span>
+          {g.label}
+        </h3>
         {#if g.items.length}
           <ul class="mt-4 space-y-2.5 text-[15px] leading-snug text-gray-800 dark:text-gray-200">
             {#each g.items as r}
