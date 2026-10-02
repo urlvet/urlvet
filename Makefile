@@ -185,6 +185,9 @@ format-frontend: ## Format frontend (prettier)
 tidy: ## Tidy backend go modules
 	cd $(BACKEND_DIR) && go mod tidy
 
+update-ranks: ## Update the Tranco top-1M list (server/assets/top-1m.csv)
+	./scripts/update-tranco.sh
+
 test: ## Run backend tests
 	cd $(BACKEND_DIR) && go test ./...
 
