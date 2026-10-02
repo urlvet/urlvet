@@ -38,6 +38,11 @@
   let linkChoices: string[] = [];
 
   $: isLanding = !scanResult && !loading && !error && !formError;
+  // The logo dot mirrors the scan: blinking while it runs, then the verdict's colour.
+  $: heroDot = loading
+    ? ("scanning" as const)
+    : ((scanResult?.result?.verdict as "Safe" | "Suspicious" | "Risky" | undefined) ??
+      ("idle" as const));
   // Choices belong to the text they came from; editing it dismisses them.
   let choicesFor = "";
   $: if (linkChoices.length && input !== choicesFor) linkChoices = [];
@@ -208,7 +213,7 @@
   <div
     class={`relative max-w-5xl mx-auto px-6 ${isLanding ? "flex flex-col items-center text-center pt-8 min-[400px]:pt-12 sm:pt-16 md:pt-24 pb-12" : "pt-10 md:pt-12 pb-12"}`}
   >
-    <Hero {isLanding} />
+    <Hero {isLanding} dot={heroDot} />
 
     <SearchBar
       bind:input
