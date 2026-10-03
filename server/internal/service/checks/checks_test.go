@@ -79,6 +79,16 @@ func TestCheckBrandMismatch_WholeWords(t *testing.T) {
 	}
 }
 
+func TestCheckBrandMismatch_OfficialDomain(t *testing.T) {
+	r := CheckBrandMismatch("paypal-login-verify.top", "PayPal Login")
+	if r.OfficialDomain != "paypal.com" {
+		t.Errorf("OfficialDomain = %q, want paypal.com", r.OfficialDomain)
+	}
+	if r := CheckBrandMismatch("paypal.com", "PayPal Login"); r.OfficialDomain != "" {
+		t.Errorf("real site got OfficialDomain %q", r.OfficialDomain)
+	}
+}
+
 func TestSameSite(t *testing.T) {
 	tests := []struct {
 		a, b string

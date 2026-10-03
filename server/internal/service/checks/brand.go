@@ -9,9 +9,12 @@ import (
 )
 
 type BrandResult struct {
-	BrandFound    string   `json:"brand_found"`
-	IsMismatch    bool     `json:"is_mismatch"`
-	DetectedNames []string `json:"detected_names"`
+	BrandFound string `json:"brand_found"`
+	// OfficialDomain is the brand's own site when the page claims to be a brand
+	// this domain doesn't belong to, so the UI can point people to the real one.
+	OfficialDomain string   `json:"official_domain,omitempty"`
+	IsMismatch     bool     `json:"is_mismatch"`
+	DetectedNames  []string `json:"detected_names"`
 }
 
 func isOfficialDomain(domain string, officialDomains []string) bool {
@@ -38,6 +41,9 @@ func CheckBrandMismatch(domain string, pageTitle string) BrandResult {
 				if !isOfficialDomain(domain, entry.OfficialDomains) {
 					res.BrandFound = brand
 					res.IsMismatch = true
+					if len(entry.OfficialDomains) > 0 {
+						res.OfficialDomain = entry.OfficialDomains[0]
+					}
 				}
 				break
 			}

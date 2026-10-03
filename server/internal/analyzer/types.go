@@ -48,7 +48,7 @@ type PhishingResult struct {
 	Target          string          `json:"target"`
 	Source          string          `json:"source"`
 	FromCache       bool            `json:"from_cache"`
-	RawResponse     json.RawMessage `json:"raw_response,omitempty"`
+	RawResponse     json.RawMessage `json:"raw_response,omitempty" swaggertype:"object"`
 }
 
 type Features struct {

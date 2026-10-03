@@ -71,6 +71,86 @@
   transform-origin: 0% 100%;
 }
 
+.guide-char .gaze {
+  transition: transform 0.18s ease-out;
+}
+.guide-char .prop-fill {
+  fill: var(--knock);
+}
+.guide-char .lens {
+  fill: var(--tint);
+}
+.guide-char .sweep {
+  animation: guide-sweep 1.3s ease-in-out infinite;
+  transform-box: view-box;
+  transform-origin: 52px 48px;
+}
+.guide-char .thumb {
+  animation: guide-thumb 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-box: view-box;
+  transform-origin: 52px 46px;
+}
+.guide-char .shiver {
+  animation:
+    guide-shiver 0.5s linear 2,
+    guide-float 3.4s ease-in-out 1s infinite;
+}
+.guide-char .stretch {
+  animation: guide-stretch 14s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes guide-sweep {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+@keyframes guide-thumb {
+  0% {
+    transform: rotate(25deg) scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes guide-shiver {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-1.2px) rotate(-1deg);
+  }
+  40%,
+  80% {
+    transform: translateX(1.2px) rotate(1deg);
+  }
+}
+@keyframes guide-stretch {
+  0%,
+  86%,
+  100% {
+    transform: scale(1, 1);
+  }
+  89% {
+    transform: scale(0.97, 1.07);
+  }
+  92% {
+    transform: scale(1.03, 0.96);
+  }
+  95% {
+    transform: scale(1, 1);
+  }
+}
+
 @keyframes guide-float {
   0%,
   100% {
@@ -152,8 +232,15 @@
   .guide-char .blink,
   .guide-char .look-around,
   .guide-char .brow-raise,
-  .guide-char .wave-arm {
+  .guide-char .wave-arm,
+  .guide-char .sweep,
+  .guide-char .thumb,
+  .guide-char .shiver,
+  .guide-char .stretch {
     animation: none;
+  }
+  .guide-char .gaze {
+    transition: none;
   }
 }
 

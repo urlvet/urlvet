@@ -18,8 +18,70 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/cache": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "List all cache keys and values",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Flush all cache keys",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/cache/{key}": {
+            "delete": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Delete a single cache key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cache key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/analyze": {
             "get": {
+                "description": "Runs every check in parallel and returns one scored report. Most clients only need\nresult.verdict (Safe, Suspicious or Risky), result.final_score (0-100, higher is safer)\nand result.reasons. Checks still running after 15 seconds are dropped and named in\nincomplete_checks; incomplete is true when that could change the verdict. Complete\nresults are cached for 24 hours per URL; incomplete ones are not cached.",
                 "produces": [
                     "application/json"
                 ],
@@ -45,6 +107,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -483,6 +554,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/report": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analysis"
+                ],
+                "summary": "Report an incorrect result",
+                "parameters": [
+                    {
+                        "description": "Report details",
+                        "name": "report",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.ReportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/risky-tld": {
             "get": {
                 "produces": [
@@ -764,6 +880,41 @@ const docTemplate = `{
                 }
             }
         },
+        "analyzer.PhishingResult": {
+            "type": "object",
+            "properties": {
+                "from_cache": {
+                    "type": "boolean"
+                },
+                "in_database": {
+                    "type": "boolean"
+                },
+                "phish_detail_page": {
+                    "type": "string"
+                },
+                "phish_id": {
+                    "type": "integer"
+                },
+                "raw_response": {
+                    "type": "object"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                },
+                "verified": {
+                    "type": "boolean"
+                },
+                "verified_at": {
+                    "type": "string"
+                }
+            }
+        },
         "analyzer.Reasons": {
             "type": "object",
             "properties": {
@@ -815,7 +966,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/analyzer.Features"
                 },
                 "incomplete": {
+                    "description": "Incomplete means signals are missing in a way that a rescan could fix, so\nthe result isn't cached. IncompleteChecks names every task that didn't\nfinish, including ones that don't make the result incomplete (a PhishTank\nrate limit), so the UI can say what wasn't checked.",
                     "type": "boolean"
+                },
+                "incomplete_checks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "infrastructure": {
                     "$ref": "#/definitions/analyzer.Infrastructure"
@@ -823,17 +981,20 @@ const docTemplate = `{
                 "performance": {
                     "$ref": "#/definitions/analyzer.Performance"
                 },
+                "phishing": {
+                    "$ref": "#/definitions/analyzer.PhishingResult"
+                },
                 "result": {
                     "$ref": "#/definitions/analyzer.Result"
                 },
                 "ssl_info": {
                     "$ref": "#/definitions/checks.SSLCertResult"
                 },
-                "threat_intel": {
-                    "$ref": "#/definitions/analyzer.ThreatIntel"
-                },
                 "tls_info": {
                     "$ref": "#/definitions/checks.TLSResult"
+                },
+                "typosquat_result": {
+                    "$ref": "#/definitions/typosquat.TyposquatResult"
                 },
                 "url": {
                     "type": "string"
@@ -863,6 +1024,9 @@ const docTemplate = `{
         "analyzer.TLDInfo": {
             "type": "object",
             "properties": {
+                "is_hosting_platform": {
+                    "type": "boolean"
+                },
                 "is_icann": {
                     "type": "boolean"
                 },
@@ -874,14 +1038,6 @@ const docTemplate = `{
                 },
                 "tld": {
                     "type": "string"
-                }
-            }
-        },
-        "analyzer.ThreatIntel": {
-            "type": "object",
-            "properties": {
-                "phishtank": {
-                    "$ref": "#/definitions/threatfeeds.PhishTankResult"
                 }
             }
         },
@@ -939,6 +1095,10 @@ const docTemplate = `{
                 },
                 "is_mismatch": {
                     "type": "boolean"
+                },
+                "official_domain": {
+                    "description": "OfficialDomain is the brand's own site when the page claims to be a brand\nthis domain doesn't belong to, so the UI can point people to the real one.",
+                    "type": "string"
                 }
             }
         },
@@ -1255,20 +1415,56 @@ const docTemplate = `{
                 }
             }
         },
-        "threatfeeds.PhishTankResult": {
+        "handler.ReportRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "expected_verdict": {
+                    "type": "string",
+                    "enum": [
+                        "Safe",
+                        "Suspicious",
+                        "Risky"
+                    ]
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "verdict": {
+                    "type": "string",
+                    "maxLength": 32
+                }
+            }
+        },
+        "typosquat.TyposquatResult": {
             "type": "object",
             "properties": {
-                "in_database": {
+                "distance": {
+                    "description": "0 for combo-squat",
+                    "type": "integer"
+                },
+                "is_combo_squat": {
                     "type": "boolean"
                 },
-                "is_online": {
+                "is_suspicious": {
                     "type": "boolean"
                 },
-                "target": {
+                "matched_brand": {
+                    "description": "SLD only",
                     "type": "string"
                 },
-                "verified": {
-                    "type": "boolean"
+                "matched_domain": {
+                    "type": "string"
                 }
             }
         }
@@ -1304,7 +1500,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "url.vet API",
