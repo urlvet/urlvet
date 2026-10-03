@@ -21,9 +21,21 @@
   /** Brow stroke width and half-length. */
   export let browWidth = 2.2;
   export let browSpan = 5;
+  /** Where to look, as a pupil offset; null lets the idle glances run. */
+  export let gaze: [number, number] | null = null;
 
-  // Pupils glance up-left while thinking or pointing (the tour target is up and to the left).
-  $: look = mood === "thinking" ? [-1.6, -2.2] : mood === "point" ? [-1.8, -1.8] : [0, 0.4];
+  // Pupils glance up-left while thinking or pointing (the tour target is up and to the
+  // left), down at the magnifying glass while scanning, and sideways when suspicious.
+  // Calm moods follow the gaze instead.
+  const FIXED: Partial<Record<Mood, [number, number]>> = {
+    thinking: [-1.6, -2.2],
+    point: [-1.8, -1.8],
+    scanning: [2, 1.8],
+    suspicious: [2.2, 0.2],
+  };
+  $: fixed = FIXED[mood];
+  $: look = fixed ?? gaze ?? [0, 0.4];
+  $: wide = mood === "ooh" || mood === "alarmed" ? 0.9 : 0;
 </script>
 
 {#if mood === "happy"}
@@ -39,15 +51,19 @@
 {:else}
   <g class="blink">
     {#each [lx, rx] as cx}
-      <ellipse {cx} cy={y} rx={eyeRx} ry={eyeRy} class="eye" stroke-width="1.8" />
-      <g class:look-around={mood === "idle"}>
-        <circle cx={cx + look[0]} cy={y + look[1]} r={pupilR} class="pupil" />
-        <circle
-          cx={cx + look[0] + pupilR * 0.36}
-          cy={y + look[1] - pupilR * 0.4}
-          r={pupilR * 0.32}
-          class="glint"
-        />
+      <ellipse
+        {cx}
+        cy={y}
+        rx={eyeRx + wide * 0.5}
+        ry={eyeRy + wide}
+        class="eye"
+        stroke-width="1.8"
+      />
+      <g class:look-around={mood === "idle" && !gaze}>
+        <g class="gaze" style="transform: translate({look[0]}px, {look[1]}px)">
+          <circle {cx} cy={y} r={pupilR} class="pupil" />
+          <circle cx={cx + pupilR * 0.36} cy={y - pupilR * 0.4} r={pupilR * 0.32} class="glint" />
+        </g>
       </g>
     {/each}
   </g>

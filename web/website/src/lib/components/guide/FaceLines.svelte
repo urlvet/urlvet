@@ -18,7 +18,7 @@
 </script>
 
 <!-- brows -->
-{#if mood === "worried"}
+{#if mood === "worried" || mood === "alarmed"}
   <path
     d="M{lx - browSpan} {y - 8} L{lx + browSpan - 1} {y - 11}"
     class="ink"
@@ -26,6 +26,29 @@
   />
   <path
     d="M{rx + browSpan} {y - 8} L{rx - browSpan + 1} {y - 11}"
+    class="ink"
+    stroke-width={browWidth}
+  />
+{:else if mood === "suspicious"}
+  <!-- one brow way up, the other pressed flat: "really?" -->
+  <path
+    d="M{lx - browSpan} {y - 12} Q{lx} {y - 17} {lx + browSpan} {y - 12}"
+    class="ink"
+    stroke-width={browWidth}
+  />
+  <path
+    d="M{rx - browSpan} {y - 8} L{rx + browSpan} {y - 9}"
+    class="ink"
+    stroke-width={browWidth}
+  />
+{:else if mood === "ooh"}
+  <path
+    d="M{lx - browSpan} {y - 12} Q{lx} {y - 16} {lx + browSpan} {y - 12}"
+    class="ink"
+    stroke-width={browWidth}
+  />
+  <path
+    d="M{rx - browSpan} {y - 12} Q{rx} {y - 16} {rx + browSpan} {y - 12}"
     class="ink"
     stroke-width={browWidth}
   />
@@ -63,14 +86,18 @@
       class="ink"
       stroke-width="2.2"
     />
-  {:else if mood === "worried"}
+  {:else if mood === "ooh"}
+    <ellipse cx={mx} cy={mouthY + 1} rx="2.2" ry="2.8" class="ink" stroke-width="2" />
+  {:else if mood === "suspicious"}
+    <path d="M{mx - 3} {mouthY + 1} L{mx + 4} {mouthY - 0.5}" class="ink" stroke-width="2.2" />
+  {:else if mood === "worried" || mood === "alarmed"}
     <path
       d="M{mx - 5} {mouthY + 2} Q{mx - 2.5} {mouthY - 1} {mx} {mouthY + 1} Q{mx + 2.5} {mouthY +
         3} {mx + 5} {mouthY}"
       class="ink"
       stroke-width="2"
     />
-  {:else if mood === "thinking"}
+  {:else if mood === "thinking" || mood === "scanning"}
     <path d="M{mx - 2} {mouthY + 1} L{mx + 3} {mouthY}" class="ink" stroke-width="2.2" />
   {:else}
     <path
