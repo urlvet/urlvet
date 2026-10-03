@@ -1,8 +1,37 @@
 <script lang="ts">
+  import { env } from "$env/dynamic/public";
   import { PILL_SOLID } from "$lib/ui/buttons";
 
   const LINK =
     "text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current transition-colors";
+
+  const REPO = "https://github.com/urlvet/urlvet";
+  // Swagger UI is served by the API server itself, next to /api/v1.
+  const API_ORIGIN = (() => {
+    try {
+      return new URL(env.PUBLIC_BASE_URL || "http://localhost:8080/api/v1").origin;
+    } catch {
+      return "http://localhost:8080";
+    }
+  })();
+  // Self-hosting comes first; the public API is only for a quick try.
+  const DEV_LINKS = [
+    {
+      label: "Run it on your own server",
+      note: "Docker setup, configuration and a reverse proxy, step by step",
+      href: `${REPO}/blob/main/docs/deployment.md`,
+    },
+    {
+      label: "API reference",
+      note: "The analyze endpoint, what it returns, and its errors",
+      href: `${REPO}/blob/main/docs/api.md`,
+    },
+    {
+      label: "Try our API first",
+      note: "Send a few test requests to url.vet's server. Rate-limited, so not for production",
+      href: `${API_ORIGIN}/swagger/index.html`,
+    },
+  ];
 
   // A made-up scan, worded exactly as the engine words its findings, with the
   // points each finding is worth in the real scoring (analyzer/result.go).
@@ -94,7 +123,12 @@
     },
   ];
 
+  // Worded the way people search, since these also feed the FAQ rich result.
   const FAQ = [
+    {
+      q: "How do I check if a link is safe?",
+      a: "Paste it into the box on the url.vet home page and press Scan. A few seconds later you get a verdict (Safe, Suspicious or Risky), a score from 0 to 100, and the reasons behind it. You never have to open the link yourself.",
+    },
     {
       q: "Is it safe to check a dangerous link here?",
       a: "Yes. Our server visits the link, not your device. Nothing from the page runs in your browser; you only see a screenshot.",
@@ -102,6 +136,26 @@
     {
       q: "Will the website know I checked it?",
       a: "It sees a visit from our server, not from you. Your IP address is never sent to it.",
+    },
+    {
+      q: "How can I tell if a link is a phishing scam?",
+      a: "Common signs: the address misspells a real brand (paypa1.com), swaps in lookalike letters from another alphabet, was registered only days ago, uses an unusual ending like .top or .zip, or the page asks for a password or card details on a site the brand doesn't own. url.vet checks for all of these and lists any it finds.",
+    },
+    {
+      q: "Can I check a link from WhatsApp, SMS, email or a QR code?",
+      a: "Yes. Copy the link and paste it here. You can paste the whole message too; url.vet finds the links in it.",
+    },
+    {
+      q: "Can it tell where a shortened link really goes?",
+      a: "Yes. url.vet follows every redirect and shows the full path, from the link you were sent to the page you would land on, and flags it when the link jumps to a different site.",
+    },
+    {
+      q: "I already clicked a suspicious link. What should I do?",
+      a: "Don't enter anything on the page. If you already typed a password, change it on the real site and turn on two-step verification. If you entered card or bank details, call your bank right away. Then scan the link here to see what it was.",
+    },
+    {
+      q: "What does Suspicious mean?",
+      a: "The score landed between 30 and 64: there are some warning signs, or not enough evidence either way. That's common for new or little-known sites. Read the flags, and don't enter personal details unless you're sure.",
     },
     {
       q: "Why did a site I trust come back Suspicious?",
@@ -112,12 +166,12 @@
       a: "It means no warning signs turned up. A real shop can still sell bad products, and a brand-new scam may not show any signs yet. Use url.vet as one layer of defense, not the only one.",
     },
     {
-      q: "Can I check a link from WhatsApp, email or a QR code?",
-      a: "Yes. Copy the link and paste it here. Shortened links work too: url.vet follows them to where they really go.",
+      q: "Do you keep the links I check?",
+      a: "Results are cached for up to 24 hours so a repeat check loads instantly, then deleted. We don't log who checked what, and there are no accounts. The privacy page has the details.",
     },
     {
-      q: "Is it free? Do I need an account?",
-      a: "It's free, and there's no account or signup.",
+      q: "Is url.vet free? Do I need an account?",
+      a: "It's free, with no account, no signup and no ads.",
     },
   ];
 
@@ -133,10 +187,10 @@
 </script>
 
 <svelte:head>
-  <title>How It Works — url.vet (URLvet)</title>
+  <title>How It Works: Check If a Link Is Safe — url.vet (URLvet)</title>
   <meta
     name="description"
-    content="How url.vet scans links, how the trust score is calculated, and what each result means."
+    content="How url.vet checks whether a link is safe or a phishing scam: the checks it runs, how the score is worked out, and answers to common questions."
   />
   <link rel="canonical" href="https://url.vet/how-it-works" />
   {@html `<script type="application/ld+json">${JSON.stringify(schemaFAQ)}</script>`}
@@ -203,8 +257,14 @@
     </figure>
 
     <dl class="mt-10 grid sm:grid-cols-2 gap-x-10 gap-y-7">
-      {#each PARTS as part}
-        <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
+      {#each PARTS as part, i}
+        <!-- An odd one out at the end spans both columns instead of sitting alone. -->
+        <div
+          class="pt-4 border-t border-gray-200 dark:border-gray-800 {i === PARTS.length - 1 &&
+          PARTS.length % 2
+            ? 'sm:col-span-2'
+            : ''}"
+        >
           <dt class="font-serif text-[1.35rem] leading-tight">{part.title}</dt>
           <dd class="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
             {part.desc}
@@ -295,9 +355,46 @@
     </dl>
   </section>
 
+  <!-- For developers -->
+  <section class="mt-24" id="developers">
+    <p class="font-mono text-[11px] uppercase tracking-wider text-gray-500">For developers</p>
+    <h2 class="mt-2 font-serif text-3xl md:text-4xl tracking-[-0.01em]">
+      Want url.vet in your own app?
+    </h2>
+    <p class="mt-4 text-[16px] leading-relaxed text-gray-600 dark:text-gray-400">
+      url.vet is <a href={REPO} class={LINK} target="_blank" rel="noopener noreferrer"
+        >open source</a
+      >, so you can run your own copy and connect your app to it. Same checks as this site, on a
+      server you control.
+    </p>
+    <ul class="mt-6">
+      {#each DEV_LINKS as link}
+        <li class="border-t border-gray-200 dark:border-gray-800">
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex items-center justify-between gap-4 py-4"
+          >
+            <span>
+              <span class="block font-serif text-[1.35rem] leading-tight">{link.label}</span>
+              <span class="mt-1 block text-[15px] text-gray-600 dark:text-gray-400"
+                >{link.note}</span
+              >
+            </span>
+            <span
+              class="text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+              aria-hidden="true">↗</span
+            >
+          </a>
+        </li>
+      {/each}
+    </ul>
+  </section>
+
   <!-- FAQ -->
   <section class="mt-24">
-    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Questions</h2>
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Frequently asked questions</h2>
     <dl class="mt-8">
       {#each FAQ as item}
         <div class="py-5 border-t border-gray-200 dark:border-gray-800">
