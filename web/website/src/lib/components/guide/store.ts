@@ -14,12 +14,11 @@ export const scanState = writable<ScanState>({ status: 'idle' });
 // ── Things Vetty remembers per visitor (localStorage) ──────────────────────
 type Memory = {
   hidden: boolean; // user tucked him away
-  introduced: boolean; // has said hello once
-  nudged: boolean; // the one-time "need a hand?" bubble was shown
+  openedAt: number; // when he was last opened (ms); 0 = never
 };
 
 const KEY = 'vetty';
-const DEFAULTS: Memory = { hidden: false, introduced: false, nudged: false };
+const DEFAULTS: Memory = { hidden: false, openedAt: 0 };
 
 function load(): Memory {
   if (!browser) return DEFAULTS;
@@ -47,3 +46,10 @@ function createMemory() {
 }
 
 export const vettyMemory = createMemory();
+
+/** Vetty re-introduces himself, and nudges again, a day after he was last opened. */
+const REINTRODUCE_AFTER_MS = 24 * 60 * 60 * 1000;
+
+export function seenRecently(m: { openedAt: number }): boolean {
+  return m.openedAt > 0 && Date.now() - m.openedAt < REINTRODUCE_AFTER_MS;
+}

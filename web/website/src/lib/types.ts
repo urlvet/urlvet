@@ -87,6 +87,8 @@ export interface ContentData {
   has_tracking: boolean;
   brand_check?: {
     brand_found: string;
+    /** The brand's own site, when the page claims a brand this domain isn't. */
+    official_domain?: string;
     is_mismatch: boolean;
     detected_names: string[];
   };
