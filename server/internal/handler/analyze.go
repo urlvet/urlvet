@@ -16,6 +16,11 @@ import (
 // AnalyzeURLHandler runs a full safety analysis on the given URL.
 //
 //	@Summary		Full URL analysis
+//	@Description	Runs every check in parallel and returns one scored report. Most clients only need
+//	@Description	result.verdict (Safe, Suspicious or Risky), result.final_score (0-100, higher is safer)
+//	@Description	and result.reasons. Checks still running after 15 seconds are dropped and named in
+//	@Description	incomplete_checks; incomplete is true when that could change the verdict. Complete
+//	@Description	results are cached for 24 hours per URL; incomplete ones are not cached.
 //	@Tags			Analysis
 //	@Produce		json
 //	@Param			url	query		string	true	"URL to analyse (max 2048 chars)"

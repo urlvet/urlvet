@@ -66,7 +66,7 @@ type PhishTankResult struct {
 	Valid           bool            `json:"valid"`
 	Target          string          `json:"target"`
 	FromCache       bool            `json:"from_cache"`
-	RawResponse     json.RawMessage `json:"raw_response,omitempty"`
+	RawResponse     json.RawMessage `json:"raw_response,omitempty" swaggertype:"object"`
 }
 
 // ErrRateLimited means PhishTank refused the lookup because we've made too

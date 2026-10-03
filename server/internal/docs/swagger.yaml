@@ -77,6 +77,29 @@ definitions:
       total_time:
         type: string
     type: object
+  analyzer.PhishingResult:
+    properties:
+      from_cache:
+        type: boolean
+      in_database:
+        type: boolean
+      phish_detail_page:
+        type: string
+      phish_id:
+        type: integer
+      raw_response:
+        type: object
+      source:
+        type: string
+      target:
+        type: string
+      valid:
+        type: boolean
+      verified:
+        type: boolean
+      verified_at:
+        type: string
+    type: object
   analyzer.Reasons:
     properties:
       bad_reasons:
@@ -111,19 +134,30 @@ definitions:
       features:
         $ref: '#/definitions/analyzer.Features'
       incomplete:
+        description: |-
+          Incomplete means signals are missing in a way that a rescan could fix, so
+          the result isn't cached. IncompleteChecks names every task that didn't
+          finish, including ones that don't make the result incomplete (a PhishTank
+          rate limit), so the UI can say what wasn't checked.
         type: boolean
+      incomplete_checks:
+        items:
+          type: string
+        type: array
       infrastructure:
         $ref: '#/definitions/analyzer.Infrastructure'
       performance:
         $ref: '#/definitions/analyzer.Performance'
+      phishing:
+        $ref: '#/definitions/analyzer.PhishingResult'
       result:
         $ref: '#/definitions/analyzer.Result'
       ssl_info:
         $ref: '#/definitions/checks.SSLCertResult'
-      threat_intel:
-        $ref: '#/definitions/analyzer.ThreatIntel'
       tls_info:
         $ref: '#/definitions/checks.TLSResult'
+      typosquat_result:
+        $ref: '#/definitions/typosquat.TyposquatResult'
       url:
         type: string
     type: object
@@ -142,6 +176,8 @@ definitions:
     type: object
   analyzer.TLDInfo:
     properties:
+      is_hosting_platform:
+        type: boolean
       is_icann:
         type: boolean
       is_risky_tld:
@@ -150,11 +186,6 @@ definitions:
         type: boolean
       tld:
         type: string
-    type: object
-  analyzer.ThreatIntel:
-    properties:
-      phishtank:
-        $ref: '#/definitions/threatfeeds.PhishTankResult'
     type: object
   analyzer.TimingEntry:
     properties:
@@ -192,6 +223,11 @@ definitions:
         type: array
       is_mismatch:
         type: boolean
+      official_domain:
+        description: |-
+          OfficialDomain is the brand's own site when the page claims to be a brand
+          this domain doesn't belong to, so the UI can point people to the real one.
+        type: string
     type: object
   checks.DomainRandomnessResult:
     properties:
@@ -406,18 +442,43 @@ definitions:
       updated:
         type: string
     type: object
-  threatfeeds.PhishTankResult:
+  handler.ReportRequest:
     properties:
-      in_database:
-        type: boolean
-      is_online:
-        type: boolean
-      target:
+      comment:
+        maxLength: 1000
         type: string
-      verified:
-        type: boolean
+      expected_verdict:
+        enum:
+        - Safe
+        - Suspicious
+        - Risky
+        type: string
+      score:
+        type: integer
+      url:
+        maxLength: 2048
+        type: string
+      verdict:
+        maxLength: 32
+        type: string
+    required:
+    - url
     type: object
-host: localhost:8080
+  typosquat.TyposquatResult:
+    properties:
+      distance:
+        description: 0 for combo-squat
+        type: integer
+      is_combo_squat:
+        type: boolean
+      is_suspicious:
+        type: boolean
+      matched_brand:
+        description: SLD only
+        type: string
+      matched_domain:
+        type: string
+    type: object
 info:
   contact: {}
   description: URL safety analysis API. Checks phishing signals, redirects, TLS, DNS,
@@ -427,8 +488,54 @@ info:
   title: url.vet API
   version: "1.0"
 paths:
+  /admin/cache:
+    delete:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Flush all cache keys
+      tags:
+      - admin
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all cache keys and values
+      tags:
+      - admin
+  /admin/cache/{key}:
+    delete:
+      parameters:
+      - description: Cache key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a single cache key
+      tags:
+      - admin
   /analyze:
     get:
+      description: |-
+        Runs every check in parallel and returns one scored report. Most clients only need
+        result.verdict (Safe, Suspicious or Risky), result.final_score (0-100, higher is safer)
+        and result.reasons. Checks still running after 15 seconds are dropped and named in
+        incomplete_checks; incomplete is true when that could change the verdict. Complete
+        results are cached for 24 hours per URL; incomplete ones are not cached.
       parameters:
       - description: URL to analyse (max 2048 chars)
         in: query
@@ -444,6 +551,12 @@ paths:
             $ref: '#/definitions/analyzer.Response'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
           schema:
             additionalProperties:
               type: string
@@ -730,6 +843,35 @@ paths:
       summary: Redirect chain analysis
       tags:
       - Security
+  /report:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Report details
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReportRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Report an incorrect result
+      tags:
+      - Analysis
   /risky-tld:
     get:
       parameters:

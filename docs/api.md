@@ -1,21 +1,19 @@
 # API Reference
 
+url.vet is built to be self-hosted: run your own copy with Docker (see [Setup](setup.md) and [Deployment](deployment.md)) and you get the same API on your own server, with your own limits and no one else's traffic.
+
+To try it before setting anything up, the public instance at `https://api.url.vet` serves the same endpoints. It's rate-limited (20 requests a minute per IP) and meant for trying things out, not for building on.
+
 ## Interactive Docs (Swagger UI)
 
-When the server is running, the full OpenAPI spec is browsable at:
+Every running server serves its own OpenAPI spec and a "Try it out" form:
 
-```
-http://localhost:8080/swagger/index.html
-```
+| | Your server | Public instance |
+|---|---|---|
+| Swagger UI | `http://localhost:8080/swagger/index.html` | [api.url.vet/swagger/index.html](https://api.url.vet/swagger/index.html) |
+| Spec (JSON) | `http://localhost:8080/swagger/doc.json` | |
 
-The raw spec files are also available:
-
-| Format | URL |
-|---|---|
-| JSON | `http://localhost:8080/swagger/doc.json` |
-| YAML | `server/internal/docs/swagger.yaml` (generated, committed) |
-
-To regenerate the spec after editing handler annotations:
+The spec is also committed as `server/internal/docs/swagger.yaml`. To regenerate it after editing handler annotations:
 
 ```bash
 cd server
@@ -26,7 +24,289 @@ Install the CLI once with: `go install github.com/swaggo/swag/cmd/swag@v1.16.4`
 
 ---
 
-## Endpoints
+## Analyze a URL
+
+```
+GET /api/v1/analyze?url=<url>
+```
+
+Runs every check in parallel and returns one scored report. This is the endpoint the website uses.
+
+```bash
+curl "http://localhost:8080/api/v1/analyze?url=https://example.com"
+```
+
+**Parameters**
+
+| Name | In | Required | Notes |
+|---|---|---|---|
+| `url` | query | yes | Full URL or bare domain (`example.com`). Max 2048 characters. URL-encode it if it has its own query string. |
+
+**Responses**
+
+| Status | When | Body |
+|---|---|---|
+| `200` | The scan ran | The report below |
+| `400` | `url` is missing, or isn't a valid URL | `{"error": "url query param is required"}` or `{"status": "ERROR", "error": "invalid url"}` |
+| `422` | The URL is valid but has nothing to scan (no usable domain) | `{"status": "ERROR", "error": "could not analyze this URL"}` |
+| `429` | Rate limit reached | `{"error": "too many requests", ...}` |
+
+A scan takes 1 to 15 seconds. Checks still running at 15 seconds are dropped, and the report says which ones (see `incomplete` below).
+
+### Reading the result
+
+Most clients only need `result`:
+
+| Field | Meaning |
+|---|---|
+| `result.verdict` | `Safe`, `Suspicious` or `Risky` |
+| `result.final_score` | 0 to 100, higher is safer. Below 30 is `Risky`, below 65 is `Suspicious`, 65 and up is `Safe` |
+| `result.risk_score` / `result.trust_score` | The two sides of the score, each 0 to 100. `final_score = 50 + (trust − risk) / 2`, rounded and clamped |
+| `result.reasons.bad_reasons` | Red flags, in plain English (`null` when there are none) |
+| `result.reasons.good_reasons` | Green flags |
+| `result.reasons.neutral_reasons` | Facts worth knowing that don't move the score |
+
+The rest of the report is the raw evidence behind those reasons:
+
+| Field | What it holds |
+|---|---|
+| `url`, `domain` | The normalized URL that was scanned and its registrable domain |
+| `features` | Popularity rank, TLD facts, and URL structure (shortener, raw IP, punycode, length, depth, subdomains, keywords, lookalike characters) |
+| `infrastructure` | Resolved IPs, nameservers, mail servers |
+| `domain_info` | Registration data from RDAP or WHOIS: registrar, created/expiry dates, age, DNSSEC. `null` if the lookup failed |
+| `analysis` | Redirect chain (`chain`, `final_url`, `has_domain_jump`), HTTP status, HSTS |
+| `ssl_info`, `tls_info` | Certificate issuer, validity, age, Certificate Transparency, hostname match |
+| `content_data` | What the page contains: forms (login, payment, personal data), where they submit, hidden iframes, trackers, and whether the page claims to be a brand that doesn't own this domain (`brand_check`). `null` if the page couldn't be fetched |
+| `domain_randomness` | How machine-generated the domain name looks |
+| `typosquat_result` | Whether the domain imitates a well-known one (`matched_domain`, `distance`) |
+| `phishing` | PhishTank lookup. `null` if the lookup didn't happen |
+| `performance` | Total time and per-check timings |
+
+### Incomplete scans
+
+Some checks depend on other services (DNS, WHOIS/RDAP, the site itself, PhishTank) and can fail or time out.
+
+| Field | Meaning |
+|---|---|
+| `incomplete` | `true` when a missing check could change the verdict. Treat the verdict with care and scan again later |
+| `incomplete_checks` | Names of the checks that didn't finish, e.g. `["whois_lookup"]`. Omitted when everything ran. Can be non-empty while `incomplete` is `false`: a PhishTank rate limit is listed but doesn't make the result incomplete |
+| `errors` | The underlying error messages, for debugging. `null` when there were none |
+
+### Caching
+
+Complete results are cached for 24 hours per normalized URL, so repeat scans are instant and identical. Incomplete results are never cached, so scanning again retries the failed checks.
+
+### Example response
+
+`https://example.com`, scanned on a local server. `domain_info.raw` and `performance.timings` are shortened here.
+
+<details>
+<summary>Show the full response</summary>
+
+```json
+{
+  "url": "https://example.com",
+  "domain": "example.com",
+  "features": {
+    "rank": 175,
+    "tld": {
+      "tld": "com",
+      "is_trusted_tld": false,
+      "is_risky_tld": false,
+      "is_icann": true,
+      "is_hosting_platform": false
+    },
+    "url": {
+      "url_shortener": false,
+      "uses_ip": false,
+      "contains_punycode": false,
+      "too_long": false,
+      "too_deep": false,
+      "has_homoglyph": false,
+      "subdomain_count": 0,
+      "keywords": {
+        "has_keywords": false,
+        "found": null,
+        "categories": null
+      }
+    }
+  },
+  "infrastructure": {
+    "ip_addresses": [
+      "172.66.147.243",
+      "104.20.23.154",
+      "2606:4700:10::ac42:93f3",
+      "2606:4700:10::6814:179a"
+    ],
+    "nameservers_valid": true,
+    "ns_hosts": [
+      "hera.ns.cloudflare.com."
+    ],
+    "mx_records_valid": false,
+    "mx_hosts": [
+      "."
+    ]
+  },
+  "domain_info": {
+    "domain": "EXAMPLE.COM",
+    "registrar": "RESERVED-Internet Assigned Numbers Authority",
+    "created": "1995-08-14T04:00:00Z",
+    "updated": "2026-08-14T08:01:43Z",
+    "expiry": "2027-08-13T04:00:00Z",
+    "nameservers": [
+      "ELLIOTT.NS.CLOUDFLARE.COM",
+      "HERA.NS.CLOUDFLARE.COM"
+    ],
+    "status": [
+      "client delete prohibited",
+      "client transfer prohibited",
+      "client update prohibited"
+    ],
+    "dnssec": true,
+    "age_human": "31 years 2 months",
+    "age_days": 11372,
+    "raw": "…",
+    "source": "RDAP"
+  },
+  "analysis": {
+    "redirection_result": {
+      "is_redirected": false,
+      "chain_length": 1,
+      "chain": [
+        "https://example.com"
+      ],
+      "final_url": "https://example.com",
+      "final_url_domain": "example.com",
+      "has_domain_jump": false
+    },
+    "http_status": {
+      "code": 200,
+      "text": "OK",
+      "success": true,
+      "is_redirect": false
+    },
+    "is_hsts_supported": false
+  },
+  "ssl_info": {
+    "Domain": "example.com",
+    "HasTLS": true,
+    "ChainValid": true,
+    "Issuer": "Cloudflare TLS Issuing ECC CA 3",
+    "NotBefore": "2026-09-26T22:49:11Z",
+    "NotAfter": "2026-12-25T22:56:35Z",
+    "AgeDays": 5,
+    "Fingerprint": "85CA6AB068E9BCCE88B6C4AA3C47F7D17228134A457F870D3800E6223A0DF07A",
+    "IsSuspicious": false,
+    "Reasons": null,
+    "CTLogged": true,
+    "KnownBadChain": false
+  },
+  "tls_info": {
+    "Present": true,
+    "Issuer": "SSL Corporation",
+    "AgeDays": 5,
+    "HostnameMismatch": false
+  },
+  "content_data": {
+    "url": "https://example.com",
+    "title": "Example Domain",
+    "has_forms": false,
+    "has_login_form": false,
+    "has_payment_form": false,
+    "has_personal_form": false,
+    "form_count": 0,
+    "forms": null,
+    "iframes": null,
+    "has_hidden_iframe": false,
+    "has_tracking": false,
+    "fetch_duration": 233844276,
+    "brand_check": {
+      "brand_found": "",
+      "is_mismatch": false,
+      "detected_names": []
+    }
+  },
+  "domain_randomness": {
+    "Domain": "example.com",
+    "Label": "example",
+    "Length": 7,
+    "Entropy": 2.5216406363433186,
+    "EntropyPerChar": 0.36023437662047403,
+    "NormalizedEntropy": 0.0605009236917598,
+    "VowelRatio": 0.42857142857142855,
+    "DigitRatio": 0,
+    "UniqueCharRatio": 0.8571428571428571,
+    "LongestConsonantRun": 3,
+    "BigramEnglishiness": 0.16666666666666666,
+    "RandomnessScore": 0.3567918975896066,
+    "IsSuspicious": false,
+    "Reasons": []
+  },
+  "typosquat_result": {
+    "is_suspicious": false
+  },
+  "phishing": {
+    "in_database": true,
+    "phish_id": 7366538,
+    "phish_detail_page": "http://www.phishtank.com/phish_detail.php?phish_id=7366538",
+    "verified": false,
+    "verified_at": "",
+    "valid": false,
+    "target": "",
+    "source": "phishtank",
+    "from_cache": false
+  },
+  "performance": {
+    "total_time": "1.439368926s",
+    "timings": [
+      {
+        "task": "phishtank_check",
+        "time": "1.438956594s"
+      },
+      {
+        "task": "content_check",
+        "time": "234.59063ms"
+      },
+      {
+        "task": "dns_validity_check",
+        "time": "234.104966ms"
+      },
+      {
+        "task": "…",
+        "time": "…"
+      }
+    ]
+  },
+  "result": {
+    "risk_score": 5,
+    "trust_score": 100,
+    "final_score": 98,
+    "verdict": "Safe",
+    "reasons": {
+      "neutral_reasons": [
+        "Standard, officially recognized domain extension.",
+        "No email server configured for this domain."
+      ],
+      "good_reasons": [
+        "Global Giant: Ranked #175 worldwide.",
+        "Long-standing domain history (31 years 2 months).",
+        "Advanced DNS security enabled (DNSSEC)."
+      ],
+      "bad_reasons": null
+    }
+  },
+  "incomplete": false,
+  "errors": null
+}
+```
+
+</details>
+
+---
+
+## Other Endpoints
+
+The single-check endpoints below are mostly for debugging and are not covered in detail here; Swagger UI lists their parameters and responses.
 
 All endpoints are under `/api/v1/`. `GET` endpoints accept a `url` query parameter (max 2048 chars).
 
@@ -99,205 +379,3 @@ All 4xx/5xx responses return JSON:
 ```json
 { "error": "description of the problem" }
 ```
-
----
-
-## Example
-
-```bash
-curl "http://localhost:8080/api/v1/analyze?url=https://example.com"
-```
- <details>
-<summary>Example API response</summary>
- <pre><code class="language-json">
-{
-  "url": "https://example.com",
-  "domain": "example.com",
-  "features": {
-    "rank": 175,
-    "tld": {
-      "tld": "com",
-      "is_trusted_tld": false,
-      "is_risky_tld": false,
-      "is_icann": true
-    },
-    "url": {
-      "url_shortener": false,
-      "uses_ip": false,
-      "contains_punycode": false,
-      "too_long": false,
-      "too_deep": false,
-      "has_homoglyph": false,
-      "subdomain_count": 0,
-      "keywords": {
-        "has_keywords": false,
-        "found": [],
-        "categories": {}
-      }
-    }
-  },
-  "infrastructure": {
-    "ip_addresses": [
-      "172.66.147.243",
-      "104.20.23.154",
-      "2606:4700:10::6814:179a",
-      "2606:4700:10::ac42:93f3"
-    ],
-    "nameservers_valid": true,
-    "ns_hosts": [
-      "hera.ns.cloudflare.com."
-    ],
-    "mx_records_valid": false,
-    "mx_hosts": [
-      "."
-    ]
-  },
-  "domain_info": {
-    "domain": "EXAMPLE.COM",
-    "registrar": "RESERVED-Internet Assigned Numbers Authority",
-    "created": "1995-08-14T04:00:00Z",
-    "updated": "2026-01-16T18:26:50Z",
-    "expiry": "2026-08-13T04:00:00Z",
-    "nameservers": [
-      "ELLIOTT.NS.CLOUDFLARE.COM",
-      "HERA.NS.CLOUDFLARE.COM"
-    ],
-    "status": [
-      "client delete prohibited",
-      "client transfer prohibited",
-      "client update prohibited"
-    ],
-    "dnssec": true,
-    "age_human": "30 years 8 months",
-    "age_days": 11202,
-    "raw": "{\"ldhName\":\"EXAMPLE.COM\",\"nameservers\":[{\"ldhName\":\"ELLIOTT.NS.CLOUDFLARE.COM\"},{\"ldhName\":\"HERA.NS.CLOUDFLARE.COM\"}],\"events\":[{\"eventAction\":\"registration\",\"eventDate\":\"1995-08-14T04:00:00Z\"},{\"eventAction\":\"expiration\",\"eventDate\":\"2026-08-13T04:00:00Z\"},{\"eventAction\":\"last changed\",\"eventDate\":\"2026-01-16T18:26:50Z\"},{\"eventAction\":\"last update of RDAP database\",\"eventDate\":\"2026-04-15T19:04:14Z\"}],\"entities\":[{\"roles\":[\"registrar\"],\"vcardArray\":[\"vcard\",[[\"version\",{},\"text\",\"4.0\"],[\"fn\",{},\"text\",\"RESERVED-Internet Assigned Numbers Authority\"]]]}],\"status\":[\"client delete prohibited\",\"client transfer prohibited\",\"client update prohibited\"],\"secureDNS\":{\"delegationSigned\":true}}",
-    "source": "RDAP"
-  },
-  "analysis": {
-    "redirection_result": {
-      "is_redirected": false,
-      "chain_length": 1,
-      "chain": [
-        "https://example.com"
-      ],
-      "final_url": "https://example.com",
-      "final_url_domain": "example.com",
-      "has_domain_jump": false
-    },
-    "http_status": {
-      "code": 200,
-      "text": "OK",
-      "success": true,
-      "is_redirect": false
-    },
-    "is_hsts_supported": false
-  },
-  "ssl_info": {
-    "Domain": "example.com",
-    "HasTLS": true,
-    "ChainValid": true,
-    "Issuer": "Cloudflare TLS Issuing ECC CA 1",
-    "NotBefore": "2026-04-02T21:18:57Z",
-    "NotAfter": "2026-07-01T21:24:46Z",
-    "AgeDays": 12,
-    "Fingerprint": "1AF627C6C2AC992E3C9102438F467C4C238D3112325AC7CF9003D77F75EFFFBA",
-    "IsSuspicious": false,
-    "Reasons": null,
-    "CTLogged": true,
-    "KnownBadChain": false
-  },
-  "tls_info": {
-    "Present": true,
-    "Issuer": "CLOUDFLARE, INC.",
-    "AgeDays": 12,
-    "HostnameMismatch": false
-  },
-  "content_data": {
-    "url": "https://example.com",
-    "title": "Example Domain",
-    "has_forms": false,
-    "has_login_form": false,
-    "has_payment_form": false,
-    "has_personal_form": false,
-    "form_count": 0,
-    "forms": null,
-    "iframes": null,
-    "has_hidden_iframe": false,
-    "has_tracking": false,
-    "fetch_duration": 137804093,
-    "brand_check": {
-      "brand_found": "",
-      "is_mismatch": false,
-      "detected_names": []
-    }
-  },
-  "domain_randomness": {
-    "Domain": "example.com",
-    "Label": "example",
-    "Length": 7,
-    "Entropy": 2.521640636343318,
-    "EntropyPerChar": 0.36023437662047403,
-    "NormalizedEntropy": 0.06050092369175979,
-    "VowelRatio": 0.42857142857142855,
-    "DigitRatio": 0,
-    "UniqueCharRatio": 0.8571428571428571,
-    "LongestConsonantRun": 3,
-    "BigramEnglishiness": 0.16666666666666666,
-    "RandomnessScore": 0.3567918975896066,
-    "IsSuspicious": false,
-    "Reasons": []
-  },
-  "typosquat_result": {
-    "is_suspicious": false
-  },
-  "phishing": {
-    "in_database": true,
-    "phish_id": 7366538,
-    "phish_detail_page": "http://www.phishtank.com/phish_detail.php?phish_id=7366538",
-    "verified": false,
-    "verified_at": "",
-    "valid": false,
-    "target": "",
-    "source": "phishtank",
-    "from_cache": false,
-    "raw_response": {
-      "meta": {
-        "timestamp": "2026-04-15T19:04:30+00:00",
-        "serverid": "e5f3084e",
-        "status": "success",
-        "requestid": "172.17.128.1.69dfe13e5ee121.10644345"
-      },
-      "results": {
-        "url": "https://example.com",
-        "in_database": true,
-        "phish_id": 7366538,
-        "phish_detail_page": "http://www.phishtank.com/phish_detail.php?phish_id=7366538",
-        "verified": false,
-        "verified_at": null,
-        "valid": false
-      }
-    }
-  },
-  "result": {
-    "risk_score": 5,
-    "trust_score": 100,
-    "final_score": 98,
-    "verdict": "Safe",
-    "reasons": {
-      "neutral_reasons": [
-        "Standard, officially recognized domain extension.",
-        "No email server configured for this domain."
-      ],
-      "good_reasons": [
-        "Global Giant: Ranked #175 worldwide.",
-        "Long-standing domain history (30 years 8 months).",
-        "Advanced DNS security enabled (DNSSEC)."
-      ],
-      "bad_reasons": null
-    }
-  },
-  "incomplete": false,
-  "errors": null
-}
-</code></pre>
-</details>

@@ -14,7 +14,7 @@ type cacheEntry struct {
 	Key        string          `json:"key"`
 	Prefix     string          `json:"prefix"`
 	TTLSeconds int64           `json:"ttl_seconds"` // -1 = no expiry, -2 = key gone
-	Value      json.RawMessage `json:"value"`
+	Value      json.RawMessage `json:"value" swaggertype:"object"`
 }
 
 // ListCacheHandler godoc
