@@ -45,7 +45,7 @@ const EGGS: Egg[] = [
   },
   {
     test: (_, h) => h === 'google.com',
-    say: 'Ah yes, the website you use to check websites.',
+    say: 'Ah yes, the website you use to search websites.',
   },
   {
     test: (_, h) => ['example.com', 'example.org', 'example.net'].includes(h),

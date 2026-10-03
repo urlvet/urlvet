@@ -9,7 +9,7 @@ describe('easterEgg', () => {
     ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'Never gonna give you up'],
     ['https://youtu.be/dQw4w9WgXcQ', 'Never gonna give you up'],
     ['pаypal.com', 'Spot the difference'],
-    ['notascam.lol', 'from our tagline'],
+    ['imnotascam.lol', 'from our tagline'],
     ['paypal.com', 'The real one'],
     ['https://www.apple.com/iphone', 'Cyrillic twin'],
     ['example.com', 'most innocent'],
