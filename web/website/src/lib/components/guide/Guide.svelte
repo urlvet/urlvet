@@ -188,22 +188,8 @@
     }
   }
 
-  // ── phones: a bit smaller, and out of the way while scrolling down ─────────
+  // ── phones: a bit smaller ──────────────────────────────────────────────────
   let small = false;
-  let tucked = false;
-  let lastY = 0;
-  let scrollTimer: ReturnType<typeof setTimeout> | undefined;
-  function onScroll() {
-    const y = window.scrollY;
-    const down = y > lastY + 4;
-    const up = y < lastY - 4;
-    lastY = y;
-    if (!small || open || tourSteps) return;
-    if (down && y > 40) tucked = true;
-    else if (up) tucked = false;
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => (tucked = false), 900);
-  }
 
   // ── pokes: tapping him over and over gets escalating complaints ────────────
   let pokeTimes: number[] = [];
@@ -468,7 +454,6 @@
     small = narrow.matches;
     const onNarrow = () => (small = narrow.matches);
     narrow.addEventListener("change", onNarrow);
-    lastY = window.scrollY;
     document.addEventListener("input", onInput, true);
     document.addEventListener("click", onClick, true);
 
@@ -491,18 +476,16 @@
   onDestroy(() => {
     timers.forEach(clearTimeout);
     clearTimeout(gazeTimer);
-    clearTimeout(scrollTimer);
     clearTimeout(pokeReset);
     if (gazeFrame) cancelAnimationFrame(gazeFrame);
   });
 </script>
 
-<svelte:window on:keydown={onKey} on:pointermove={onPointerMove} on:scroll={onScroll} />
+<svelte:window on:keydown={onKey} on:pointermove={onPointerMove} />
 
 {#if !$vettyMemory.hidden}
   <div
-    class="dock fixed right-3 sm:right-4 bottom-3 sm:bottom-4 z-[70] flex flex-col items-end gap-2 pointer-events-none"
-    class:tucked
+    class="fixed right-3 sm:right-4 bottom-3 sm:bottom-4 z-[70] flex flex-col items-end gap-2 pointer-events-none"
     style="margin-bottom: env(safe-area-inset-bottom, 0px)"
   >
     {#if open}
@@ -835,27 +818,6 @@
 {/if}
 
 <style>
-  /* Slides off the bottom edge while scrolling down on phones. */
-  .dock {
-    transition:
-      transform 0.3s ease,
-      opacity 0.3s ease;
-  }
-  .dock.tucked {
-    transform: translateY(calc(100% + 24px));
-    opacity: 0;
-  }
-  .dock.tucked :global(*) {
-    pointer-events: none !important;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .dock {
-      transition: opacity 0.2s;
-    }
-    .dock.tucked {
-      transform: none;
-    }
-  }
   .vetty {
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12));

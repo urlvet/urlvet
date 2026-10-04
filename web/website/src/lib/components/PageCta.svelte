@@ -13,7 +13,7 @@
     Got a link you're <span class="italic">unsure about?</span>
   </p>
   <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto flex-shrink-0">
-    Check it on url.vet
+    Check it now
     <Icon path={ICON.arrowRight} />
   </a>
 </section>

@@ -4,7 +4,7 @@
   // Example links to try, and the short list of promises under the search bar.
   export let onTry: (url: string) => void;
 
-  const POINTS = ["Open source", "No signup", "Explains every verdict", "See it before you click"];
+  const POINTS = ["Free and open source", "No tracking", "Explains every result"];
 
   // Keep the chips to two rows by measuring, not by breakpoint: drop the legit/fake
   // labels (level 1), then "Try" too (level 2), until they fit.
@@ -79,16 +79,14 @@
 </div>
 
 <div
-  class="mt-10 pt-6 w-full max-w-2xl border-t border-gray-200 dark:border-gray-800 grid grid-cols-2 gap-x-4 gap-y-2.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2"
+  class="mt-10 pt-6 w-full max-w-2xl border-t border-gray-200 dark:border-gray-800 flex justify-center"
 >
-  {#each POINTS as point}
-    <span
-      class="flex items-start gap-2 text-left leading-snug text-[13px] min-[360px]:text-sm text-gray-600 dark:text-gray-400"
-    >
-      <span
-        class="mt-[0.6em] w-1 h-1 flex-shrink-0 rounded-full bg-accent-light dark:bg-accent-dark"
-      ></span>
-      {point}
-    </span>
-  {/each}
+  <!-- Short sentences on a centred line; each stays whole when the line wraps. -->
+  <p
+    class="max-w-xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400 [text-wrap:balance]"
+  >
+    {#each POINTS as point}
+      <span class="whitespace-nowrap">{point}.</span>{" "}
+    {/each}
+  </p>
 </div>

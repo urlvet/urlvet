@@ -8,57 +8,61 @@
   // (handler/middleware/rate_limit.go), caching (server/internal/constants/ttls.go),
   // reports (handler/report.go).
 
-  const AT_A_GLANCE = [
-    { label: "Accounts", value: "None" },
-    { label: "Cookies", value: "None" },
-    { label: "Analytics & ads", value: "None" },
-    { label: "Data sold", value: "Never" },
-    { label: "Your IP in our logs", value: "Never" },
-    { label: "Cached scan results", value: "Up to 24 hours" },
+  // The short version: what we don't have, and the few things we keep for a while.
+  const NONE = [
+    "accounts",
+    "cookies",
+    "ads",
+    "trackers",
+    "profiles of you",
+    "IP addresses in our logs",
+    "data sold",
   ];
-
-  const NEVER = ["Sell your data", "Show you ads", "Ask you to sign up", "Build a profile of you"];
-
+  // What we keep, how long for, and what's in it.
   const KEEP = [
     {
       t: "Scan results",
-      d: "Cached by link for up to 24 hours, so a link that's checked twice (or shared) loads instantly. Individual checks expire sooner, some after 3 hours.",
+      for: "24 hours",
+      d: "Cached by link, so a repeat or shared check loads instantly. Some individual checks expire sooner.",
     },
     {
       t: "Page screenshots",
-      d: "Stored on our server for up to 24 hours, then deleted automatically.",
+      for: "24 hours",
+      d: "Stored on our server, then deleted automatically.",
     },
     {
-      t: "Recent activity",
-      d: "The last 100 scans (link, verdict, score, time) are held in the server's memory for the maintainer's dashboard. Never written to disk; gone whenever the server restarts.",
+      t: "Recent searches",
+      for: "Until restart",
+      d: "The last 100 scans (link, verdict, score, time), held in the server's memory for the admin dashboard. Never written to disk.",
     },
     {
       t: "Reports you send",
-      d: "If you report a wrong verdict, we keep the link, our verdict and score, your suggestion, your comment and the time. It's kept until the issue it points to is fixed, then deleted. No IP address, no account.",
+      for: "Until fixed",
+      d: "The link, our verdict and score, your suggestion, your comment and the time. No IP address, no account.",
     },
   ];
 
   const THIRD_PARTIES = [
     {
       who: "Vercel, our host",
-      what: "Hosts this website. Like any host, it handles your visit, so it sees your IP address and the address of the page you open (for a share link, that includes the scanned link). It keeps its request logs briefly.",
+      what: "Hosts this website, so it sees your IP address and the page you open (for a share link, that includes the scanned link). It keeps request logs briefly.",
       href: "https://vercel.com/legal/privacy-policy",
     },
     {
       who: "The website you scan",
-      what: "Our server visits it to check redirects, certificates and content, and takes a screenshot. The site, and any trackers on it, see our server, not you.",
+      what: "Our server visits it and takes a screenshot. The site, and any trackers on it, see our server, not you.",
     },
     {
       who: "PhishTank",
-      what: "Receives the link, to check it against its database of reported phishing.",
+      what: "Receives the link, to check it against reported phishing.",
     },
     {
       who: "DNS resolvers",
-      what: "Receive the domain name only, to find the servers behind it (as any lookup on the internet does).",
+      what: "Receive the domain name only, to find the servers behind it.",
     },
     {
       who: "Domain registries",
-      what: "The public record of who registered a domain. They receive the domain name only, so we can look up its age.",
+      what: "Receive the domain name only, so we can look up its age.",
     },
   ];
 </script>
@@ -78,56 +82,38 @@
     We check the link, <span class="italic">not you.</span>
   </h1>
   <p class="mt-6 text-xl leading-relaxed text-gray-700 dark:text-gray-300">
-    url.vet needs the link you paste to check it. That's it. Here is exactly what happens to it, in
-    plain words. And because the code is open source, you don't have to take our word for any of
-    this.
+    url.vet needs the link you paste, and nothing else. Here is exactly what happens to it.
   </p>
 
-  <!-- At a glance -->
-  <dl class="mt-12 grid sm:grid-cols-2 gap-x-10">
-    {#each AT_A_GLANCE as item}
-      <div
-        class="flex items-baseline justify-between gap-4 py-3.5 border-b border-gray-200 dark:border-gray-800"
-      >
-        <dt class="text-[15px] text-gray-600 dark:text-gray-400">{item.label}</dt>
-        <dd class="font-mono text-sm text-gray-900 dark:text-gray-100">{item.value}</dd>
-      </div>
-    {/each}
-  </dl>
-
-  <!-- Promises -->
-  <section class="mt-20">
-    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">What we'll never do</h2>
-    <ul class="mt-6 grid sm:grid-cols-2 gap-x-10">
-      {#each NEVER as item}
-        <li
-          class="py-3 border-t border-gray-200 dark:border-gray-800 font-serif text-[1.45rem] leading-tight"
-        >
-          {item}
-        </li>
+  <!-- At a glance: what we don't have, as one statement; what we keep, as three figures -->
+  <section class="mt-14" aria-label="The short version">
+    <p class="font-mono text-[11px] uppercase tracking-wider text-gray-500">In short</p>
+    <p class="mt-4 font-serif text-[1.75rem] md:text-[2.1rem] leading-[1.3] tracking-[-0.01em]">
+      {#each NONE as item}
+        <span class="whitespace-nowrap"
+          ><span class="text-gray-400 dark:text-gray-500">No</span>
+          {item}.</span
+        >{" "}
       {/each}
-    </ul>
+    </p>
   </section>
 
   <section class="mt-20">
     <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">When you scan a link</h2>
     <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
       <p>
-        The link goes to our server, which runs the checks and sends back the result. Like any
-        website, our server can see your IP address while it answers you. We use it for one thing:
-        limiting how many requests one address can make per minute, so the service stays up. Even
-        then we don't store the address itself, only a scrambled version that can't be turned back
-        into it, and the key used to scramble it is replaced every day. That counter is deleted
-        after a minute.
+        The link goes to our server, which runs the checks and sends back the result. Our server
+        sees your IP address while it answers, and uses it for one thing: limiting how many requests
+        one address can make per minute. It keeps only a scrambled version that can't be turned
+        back, and deletes it after a minute.
       </p>
       <p>
         <span class="text-gray-900 dark:text-gray-100 font-medium"
           >Our logs never contain your IP address or the link you scanned.</span
         >
-        They record one line per request (which page, whether it worked, how long it took), and if an
-        error mentions a web address, everything after the
-        <span class="font-mono text-[15px]">?</span> is removed before it's written, since that's where
-        links hide things like password-reset tokens.
+        They record one line per request: which page, whether it worked, how long it took. If an error
+        mentions a web address, everything after the
+        <span class="font-mono text-[15px]">?</span> is cut before it's written.
       </p>
     </div>
   </section>
@@ -141,7 +127,12 @@
         <div
           class="flex flex-col sm:flex-row gap-1 sm:gap-6 py-5 border-t border-gray-200 dark:border-gray-800"
         >
-          <dt class="sm:w-44 flex-shrink-0 font-serif text-[1.3rem] leading-tight">{item.t}</dt>
+          <dt class="sm:w-44 flex-shrink-0">
+            <span class="block font-serif text-[1.3rem] leading-tight">{item.t}</span>
+            <span class="mt-1 block font-mono text-[11px] uppercase tracking-wider text-gray-500"
+              >{item.for}</span
+            >
+          </dt>
           <dd class="text-[16px] leading-relaxed text-gray-700 dark:text-gray-300">{item.d}</dd>
         </div>
       {/each}
@@ -151,8 +142,7 @@
   <section class="mt-20">
     <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Who else sees the link</h2>
     <p class="mt-5 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
-      This website runs on Vercel, and some checks need outside help. These are the only parties
-      involved:
+      Some checks need outside help. These are the only others involved:
     </p>
     <dl class="mt-6">
       {#each THIRD_PARTIES as p}
@@ -172,8 +162,7 @@
       {/each}
     </dl>
     <p class="mt-4 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
-      Everything this website loads (fonts, images, code) comes from url.vet itself. No trackers, no
-      ad networks, no font or analytics services watching your visit.
+      Everything this website loads (fonts, images, code) comes from url.vet itself.
     </p>
   </section>
 
@@ -188,9 +177,8 @@
   <section class="mt-20">
     <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">In your browser</h2>
     <p class="mt-5 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
-      We don't set cookies. Your browser's local storage remembers your light or dark theme and
-      whether you've met or hidden Vetty. It never leaves your device, and clearing your site data
-      removes it.
+      Your browser remembers your light or dark theme and whether you've met or hidden Vetty. That
+      stays on your device, and clearing your site data removes it.
     </p>
   </section>
 
@@ -202,8 +190,8 @@
         target="_blank"
         rel="noopener noreferrer"
         class={LINK}>abhizaik</a
-      >. There are no accounts, so we hold nothing tied to you by name. To ask what we hold about a
-      link you scanned or reported, or to have a report deleted, email
+      >. We hold nothing tied to your name. To ask what we hold about a link you scanned or
+      reported, or to have a report deleted, email
       <a href="mailto:hi@url.vet" class="font-mono text-base {LINK}">hi@url.vet</a>.
     </p>
   </section>

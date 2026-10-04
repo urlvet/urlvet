@@ -35,6 +35,8 @@ export default {
         sans: ['Geist', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         serif: ['"Instrument Serif"', 'Georgia', 'serif'],
         mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        // Handwriting, for the signature on the About page only.
+        signature: ['"La Belle Aurore"', '"Instrument Serif"', 'cursive'],
       },
     },
   },
