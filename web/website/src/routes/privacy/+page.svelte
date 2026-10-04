@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { PILL_SOLID } from "$lib/ui/buttons";
+  import PageCta from "$lib/components/PageCta.svelte";
+  import { REPO } from "$lib/site";
+  import { LINK } from "$lib/ui/text";
 
   // Plain-language privacy notice. Keep it in sync with what the server actually does:
   // logging (server/internal/logger, handler/middleware/request_log.go), rate limiting
   // (handler/middleware/rate_limit.go), caching (server/internal/constants/ttls.go),
   // reports (handler/report.go).
-
-  const REPO = "https://github.com/urlvet/urlvet";
-  const LINK =
-    "text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current transition-colors";
 
   const AT_A_GLANCE = [
     { label: "Accounts", value: "None" },
@@ -229,29 +227,5 @@
     </p>
   </section>
 
-  <!-- Back to the product -->
-  <section
-    class="mt-24 pt-12 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
-  >
-    <p class="font-serif text-3xl md:text-4xl tracking-[-0.01em] leading-tight">
-      Got a link you're <span class="italic">unsure about?</span>
-    </p>
-    <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto flex-shrink-0">
-      Check it on url.vet
-      <svg
-        class="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-        />
-      </svg>
-    </a>
-  </section>
+  <PageCta />
 </div>

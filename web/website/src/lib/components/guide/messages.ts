@@ -20,14 +20,14 @@ export const POKES = [
 /** Heading of the "More" list in Vetty's menu. */
 export const MORE_TITLE = "Here's everything else I can do.";
 
-export const NUDGE = "It looks like you're about to check a link. I can help with that.";
+export const NUDGE = 'Little overwhelmed with all these stuffs in here? I can help with that.';
 export const NUDGE_CTA = 'See what I can do';
 
 /** Greeting when reopening Vetty, by page. */
 export const GREETINGS: Record<string, string[]> = {
   home: [
     "It looks like you're checking a link. Would you like help?",
-    'Back again? Good. Suspicious links hate this one trick: checking them.',
+    'Back again? Great.',
     "Need a hand? I don't have many, but they're both yours.",
   ],
   result: [
@@ -43,8 +43,8 @@ export const GREETINGS: Record<string, string[]> = {
 
 export const TIPS = [
   'Tip: press / anywhere to jump to the search bar.',
-  'Tip: shortened links hide where they really go. Paste them here first.',
-  'Tip: a page can look exactly like your bank and still not be your bank. Check the address.',
+  'Tip: shortened links hide where they really go. Paste them here to see their journey.',
+  'Tip: a page can look exactly like your bank and still not be your bank. Even URLs.',
   'Tip: every result has a share link, so you can send it to whoever sent you the link.',
 ];
 

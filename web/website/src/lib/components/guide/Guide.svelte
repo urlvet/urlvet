@@ -9,6 +9,8 @@
   import { ICON } from "../../ui/icons";
   import { formatUrl, stripTrackers } from "../../utils";
   import Icon from "../Icon.svelte";
+  import { PILL_OUTLINE, PILL_SOLID } from "../../ui/buttons";
+  import Bullets from "./Bullets.svelte";
   import CharacterClip from "./CharacterClip.svelte";
   import {
     CHECK_FOR_ME,
@@ -16,8 +18,8 @@
     GREETINGS,
     HIDE_BYE,
     INTRO,
-    MORE_TITLE,
     MEET,
+    MORE_TITLE,
     NAME,
     NUDGE,
     NUDGE_CTA,
@@ -56,6 +58,14 @@
   type Item = { label: string; run: () => void; group?: string };
 
   const NUDGE_AFTER_MS = 5000;
+
+  // Styles shared by the speech bubbles and what's inside them.
+  const BUBBLE =
+    "rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900";
+  const LEAD = "font-serif text-xl leading-snug text-gray-900 dark:text-gray-100";
+  const LABEL = "font-mono text-[11px] uppercase tracking-wider text-gray-500";
+  const FIELD =
+    "w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2";
 
   let open = false;
   let view: View = "menu";
@@ -356,7 +366,7 @@
             ].map((item) => ({ ...item, group: "This result" })),
             ...[howItWorks, whoMade, meetItem, hideItem].map((item) => ({
               ...item,
-              group: "url.vet and me",
+              group: "url.vet",
             })),
           ],
         };
@@ -411,10 +421,8 @@
     openWarn();
   }
 
-  // Once per result, after the verdict has landed: a Risky result gets an offer to
-  // warn the sender (more useful than a joke), except the demo fakes; special
-  // links get a quip. When Vetty
-  // is hidden the results page shows the quip instead, and the alert is skipped.
+  // Once per result: Risky results (except the demo fakes) get the warn offer,
+  // special links a quip. If Vetty is hidden, the page shows the quip instead.
   $: if (!result) {
     quip = null;
     riskyAlert = false;
@@ -503,10 +511,10 @@
         role="dialog"
         aria-label="{NAME}, the url.vet helper"
         transition:fly={{ y: 12, duration: 200 }}
-        class="bubble pointer-events-auto relative w-[min(330px,calc(100vw-32px))] max-h-[calc(100vh-140px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl shadow-black/15 text-left"
+        class="bubble pointer-events-auto relative w-[min(330px,calc(100vw-32px))] max-h-[calc(100vh-140px)] overflow-y-auto {BUBBLE} shadow-2xl shadow-black/15 text-left"
       >
         <div class="flex items-start justify-between gap-3 px-5 pt-4">
-          <p class="font-mono text-[11px] uppercase tracking-wider text-gray-500">{NAME}</p>
+          <p class={LABEL}>{NAME}</p>
           <button
             type="button"
             class="-mr-2 -mt-1 p-1.5 rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
@@ -520,15 +528,15 @@
         <div class="px-5 pb-5 pt-1 text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
           {#if view === "menu" || view === "more"}
             {#if view === "more"}
-              <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+              <p class={LEAD}>
                 {MORE_TITLE}
               </p>
             {:else if greeting}
-              <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+              <p class={LEAD}>
                 {greeting}
               </p>
             {:else}
-              <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+              <p class={LEAD}>
                 {INTRO[0]}
               </p>
               <p class="mt-2">{INTRO[1]}</p>
@@ -588,21 +596,14 @@
               <p class={i === 0 ? "" : "mt-1"}>{line}</p>
             {/each}
           {:else if view === "explain" && explanation}
-            <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+            <p class={LEAD}>
               {explanation.lead}
             </p>
             {#each explanation.lists as list}
-              <p class="mt-3 font-mono text-[11px] uppercase tracking-wider text-gray-500">
+              <p class="mt-3 {LABEL}">
                 {list.title}
               </p>
-              <ul class="mt-1.5 space-y-1">
-                {#each list.items as item}
-                  <li class="flex gap-2">
-                    <span class="mt-[0.6em] w-1 h-1 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    <span>{item}</span>
-                  </li>
-                {/each}
-              </ul>
+              <Bullets items={list.items} />
             {/each}
             <p class="mt-3 text-gray-600 dark:text-gray-400">{explanation.advice}</p>
             <button
@@ -611,21 +612,14 @@
               on:click={() => (view = "scores")}>What does the score mean?</button
             >
           {:else if view === "meet"}
-            <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+            <p class={LEAD}>
               {MEET.lead}
             </p>
             <p class="mt-2">{MEET.why}</p>
-            <p class="mt-4 font-mono text-[11px] uppercase tracking-wider text-gray-500">
+            <p class="mt-4 {LABEL}">
               {MEET.canTitle}
             </p>
-            <ul class="mt-1.5 space-y-1">
-              {#each MEET.can as item}
-                <li class="flex gap-2">
-                  <span class="mt-[0.6em] w-1 h-1 rounded-full bg-gray-400 flex-shrink-0"></span>
-                  <span>{item}</span>
-                </li>
-              {/each}
-            </ul>
+            <Bullets items={MEET.can} />
             <p class="mt-4 text-sm text-gray-500">{MEET.note}</p>
           {:else if view === "check"}
             <form on:submit|preventDefault={checkForMe}>
@@ -636,7 +630,7 @@
                 bind:value={checkInput}
                 rows="3"
                 placeholder="https://…"
-                class="mt-3 w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 font-mono text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 dark:focus:border-gray-500"
+                class="mt-3 {FIELD} font-mono text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 dark:focus:border-gray-500"
                 on:keydown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -647,14 +641,14 @@
               <button
                 type="submit"
                 disabled={!checkInput.trim()}
-                class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gray-900 dark:bg-gray-100 px-4 py-2 text-sm font-medium text-gray-50 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white disabled:opacity-40 transition-colors"
+                class="mt-2 {PILL_SOLID} px-3.5 py-2"
               >
                 Check it
                 <Icon path={ICON.arrowRight} class="w-3.5 h-3.5" />
               </button>
             </form>
           {:else if view === "real" && real}
-            <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+            <p class={LEAD}>
               {REAL_SITE[real.reason](real.domain)}
             </p>
             <p class="mt-2">{REAL_SITE.advice(real.domain)}</p>
@@ -663,12 +657,11 @@
                 href="https://{real.domain}"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 rounded-full bg-gray-900 dark:bg-gray-100 px-4 py-2 text-sm font-medium text-gray-50 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white transition-colors"
-                >Open {real.domain} ↗</a
+                class="{PILL_SOLID} px-3.5 py-2">Open {real.domain} ↗</a
               >
               <button
                 type="button"
-                class="inline-flex items-center rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500"
+                class="{PILL_OUTLINE} px-3.5 py-2"
                 on:click={() => real && putInSearchBar(real.domain)}>Check it first</button
               >
             </div>
@@ -678,27 +671,24 @@
               id="vetty-warn"
               bind:value={warnText}
               rows="6"
-              class="mt-3 w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm leading-relaxed text-gray-900 dark:text-gray-100 focus:outline-none focus:border-gray-500"
+              class="mt-3 {FIELD} text-sm leading-relaxed text-gray-900 dark:text-gray-100 focus:outline-none focus:border-gray-500"
             ></textarea>
             <div class="mt-2 flex flex-wrap gap-2">
               <a
                 href="https://wa.me/?text={encodeURIComponent(warnText)}"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 rounded-full bg-gray-900 dark:bg-gray-100 px-4 py-2 text-sm font-medium text-gray-50 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white transition-colors"
-                >Send on WhatsApp</a
+                class="{PILL_SOLID} px-3.5 py-2">Send on WhatsApp</a
               >
               <button
                 type="button"
-                class="inline-flex items-center rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500"
+                class="{PILL_OUTLINE} px-3.5 py-2"
                 on:click={() => copy(warnText, "warn")}
                 >{copied === "warn" ? "Copied" : "Copy"}</button
               >
               {#if canShare}
-                <button
-                  type="button"
-                  class="inline-flex items-center rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500"
-                  on:click={shareNative}>Other apps…</button
+                <button type="button" class="{PILL_OUTLINE} px-3.5 py-2" on:click={shareNative}
+                  >Other apps…</button
                 >
               {/if}
             </div>
@@ -716,7 +706,7 @@
             <div>
               <button
                 type="button"
-                class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gray-900 dark:bg-gray-100 px-4 py-2 text-sm font-medium text-gray-50 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white transition-colors"
+                class="mt-3 {PILL_SOLID} px-3.5 py-2"
                 on:click={() => clean && copy(clean.cleaned, "clean")}
                 >{copied === "clean" ? "Copied" : "Copy clean link"}</button
               >
@@ -747,7 +737,7 @@
               {/each}
             </ul>
           {:else if view === "bye"}
-            <p class="font-serif text-xl leading-snug text-gray-900 dark:text-gray-100">
+            <p class={LEAD}>
               {HIDE_BYE}
             </p>
           {/if}
@@ -771,7 +761,7 @@
       <div
         role="status"
         transition:fly={{ y: 8, duration: 200 }}
-        class="bubble pointer-events-auto relative max-w-[280px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-black/10"
+        class="bubble pointer-events-auto relative max-w-[280px] {BUBBLE} shadow-xl shadow-black/10"
       >
         <button
           type="button"
@@ -800,7 +790,7 @@
       <div role="status" transition:fly={{ y: 8, duration: 200 }} class="pointer-events-auto">
         <button
           type="button"
-          class="bubble relative max-w-[280px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
+          class="bubble relative max-w-[280px] {BUBBLE} shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
           title="Dismiss"
           on:click={() => (quip = null)}
         >
@@ -812,7 +802,7 @@
       <button
         type="button"
         transition:fly={{ y: 8, duration: 200 }}
-        class="bubble group pointer-events-auto relative max-w-[260px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
+        class="bubble group pointer-events-auto relative max-w-[260px] {BUBBLE} shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
         on:click={toggle}
       >
         {NUDGE}
