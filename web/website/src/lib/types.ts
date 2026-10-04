@@ -119,12 +119,6 @@ export interface PhishingResult {
   raw_response?: unknown;
 }
 
-export interface ScreenshotResponse {
-  status: string;
-  msg: string;
-  file: string;
-}
-
 export interface RankResponse {
   rank: number;
 }
@@ -184,27 +178,4 @@ export interface WhoisResponse {
   expires_at: string;
   registrar: string;
   raw_data: any;
-}
-
-export interface PhishingCheckResult {
-  rank?: RankResponse;
-  ipCheck?: IpCheckResponse;
-  ipResolve?: IpResolveResponse;
-  length?: LengthResponse;
-  depth?: DepthResponse;
-  hsts?: HstsResponse;
-  redirects?: RedirectsResponse;
-  punycode?: PunycodeResponse;
-  trustedTld?: TrustedTldResponse;
-  riskyTld?: RiskyTldResponse;
-  urlShortener?: UrlShortenerResponse;
-  statusCode?: StatusCodeResponse;
-  whois?: WhoisResponse;
-  [key: string]: any; // Allow string indexing
-}
-
-export interface CheckStatus {
-  loading: boolean;
-  error?: string;
-  completed: boolean;
 }

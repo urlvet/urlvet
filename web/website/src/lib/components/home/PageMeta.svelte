@@ -1,6 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { onDestroy } from "svelte";
+  import { REPO } from "../../site";
   // <head> tags: per-scan share card when a domain is known, the site card otherwise.
   export let shareDomain: string;
   export let verdict: string | undefined;
@@ -52,8 +53,8 @@
       name: "abhizaik",
       url: "https://abhizaik.com",
     },
-    license: "https://github.com/urlvet/urlvet/blob/main/LICENSE",
-    codeRepository: "https://github.com/urlvet/urlvet",
+    license: `${REPO}/blob/main/LICENSE`,
+    codeRepository: REPO,
     featureList: [
       "Real-time URL scanning",
       "Phishing detection",

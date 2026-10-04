@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { PILL_OUTLINE, PILL_SOLID } from "$lib/ui/buttons";
-
-  const REPO = "https://github.com/urlvet/urlvet";
-  const GITHUB_PATH =
-    "M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.387 7.872 10.905.576.106.784-.25.784-.556 0-.274-.01-1-.016-1.974-3.2.694-3.876-1.544-3.876-1.544-.522-1.33-1.276-1.683-1.276-1.683-1.042-.714.08-.699.08-.699 1.152.08 1.756 1.183 1.756 1.183 1.024 1.754 2.688 1.246 3.344.952.104-.742.4-1.246.728-1.532-2.554-.292-5.238-1.276-5.238-5.674 0-1.252.448-2.274 1.184-3.076-.12-.292-.512-1.468.112-3.064 0 0 .964-.308 3.16 1.176.916-.254 1.9-.382 2.876-.388.976.006 1.96.134 2.876.388 2.192-1.484 3.156-1.176 3.156-1.176.624 1.596.232 2.772.112 3.064.736.802 1.184 1.824 1.184 3.076 0 4.408-2.69 5.38-5.25 5.664.412.354.78 1.05.78 2.118 0 1.532-.014 2.768-.014 3.144 0 .308.2.672.788.556C20.708 21.385 24 17.084 24 12c0-6.352-5.148-11.5-12-11.5z";
-
-  const LINK =
-    "text-gray-900 dark:text-gray-100 underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-current transition-colors";
+  import PageCta from "$lib/components/PageCta.svelte";
+  import { REPO } from "$lib/site";
+  import { LINK } from "$lib/ui/text";
+  import { GITHUB_LOGO } from "$lib/ui/icons";
+  import { PILL_OUTLINE } from "$lib/ui/buttons";
 
   const PRINCIPLES = [
     {
@@ -81,7 +78,7 @@
             class="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d={GITHUB_PATH} />
+              <path d={GITHUB_LOGO} />
             </svg>
             @abhizaik
           </a>
@@ -196,7 +193,7 @@
       class="mt-7 {PILL_OUTLINE} px-5 py-2.5"
     >
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path d={GITHUB_PATH} />
+        <path d={GITHUB_LOGO} />
       </svg>
       View on GitHub
     </a>
@@ -224,31 +221,7 @@
     </div>
   </section>
 
-  <!-- Back to the product -->
-  <section
-    class="mt-24 pt-12 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
-  >
-    <p class="font-serif text-3xl md:text-4xl tracking-[-0.01em] leading-tight">
-      Got a link you're <span class="italic">unsure about?</span>
-    </p>
-    <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto flex-shrink-0">
-      Check it on url.vet
-      <svg
-        class="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-        />
-      </svg>
-    </a>
-  </section>
+  <PageCta />
 
   <p class="mt-16 font-mono text-[11px] text-gray-400">
     url.vet is also known as URLvet, and was previously called SafeSurf.

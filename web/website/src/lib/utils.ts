@@ -218,15 +218,6 @@ export function getDomainFromUrl(url: string): string {
   }
 }
 
-export function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  } catch {
-    return dateString;
-  }
-}
-
 /**
  * Formats a URL for safe sharing by stripping schema and replacing dots with [.]
  * Example: "https://example.com" -> "example[.]com"

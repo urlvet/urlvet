@@ -6,10 +6,8 @@
 
   const POINTS = ["Open source", "No signup", "Explains every verdict", "See it before you click"];
 
-  // The chips should sit in two rows. Screen width, fonts and phone text-size
-  // settings all change how wide they are, so measure instead of guessing a
-  // breakpoint: drop the legit/fake labels, then the "Try" label, until they fit.
-  // 0 = everything, 1 = no labels, 2 = no labels and no "Try".
+  // Keep the chips to two rows by measuring, not by breakpoint: drop the legit/fake
+  // labels (level 1), then "Try" too (level 2), until they fit.
   let level = 0;
   let row: HTMLDivElement;
 

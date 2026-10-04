@@ -7,23 +7,17 @@ export const TAGLINE_LINKS = [
   'amaz0n.deal',
   'iphone18pro.gift',
   'spotify-premium.free',
-  'youtube-premium.win',
   'playstation5.free',
 
   // Obvious bait
   'imnotascam.lol',
-  'u-wont-regret-this-link.com',
-  'congrats-on-existing.com',
+  'u-wont-regret-this.net',
+  'congrats-on-winning-lottery.com',
   'i-accidentally-paid-u.com',
   'nigerian-prince-support.com',
-  'real-bank-login.com',
+  'official-bank-login.biz',
   'download-more-ram.zip',
-  'password-reset-final.com',
-  'login-final-boss.com',
 
   // Gen-Z
   'delulu-free-money.com',
-  'ur-main-character-reward.com',
-  'no-aura-login.com',
-  'login-caught-in-4k.com',
 ];
