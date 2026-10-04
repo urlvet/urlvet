@@ -1,9 +1,43 @@
 <script lang="ts">
+  import { vettyMemory } from "$lib/components/guide/store";
   import PageCta from "$lib/components/PageCta.svelte";
   import { REPO } from "$lib/site";
-  import { LINK } from "$lib/ui/text";
-  import { GITHUB_LOGO } from "$lib/ui/icons";
   import { PILL_OUTLINE } from "$lib/ui/buttons";
+  import { GITHUB_LOGO } from "$lib/ui/icons";
+  import { LINK } from "$lib/ui/text";
+  import { tick } from "svelte";
+
+  const VETTY = [
+    {
+      title: "What Vetty does",
+      dot: "bg-emerald-500",
+      items: [
+        "Shows you how to use url.vet",
+        "Checks a link for you",
+        "Explains a result in simple words",
+        "Takes you to the real site if a page is fake",
+      ],
+    },
+    {
+      title: "What Vetty never does",
+      dot: "bg-red-500",
+      items: [
+        "Collect your data",
+        "Use what you type to train AI",
+        "Ask you to sign up or pay",
+        "Show ads or try to sell you anything",
+      ],
+    },
+  ];
+
+  // Opens Vetty's bubble, bringing him back first if he was hidden.
+  async function sayHi() {
+    vettyMemory.set({ hidden: false });
+    await tick();
+    if (!document.querySelector(".vetty[aria-expanded='true']")) {
+      document.querySelector<HTMLElement>("button.vetty")?.click();
+    }
+  }
 
   const PRINCIPLES = [
     {
@@ -41,56 +75,26 @@
 <div class="max-w-3xl mx-auto px-6 pt-16 md:pt-24 pb-20 text-gray-900 dark:text-gray-100">
   <p class="font-mono text-xs uppercase tracking-wider text-gray-500">About</p>
   <h1 class="mt-4 font-serif text-5xl md:text-6xl leading-[1.02] tracking-[-0.015em]">
-    Doubt, <span class="italic">made useful.</span>
+    Built for my loved ones. <span class="italic sm:block">Open to everyone.</span>
   </h1>
   <p class="mt-6 text-xl leading-relaxed text-gray-700 dark:text-gray-300">
-    Paste any link and url.vet tells you whether it's safe, and why. Detailed enough for experts,
-    plain enough for everyone else.
+    url.vet is a free, open-source tool that tells you whether a link is safe, and why. This page is
+    about why it exists and what it stands for.
   </p>
 
   <!-- Maker: the why, in first person -->
   <section class="mt-20">
     <h2 class="mt-2 font-serif text-3xl md:text-4xl tracking-[-0.01em]">Why I built it</h2>
-    <!-- A note from a person: a card with who's speaking up top, and a signature at the end. -->
+    <!-- A letter: straight into the words, signed once at the end. -->
     <figure
       class="relative mt-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-7 md:px-10 md:py-9 shadow-sm shadow-black/[0.03]"
     >
-      <figcaption class="flex items-center gap-3.5">
-        <img
-          src="/team/abhizaik.jpg"
-          alt=""
-          class="w-11 h-11 rounded-full flex-shrink-0 grayscale-[30%]"
-          loading="lazy"
-        />
-        <div class="min-w-0">
-          <p class="text-[15px]">
-            <a
-              href="https://abhizaik.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-medium hover:underline underline-offset-4">abhizaik</a
-            ><span class="text-gray-500">, creator &amp; maintainer</span>
-          </p>
-          <a
-            href="https://github.com/abhizaik"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d={GITHUB_LOGO} />
-            </svg>
-            @abhizaik
-          </a>
-        </div>
-      </figcaption>
       <span
-        class="hidden sm:block pointer-events-none absolute right-6 top-2 md:right-9 md:top-3 font-serif text-[5.5rem] leading-none text-accent-light/25 dark:text-accent-dark/25 select-none"
+        class="block h-9 font-serif text-[4.5rem] leading-none text-accent-light/40 dark:text-accent-dark/40 select-none"
         aria-hidden="true">&ldquo;</span
       >
-
       <blockquote
-        class="mt-7 max-w-[36rem] space-y-5 text-[17px] md:text-lg leading-relaxed text-gray-800 dark:text-gray-200"
+        class="mt-3 max-w-[36rem] space-y-5 text-[17px] md:text-lg leading-relaxed text-gray-800 dark:text-gray-200"
       >
         <p>
           I’d often get a link and wonder if it was safe to open. I tried a few online link
@@ -98,43 +102,45 @@
           technical data to dig through myself. I wasn’t really happy with either.
         </p>
         <p>
-          Then I started noticing it at home. My parents would open and forward links from WhatsApp
-          without really knowing if they were real (and most of the time they weren’t). Friends
-          would send me “hot deals” that didn’t even go to the shopping website they claimed to.
+          Then I saw the same problem at home. My parents would open and forward links from WhatsApp
+          without really knowing if they were real (and often they weren’t). Friends would send me
+          “hot deals” that didn’t even lead to the shop they claimed to be from.
         </p>
         <p>
-          I wanted something I could use myself and also hand to my parents. A straight answer for
-          them, and the reasons behind it for anyone who wants to look.
-        </p>
-        <p>
-          Also I’m a pretty private person, and I don’t like how most apps treat their users today:
+          Also, I’m a pretty private person, and I don’t like how most apps treat their users today:
           tracking everything, collecting all your data, selling it to advertisers. I found all of
-          it irritating and wanted to build something that does things the right way.
+          it irritating and wanted to build something that does none of that.
         </p>
-        <p>That’s how the idea for url.vet started.</p>
+        <p>
+          I wanted something my family, my friends and I could all use. A straight answer for them,
+          and the reasons behind it for anyone who wants to look deeper.
+        </p>
+        <p class="font-medium text-gray-900 dark:text-gray-100">That’s how url.vet started.</p>
       </blockquote>
-      <!-- Signed by hand: the name with a pen flourish under it. -->
-      <p class="mt-8 flex items-center gap-3 text-gray-500">
-        <span class="w-6 h-px bg-current opacity-60" aria-hidden="true"></span>
-        <span
-          class="relative inline-block font-serif italic text-[1.5rem] leading-none text-gray-900 dark:text-gray-100"
-          aria-label="Signed, abhizaik"
-          >abhizaik<svg
-            class="absolute -left-2 -bottom-3 w-[calc(100%+1rem)] h-4 overflow-visible text-gray-400 dark:text-gray-500"
-            viewBox="0 0 100 16"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-            ><path
-              d="M3 11C22 6 48 4 72 5.5C86 6.5 95 8 97 5.5C98.5 3.5 94 2.5 90 5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              vector-effect="non-scaling-stroke"
-            /></svg
-          ></span
+
+      <!-- Sign-off: photo and name, both linking to the creator's site. -->
+      <figcaption class="mt-8">
+        <a
+          href="https://abhizaik.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group inline-flex items-center gap-4"
         >
-      </p>
+          <img
+            src="/team/abhizaik.jpg"
+            alt=""
+            class="w-12 h-12 rounded-full flex-shrink-0 grayscale-[30%] group-hover:grayscale-0 transition"
+            loading="lazy"
+          />
+          <span>
+            <span
+              class="block font-signature text-[1.75rem] leading-none text-gray-900 dark:text-gray-100"
+              >abhizaik</span
+            >
+            <span class="mt-1.5 block text-[13px] text-gray-500">Creator of url.vet</span>
+          </span>
+        </a>
+      </figcaption>
     </figure>
   </section>
 
@@ -153,6 +159,41 @@
         </li>
       {/each}
     </ul>
+  </section>
+
+  <!-- Vetty -->
+  <section class="mt-24" id="vetty">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Meet Vetty</h2>
+    <p class="mt-5 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
+      Vetty is the paperclip in the corner. He helps you use url.vet. He is inspired by Clippy, the
+      paperclip helper from old office software.
+    </p>
+
+    <div class="mt-8 grid sm:grid-cols-2 gap-x-10 gap-y-8">
+      {#each VETTY as list}
+        <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
+          <h3 class="font-serif text-[1.45rem] leading-tight">{list.title}</h3>
+          <ul class="mt-3 space-y-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
+            {#each list.items as item}
+              <li class="flex gap-2.5">
+                <span
+                  class="mt-[0.55em] w-1.5 h-1.5 rounded-full flex-shrink-0 {list.dot}"
+                  aria-hidden="true"
+                ></span>
+                <span>{item}</span>
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {/each}
+    </div>
+
+    <p class="mt-8 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
+      Don't want him around? Hide him from his menu. He will wait at the bottom of the page.
+    </p>
+    <button type="button" class="mt-5 {PILL_OUTLINE} px-5 py-2.5" on:click={sayHi}>
+      Say hi to Vetty
+    </button>
   </section>
 
   <!-- Open source + help -->
@@ -204,7 +245,7 @@
     <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">Get in touch</h2>
     <div class="mt-5 space-y-4 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
       <p>
-        Feedback, ideas, or just to say hi: <a
+        Have feedback or an idea, or just want to say hello? Email <a
           href="mailto:hi@url.vet"
           class="font-mono text-base {LINK}">hi@url.vet</a
         >.
@@ -218,12 +259,11 @@
           class={LINK}>security policy</a
         >.
       </p>
+      <p class="text-[15px] text-gray-500">
+        url.vet is also written as URLvet. It used to be called SafeSurf.
+      </p>
     </div>
   </section>
 
   <PageCta />
-
-  <p class="mt-16 font-mono text-[11px] text-gray-400">
-    url.vet is also known as URLvet, and was previously called SafeSurf.
-  </p>
 </div>

@@ -90,6 +90,10 @@ Fast scanners (like Google Safe Browsing) give you a verdict from database looku
 
 
 
+## Vetty
+
+Vetty is the paperclip in the corner of the website. He helps people use url.vet. He is inspired by Clippy, the paperclip helper from old office software. 
+
 ## API Example
 
 Analyze a URL via HTTP:
