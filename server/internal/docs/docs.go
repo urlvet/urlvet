@@ -416,6 +416,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/lists/known-sites": {
+            "get": {
+                "description": "The 10,000 most popular sites, and the user-content hosts on them that still need checking. A host matches a site if it is the site or a subdomain of it.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lists"
+                ],
+                "summary": "Well-known sites",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.KnownSitesResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified"
+                    }
+                }
+            }
+        },
+        "/lists/threats": {
+            "get": {
+                "description": "Known phishing and malware links (PhishTank, URLhaus) as sorted SHA-256 prefixes of each link's normalized form: no scheme, lowercase host without \"www.\", no trailing slash or fragment, query kept. Clients hash a link the same way and look the prefix up locally, so nothing is sent. Supports If-None-Match.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lists"
+                ],
+                "summary": "Hashed threat list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ThreatListResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified"
+                    }
+                }
+            }
+        },
         "/punycode": {
             "get": {
                 "produces": [
@@ -866,6 +912,27 @@ const docTemplate = `{
                 }
             }
         },
+        "analyzer.OriginFindings": {
+            "type": "object",
+            "properties": {
+                "bad_reasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "confirmed": {
+                    "description": "Confirmed is set when a list names the link or a hop: the result is\nRisky, whatever the destination looks like.",
+                    "type": "boolean"
+                },
+                "risk": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "analyzer.Performance": {
             "type": "object",
             "properties": {
@@ -938,6 +1005,26 @@ const docTemplate = `{
                 }
             }
         },
+        "analyzer.RedirectInfo": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "description": "the redirect chain, starting with URL",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "target": {
+                    "description": "where it leads; the page the scan describes",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "the link as submitted",
+                    "type": "string"
+                }
+            }
+        },
         "analyzer.Response": {
             "type": "object",
             "properties": {
@@ -978,17 +1065,57 @@ const docTemplate = `{
                 "infrastructure": {
                     "$ref": "#/definitions/analyzer.Infrastructure"
                 },
+                "origin": {
+                    "description": "Origin is what the submitted link itself, and the hops after it, add to\nthat site's result: risk only, already counted in Result.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/analyzer.OriginFindings"
+                        }
+                    ]
+                },
                 "performance": {
                     "$ref": "#/definitions/analyzer.Performance"
                 },
                 "phishing": {
                     "$ref": "#/definitions/analyzer.PhishingResult"
                 },
+                "redirected_from": {
+                    "description": "RedirectedFrom is set when the submitted link sent visitors on to\nanother site; everything else describes that site.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/analyzer.RedirectInfo"
+                        }
+                    ]
+                },
                 "result": {
                     "$ref": "#/definitions/analyzer.Result"
                 },
+                "safe_browsing": {
+                    "description": "SafeBrowsing is Google Safe Browsing's verdict; absent when it isn't configured.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/threatfeeds.GoogleThreatResult"
+                        }
+                    ]
+                },
+                "short_link": {
+                    "description": "ShortLink is set when the submitted link was on a URL shortener. When\nit resolved, everything else describes the page it leads to.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/analyzer.ShortLinkInfo"
+                        }
+                    ]
+                },
                 "ssl_info": {
                     "$ref": "#/definitions/checks.SSLCertResult"
+                },
+                "threat_feeds": {
+                    "description": "ThreatFeeds is the match against locally held phishing and malware\nlists (PhishTank's dump, plus OpenPhish and URLhaus when enabled).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/threatfeeds.FeedMatch"
+                        }
+                    ]
                 },
                 "tls_info": {
                     "$ref": "#/definitions/checks.TLSResult"
@@ -998,6 +1125,14 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                },
+                "web_risk": {
+                    "description": "WebRisk is Google Web Risk's verdict; absent when it isn't configured.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/threatfeeds.GoogleThreatResult"
+                        }
+                    ]
                 }
             }
         },
@@ -1017,6 +1152,30 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "verdict": {
+                    "type": "string"
+                }
+            }
+        },
+        "analyzer.ShortLinkInfo": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "description": "every link followed, starting with URL",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "resolved": {
+                    "description": "false: the destination couldn't be found",
+                    "type": "boolean"
+                },
+                "target": {
+                    "description": "where it leads; the page the scan describes",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "the short link as submitted",
                     "type": "string"
                 }
             }
@@ -1196,6 +1355,10 @@ const docTemplate = `{
                 "is_hidden": {
                     "type": "boolean"
                 },
+                "login_intent": {
+                    "description": "button, label or action says sign in / next / verify",
+                    "type": "boolean"
+                },
                 "method": {
                     "description": "GET/POST etc.",
                     "type": "string"
@@ -1231,9 +1394,16 @@ const docTemplate = `{
                 "brand_check": {
                     "$ref": "#/definitions/checks.BrandResult"
                 },
+                "content_type": {
+                    "description": "Set for responses that aren't web pages (installers, archives, images):\nthose aren't parsed, and FileName is what the download would be saved as.",
+                    "type": "string"
+                },
                 "fetch_duration": {
                     "description": "nanoseconds",
                     "type": "integer"
+                },
+                "file_name": {
+                    "type": "string"
                 },
                 "form_count": {
                     "type": "integer"
@@ -1269,10 +1439,33 @@ const docTemplate = `{
                         "$ref": "#/definitions/checks.IframeInfo"
                     }
                 },
+                "provider_block": {
+                    "description": "ProviderBlock is set when the page is the host's or CDN's own warning\nor takedown page instead of the site (Cloudflare's phishing interstitial).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/checks.ProviderBlock"
+                        }
+                    ]
+                },
+                "script_redirect": {
+                    "$ref": "#/definitions/checks.ScriptRedirect"
+                },
                 "title": {
                     "type": "string"
                 },
                 "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "checks.ProviderBlock": {
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "\"phishing\", \"malware\" or \"blocked\"",
                     "type": "string"
                 }
             }
@@ -1347,6 +1540,23 @@ const docTemplate = `{
                 }
             }
         },
+        "checks.ScriptRedirect": {
+            "type": "object",
+            "properties": {
+                "cross_domain": {
+                    "description": "destination is on another site",
+                    "type": "boolean"
+                },
+                "target": {
+                    "description": "literal destination, when the page names one",
+                    "type": "string"
+                },
+                "to_ip": {
+                    "description": "destination is a raw IP address",
+                    "type": "boolean"
+                }
+            }
+        },
         "checks.TLSResult": {
             "type": "object",
             "properties": {
@@ -1368,12 +1578,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "age_days": {
-                    "description": "total days since registration",
+                    "description": "total days since registration; null when unknown",
                     "type": "integer"
                 },
                 "age_human": {
-                    "description": "e.g. \"2 years 3 months\"",
+                    "description": "e.g. \"2 years 3 months\"; empty when unknown",
                     "type": "string"
+                },
+                "age_known": {
+                    "description": "Some registries (.de, .eu, …) don't publish a creation date. Then\nAgeKnown is false and AgeDays is null: a zero date would read as 2,025\nyears old, and 0 would read as \"registered today\".",
+                    "type": "boolean"
                 },
                 "created": {
                     "type": "string"
@@ -1415,6 +1629,26 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.KnownSitesResponse": {
+            "type": "object",
+            "properties": {
+                "sites": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "user_content": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.ReportRequest": {
             "type": "object",
             "required": [
@@ -1446,12 +1680,94 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.ThreatListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "sha256"
+                },
+                "prefix_len": {
+                    "type": "integer",
+                    "example": 8
+                },
+                "prefixes": {
+                    "description": "base64 of the sorted prefixes, back to back",
+                    "type": "string"
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "threatfeeds.FeedMatch": {
+            "type": "object",
+            "properties": {
+                "checked": {
+                    "description": "feeds that were loaded and checked",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "listed": {
+                    "type": "boolean"
+                },
+                "match": {
+                    "description": "\"url\": this exact link; \"host\": another page on the same site",
+                    "type": "string"
+                },
+                "sources": {
+                    "description": "feeds that list it",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "threatfeeds.GoogleThreatResult": {
+            "type": "object",
+            "properties": {
+                "expire_time": {
+                    "description": "how long Google says the answer holds (Web Risk only)",
+                    "type": "string"
+                },
+                "listed": {
+                    "type": "boolean"
+                },
+                "threat_types": {
+                    "description": "SOCIAL_ENGINEERING, MALWARE, UNWANTED_SOFTWARE",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "typosquat.TyposquatResult": {
             "type": "object",
             "properties": {
+                "combo_exact": {
+                    "description": "just the brand name, on another ending (roblox.dk)",
+                    "type": "boolean"
+                },
                 "distance": {
                     "description": "0 for combo-squat",
                     "type": "integer"
+                },
+                "embedded_domain": {
+                    "description": "\"google.com\" in accounts.google.com.example.fr",
+                    "type": "string"
                 },
                 "is_combo_squat": {
                     "type": "boolean"
@@ -1465,6 +1781,18 @@ const docTemplate = `{
                 },
                 "matched_domain": {
                     "type": "string"
+                },
+                "path_brand": {
+                    "description": "\"paypal\" in example.org/paypal-de/login",
+                    "type": "string"
+                },
+                "subdomain_brand": {
+                    "description": "Brand names in other parts of the URL (see CheckURLParts).",
+                    "type": "string"
+                },
+                "subdomain_brand_exact": {
+                    "description": "the label is just the name (github.acme.com)",
+                    "type": "boolean"
                 }
             }
         }

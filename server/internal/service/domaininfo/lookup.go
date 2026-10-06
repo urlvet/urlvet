@@ -17,13 +17,7 @@ func LookupWithContext(ctx context.Context, domain string) (*RegistrationData, e
 	// Try RDAP first with timeout
 	rdapData, err := fetchRDAPWithContext(ctx, domain)
 	if err == nil && rdapData != nil {
-		ageHuman, ageDays, err := checks.GetDomainAge(rdapData.CreatedDate)
-		if err != nil {
-			return rdapData, err
-		}
-		rdapData.AgeHuman = ageHuman
-		rdapData.AgeDays = ageDays
-		return rdapData, nil
+		return rdapData, setAge(rdapData)
 	}
 
 	// RDAP failed, fall back to WHOIS
@@ -32,12 +26,21 @@ func LookupWithContext(ctx context.Context, domain string) (*RegistrationData, e
 		return nil, err
 	}
 
-	ageHuman, ageDays, err := checks.GetDomainAge(whoisData.CreatedDate)
-	if err != nil {
-		return whoisData, err
-	}
-	whoisData.AgeHuman = ageHuman
-	whoisData.AgeDays = ageDays
+	return whoisData, setAge(whoisData)
+}
 
-	return whoisData, nil
+// setAge fills in the age from the creation date, leaving it unset when the
+// registry didn't publish one.
+func setAge(d *RegistrationData) error {
+	if d.CreatedDate.IsZero() {
+		return nil
+	}
+	ageHuman, ageDays, err := checks.GetDomainAge(d.CreatedDate)
+	if err != nil {
+		return err
+	}
+	d.AgeKnown = true
+	d.AgeHuman = ageHuman
+	d.AgeDays = &ageDays
+	return nil
 }

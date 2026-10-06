@@ -11,6 +11,7 @@ import (
 	"github.com/urlvet/urlvet/internal/service/rank"
 	"github.com/urlvet/urlvet/internal/service/threatfeeds"
 	"github.com/urlvet/urlvet/internal/service/typosquat"
+	"golang.org/x/net/publicsuffix"
 )
 
 // Rank
@@ -105,7 +106,10 @@ func (tldTask) Name() string { return "tld_check" }
 func (tldTask) Run(in *Input, out *Output) error {
 	t, icann, tld := checks.IsTrustedTld(in.Domain)
 	r, _, _ := checks.IsRiskyTld(in.Domain)
-	_, isHosting := constants.TrustedHostingPlatforms[tld]
+	isHosting := isHostingSuffix(tld)
+	if platform := checks.CustomerSitePlatform(in.Domain); platform != "" {
+		tld, isHosting = platform, true
+	}
 	updateOutput(func(o *Output) {
 		o.TLDTrusted = t
 		o.TLDICANN = icann
@@ -114,6 +118,22 @@ func (tldTask) Run(in *Input, out *Output) error {
 		o.TLDIsHostingPlatform = isHosting
 	})(out)
 	return nil
+}
+
+// isHostingSuffix reports whether a public suffix is, or sits under, one of
+// the TrustedHostingPlatforms.
+func isHostingSuffix(suffix string) bool {
+	for d := suffix; d != ""; {
+		if _, ok := constants.TrustedHostingPlatforms[d]; ok {
+			return true
+		}
+		i := strings.Index(d, ".")
+		if i < 0 {
+			break
+		}
+		d = d[i+1:]
+	}
+	return false
 }
 
 // Shortener
@@ -222,6 +242,16 @@ type whoisTask struct{}
 
 func (whoisTask) Name() string { return "whois_lookup" }
 func (whoisTask) Run(in *Input, out *Output) error {
+	// A site under a private suffix (someone.github.io, a bucket on
+	// storage.googleapis.com) or on a site builder (someone.weebly.com) isn't
+	// registered on its own, so there's no
+	// record to find; the lookup would only fail and leave the scan incomplete.
+	if suffix, icann := publicsuffix.PublicSuffix(in.Domain); !icann && suffix != in.Domain {
+		return nil
+	}
+	if checks.CustomerSitePlatform(in.Domain) != "" {
+		return nil
+	}
 	_, err := cachedTask(
 		context.Background(),
 		in.Cache,
@@ -304,6 +334,7 @@ type typosquatTask struct{}
 func (typosquatTask) Name() string { return "typosquat_check" }
 func (typosquatTask) Run(in *Input, out *Output) error {
 	result := typosquat.CheckTyposquatting(in.Domain)
+	typosquat.CheckURLParts(in.URL, in.Domain, &result)
 	updateOutput(func(o *Output) { o.TyposquatResult = result })(out)
 	return nil
 }
@@ -313,6 +344,14 @@ type phishtankTask struct{}
 
 func (phishtankTask) Name() string { return "phishtank_check" }
 func (phishtankTask) Run(in *Input, out *Output) error {
+	// With PhishTank's dump loaded, threatFeedsTask already checks this URL
+	// against every verified, online report. The live API adds only
+	// unverified reports and is rate-limited on most scans, which left a
+	// "couldn't check PhishTank" note on results the dump had checked.
+	// FEED_PHISHTANK=0 or THREAT_LOOKUPS=0 means no PhishTank calls at all.
+	if !threatfeeds.PhishTankAPIAllowed() {
+		return nil
+	}
 	fromCache, err := cachedTask(
 		context.Background(),
 		in.Cache,
@@ -465,7 +504,14 @@ type tlsCombinedCacheResult struct {
 func (tlsCombinedTask) Name() string { return "tls_combined_check" }
 func (tlsCombinedTask) Run(in *Input, out *Output) error {
 	ctx := context.Background()
-	cacheKey := "tls_combined:" + in.Domain
+	// Check the certificate of the host the link points at, which is the one a
+	// browser checks: www.example.com can be served a certificate that only
+	// covers example.com, or none of the two.
+	host, _ := checks.GetHost(in.URL)
+	if host == "" {
+		host = in.Domain
+	}
+	cacheKey := "tls_combined:" + host
 
 	// Try cache first
 	if in.Cache != nil {
@@ -482,7 +528,7 @@ func (tlsCombinedTask) Run(in *Input, out *Output) error {
 	}
 
 	// Try combined TLS/SSL check first
-	combinedResult, err := checks.CheckTLSCombined(in.Domain)
+	combinedResult, err := checks.CheckTLSCombined(host)
 	if err == nil {
 		// Success - populate both TLS and SSL info
 		// Store in cache
@@ -505,7 +551,7 @@ func (tlsCombinedTask) Run(in *Input, out *Output) error {
 	var fallbackErrs []error
 
 	// Try TLS check
-	t, err := checks.GetTLSInfo(in.Domain)
+	t, err := checks.GetTLSInfo(host)
 	if err != nil {
 		fallbackErrs = append(fallbackErrs, err)
 	} else {
@@ -515,7 +561,7 @@ func (tlsCombinedTask) Run(in *Input, out *Output) error {
 	}
 
 	// Try SSL check
-	sslInfo := checks.AnalyzeSSLCert(in.Domain)
+	sslInfo := checks.AnalyzeSSLCert(host)
 	out.mu.Lock()
 	out.SSLInfo = sslInfo
 	out.mu.Unlock()
@@ -526,4 +572,55 @@ func (tlsCombinedTask) Run(in *Input, out *Output) error {
 	}
 
 	return nil
+}
+
+// Local threat feeds
+type threatFeedsTask struct{}
+
+func (threatFeedsTask) Name() string { return "threat_feeds_check" }
+func (threatFeedsTask) Run(in *Input, out *Output) error {
+	// Host matches are filtered later, once the site's rank is known.
+	m := threatfeeds.LookupLocal(in.URL, false)
+	updateOutput(func(o *Output) { o.ThreatFeeds = &m })(out)
+	return nil
+}
+
+// Google Web Risk
+type webRiskTask struct{}
+
+func (webRiskTask) Name() string { return "webrisk_check" }
+func (webRiskTask) Run(in *Input, out *Output) error {
+	if !threatfeeds.WebRiskEnabled() {
+		return nil
+	}
+	_, err := cachedTask(
+		context.Background(),
+		in.Cache,
+		"webrisk:"+in.URL,
+		constants.WebRiskTTL,
+		func() (*threatfeeds.GoogleThreatResult, error) { return threatfeeds.CheckWebRisk(in.URL) },
+		func(o *Output, r *threatfeeds.GoogleThreatResult) { o.WebRisk = r },
+		out,
+	)
+	return err
+}
+
+// Google Safe Browsing (hash prefixes only; Google never sees the URL)
+type safeBrowsingTask struct{}
+
+func (safeBrowsingTask) Name() string { return "safe_browsing_check" }
+func (safeBrowsingTask) Run(in *Input, out *Output) error {
+	if !threatfeeds.SafeBrowsingEnabled() {
+		return nil
+	}
+	_, err := cachedTask(
+		context.Background(),
+		in.Cache,
+		"safe_browsing:"+in.URL,
+		constants.SafeBrowsingTTL,
+		func() (*threatfeeds.GoogleThreatResult, error) { return threatfeeds.CheckSafeBrowsing(in.URL) },
+		func(o *Output, r *threatfeeds.GoogleThreatResult) { o.SafeBrowsing = r },
+		out,
+	)
+	return err
 }

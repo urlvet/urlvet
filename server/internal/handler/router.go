@@ -84,6 +84,10 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/status-code", CheckStatusCodeHandler)
 		v1.GET("/domain-info", DomainInfoHandler)
 
+		// Lists the browser extension keeps locally
+		v1.GET("/lists/threats", ThreatListHandler)
+		v1.GET("/lists/known-sites", KnownSitesHandler)
+
 		// Admin login — issues a signed session token
 		v1.POST("/admin/login", AdminLoginHandler)
 

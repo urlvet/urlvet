@@ -26,8 +26,24 @@ type Response struct {
 	DomainRandomness checks.DomainRandomnessResult `json:"domain_randomness"`
 	TyposquatResult  typosquat.TyposquatResult     `json:"typosquat_result"`
 	Phishing         *PhishingResult               `json:"phishing"`
-	Performance      Performance                   `json:"performance"`
-	Result           Result                        `json:"result"`
+	// ThreatFeeds is the match against locally held phishing and malware
+	// lists (PhishTank's dump, plus OpenPhish and URLhaus when enabled).
+	ThreatFeeds *threatfeeds.FeedMatch `json:"threat_feeds,omitempty"`
+	// WebRisk is Google Web Risk's verdict; absent when it isn't configured.
+	WebRisk *threatfeeds.GoogleThreatResult `json:"web_risk,omitempty"`
+	// SafeBrowsing is Google Safe Browsing's verdict; absent when it isn't configured.
+	SafeBrowsing *threatfeeds.GoogleThreatResult `json:"safe_browsing,omitempty"`
+	Performance  Performance                     `json:"performance"`
+	Result       Result                          `json:"result"`
+	// ShortLink is set when the submitted link was on a URL shortener. When
+	// it resolved, everything else describes the page it leads to.
+	ShortLink *ShortLinkInfo `json:"short_link,omitempty"`
+	// RedirectedFrom is set when the submitted link sent visitors on to
+	// another site; everything else describes that site.
+	RedirectedFrom *RedirectInfo `json:"redirected_from,omitempty"`
+	// Origin is what the submitted link itself, and the hops after it, add to
+	// that site's result: risk only, already counted in Result.
+	Origin *OriginFindings `json:"origin,omitempty"`
 	// Incomplete means signals are missing in a way that a rescan could fix, so
 	// the result isn't cached. IncompleteChecks names every task that didn't
 	// finish, including ones that don't make the result incomplete (a PhishTank
@@ -35,6 +51,21 @@ type Response struct {
 	Incomplete       bool     `json:"incomplete"`
 	IncompleteChecks []string `json:"incomplete_checks,omitempty"`
 	Errors           []string `json:"errors"`
+}
+
+// ShortLinkInfo describes a short link and where it was followed to.
+type ShortLinkInfo struct {
+	URL      string   `json:"url"`              // the short link as submitted
+	Chain    []string `json:"chain"`            // every link followed, starting with URL
+	Target   string   `json:"target,omitempty"` // where it leads; the page the scan describes
+	Resolved bool     `json:"resolved"`         // false: the destination couldn't be found
+}
+
+// RedirectInfo describes an open redirect that was followed.
+type RedirectInfo struct {
+	URL    string   `json:"url"`    // the link as submitted
+	Chain  []string `json:"chain"`  // the redirect chain, starting with URL
+	Target string   `json:"target"` // where it leads; the page the scan describes
 }
 
 // PhishingResult is the unified phishing-check output exposed in the API response.
@@ -189,6 +220,9 @@ type OutputData struct {
 	ContentData     *checks.PageFormResult
 	TLSInfo         checks.TLSResult
 	PhishTank       *threatfeeds.PhishTankResult
+	ThreatFeeds     *threatfeeds.FeedMatch
+	WebRisk         *threatfeeds.GoogleThreatResult
+	SafeBrowsing    *threatfeeds.GoogleThreatResult
 	TyposquatResult typosquat.TyposquatResult
 }
 
