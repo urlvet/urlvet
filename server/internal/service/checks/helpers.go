@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/urlvet/urlvet/internal/constants"
 	"golang.org/x/net/publicsuffix"
 )
 
@@ -24,6 +25,9 @@ func GetDomain(rawURL string) (string, error) {
 	}
 
 	host := strings.ToLower(parsedURL.Hostname())
+	if site := customerSite(host); site != "" {
+		return site, nil
+	}
 	domain, err := publicsuffix.EffectiveTLDPlusOne(host)
 	if err != nil {
 		// A host that is itself a public suffix (gov.uk, github.io) has no
@@ -34,6 +38,42 @@ func GetDomain(rawURL string) (string, error) {
 		return "", err
 	}
 	return domain, nil
+}
+
+// CustomerSitePlatform returns the provider when host is a customer's site on
+// a builder or host that isn't on the Public Suffix List (someone.weebly.com
+// → weebly.com), or "" otherwise.
+func CustomerSitePlatform(host string) string {
+	host = strings.ToLower(host)
+	for suffix := range constants.CustomerSiteHosts {
+		if !strings.HasSuffix(host, "."+suffix) {
+			continue
+		}
+		rest := strings.TrimSuffix(host, "."+suffix)
+		if _, own := constants.ProviderSubdomains[suffix][rest[strings.LastIndex(rest, ".")+1:]]; own {
+			return ""
+		}
+		return suffix
+	}
+	return ""
+}
+
+// customerSite returns the customer's site for a host on a CustomerSiteHosts
+// provider: the whole host without "www." (www.someone.weebly.com →
+// someone.weebly.com). Providers name customers differently (GoDaddy puts an
+// ID first and a region second: 1286524.us23.myftpupload.com), so no single
+// label can stand for the customer. The provider's own www host stays the
+// provider. "" when host isn't on such a provider.
+func customerSite(host string) string {
+	suffix := CustomerSitePlatform(host)
+	if suffix == "" {
+		return ""
+	}
+	rest := strings.TrimPrefix(strings.TrimSuffix(host, "."+suffix), "www.")
+	if rest == "www" || rest == "" {
+		return suffix
+	}
+	return rest + "." + suffix
 }
 
 func GetHost(rawURL string) (string, error) {
@@ -51,7 +91,10 @@ func IsValidURL(rawURL string) (*url.URL, bool, error) {
 		rawURL = "https://" + rawURL
 	}
 
-	parsed, err := url.ParseRequestURI(rawURL)
+	// url.Parse, not ParseRequestURI: a request URI has no fragment, so
+	// ParseRequestURI folds "#…" into the path as "%23…" and the page 404s.
+	// Redirector links carry their payload in the fragment.
+	parsed, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, false, err
 	}

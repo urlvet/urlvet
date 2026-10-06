@@ -21,6 +21,7 @@ func TestIsValidURL_LowercasesHost(t *testing.T) {
 		"Google.com/Hh":             "https://google.com/Hh",
 		"HTTPS://WWW.Example.COM":   "https://www.example.com",
 		"https://Example.com/A?Q=B": "https://example.com/A?Q=B",
+		"https://e.com/p.html#?x=1": "https://e.com/p.html#?x=1",
 	}
 	for in, want := range tests {
 		u, ok, err := IsValidURL(in)
