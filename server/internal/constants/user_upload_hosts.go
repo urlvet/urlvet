@@ -1,0 +1,48 @@
+package constants
+
+// UserUploadHosts serve files that any account can upload. A program
+// downloaded from one carries the host's name but not its vouching: a
+// "VMware" installer under github.com/<anyone>/releases is whoever uploaded it.
+// Matched against the URL's host and its parent domains.
+var UserUploadHosts = map[string]struct{}{
+	"github.com":                     {},
+	"githubusercontent.com":          {},
+	"gitlab.com":                     {},
+	"bitbucket.org":                  {},
+	"sourceforge.net":                {},
+	"drive.google.com":               {},
+	"docs.google.com":                {},
+	"sites.google.com":               {},
+	"drive.usercontent.google.com":   {},
+	"storage.googleapis.com":         {},
+	"firebasestorage.googleapis.com": {},
+	"dropbox.com":                    {},
+	"dropboxusercontent.com":         {},
+	"onedrive.live.com":              {},
+	"1drv.ms":                        {},
+	"sharepoint.com":                 {},
+	"box.com":                        {},
+	"mediafire.com":                  {},
+	"mega.nz":                        {},
+	"wetransfer.com":                 {},
+	"we.tl":                          {},
+	"cdn.discordapp.com":             {},
+	"media.discordapp.net":           {},
+	"amazonaws.com":                  {},
+	"cloudfront.net":                 {},
+	"blob.core.windows.net":          {},
+	"r2.dev":                         {},
+	"backblazeb2.com":                {},
+	"filesusr.com":                   {},
+	"storageapi.fleek.co":            {},
+	"wasabisys.com":                  {},
+	"aliyuncs.com":                   {},
+	"myqcloud.com":                   {},
+	"filebase.com":                   {},
+	"digitaloceanspaces.com":         {},
+	"linodeobjects.com":              {},
+	"archive.org":                    {},
+	"pixeldrain.com":                 {},
+	"gofile.io":                      {},
+	"catbox.moe":                     {},
+}
