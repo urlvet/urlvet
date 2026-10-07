@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>{$page.status} — url.vet</title>
+  <title>{$page.status === 404 ? "Page not found" : "Something went wrong"} | url.vet</title>
   <meta name="robots" content="noindex" />
 </svelte:head>
 

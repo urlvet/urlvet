@@ -42,7 +42,7 @@
     score: 7,
     red: [
       "Typosquatting detected: domain closely resembles 'paypal.com' (1 character difference).",
-      "Newly created domain (3 days old). High Risk.",
+      "Registered 3 days ago. Phishing sites are usually brand new.",
       "High-risk domain extension detected (often associated with spam).",
       "Sensitive security keywords found in URL: login",
       "Very low traffic volume.",
@@ -115,11 +115,26 @@
 <svelte:window on:hashchange={openFromHash} />
 
 <svelte:head>
-  <title>How It Works: Check If a Link Is Safe — url.vet (URLvet)</title>
+  <title>How url.vet checks a link</title>
   <meta
     name="description"
-    content="How url.vet checks whether a link is safe or a phishing scam: the checks it runs, how the score is worked out, and answers to common questions."
+    content="The checks url.vet runs on every link, how they add up to a verdict, and answers to common questions."
   />
+  <meta property="og:title" content="How url.vet checks a link" />
+  <meta
+    property="og:description"
+    content="The checks url.vet runs on every link, how they add up to a verdict, and answers to common questions."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://url.vet/how-it-works" />
+  <meta property="og:image" content="https://url.vet/og" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How url.vet checks a link" />
+  <meta
+    name="twitter:description"
+    content="The checks url.vet runs on every link, how they add up to a verdict, and answers to common questions."
+  />
+  <meta name="twitter:image" content="https://url.vet/og" />
   <link rel="canonical" href="https://url.vet/how-it-works" />
   {@html `<script type="application/ld+json">${JSON.stringify(schemaFAQ)}</script>`}
 </svelte:head>

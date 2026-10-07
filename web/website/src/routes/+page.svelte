@@ -54,9 +54,9 @@
   };
   $: verdictNow = scanResult?.result?.verdict;
   $: liveTitle = loading
-    ? `Checking ${getDomainFromUrl(formatUrl(input)) || "link"}… · url.vet`
+    ? `Checking ${getDomainFromUrl(formatUrl(input)) || "link"}… | url.vet`
     : scanResult && verdictNow && VERDICT_TAB[verdictNow]
-      ? `${verdictNow} — ${scanResult.domain} · url.vet`
+      ? `${verdictNow}: ${scanResult.domain} | url.vet`
       : undefined;
   $: verdictDot = !loading && verdictNow ? VERDICT_TAB[verdictNow] : undefined;
 
