@@ -1,0 +1,529 @@
+/* url.vet look for the popup and the on-page card. Tokens follow the website
+   (web/website/tailwind.config.js and the verdict card): warm cream paper in
+   light mode, warm near-black in dark, a muted blue accent, and verdict colours
+   kept for verdicts. The card lives in a shadow root, hence :host. */
+
+:root,
+:host {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --text: #1a1714;
+  --soft: #3f3a33;
+  --muted: #7c7366;
+  --faint: #a69c8c;
+  --line: #e6dfd2;
+  --line-strong: #d3cab9;
+  --wordmark: #b3a998;
+  --accent: #3461c9;
+  --solid-bg: #1a1714;
+  --solid-fg: #faf7f2;
+  --solid-hover: #3f3a33;
+  --ring-track: #e6dfd2;
+
+  --safe: #10b981;
+  --safe-text: #059669;
+  --safe-bg: rgb(236 253 245 / 0.7);
+  --safe-line: #a7f3d0;
+  --safe-badge-bg: #d1fae5;
+  --safe-badge-text: #047857;
+  --safe-badge-line: #6ee7b7;
+
+  --suspicious: #eab308;
+  --suspicious-text: #ca8a04;
+  --suspicious-bg: rgb(255 251 235 / 0.7);
+  --suspicious-line: #fef08a;
+  --suspicious-badge-bg: #fef9c3;
+  --suspicious-badge-text: #a16207;
+  --suspicious-badge-line: #fde047;
+
+  --risky: #ef4444;
+  --risky-text: #dc2626;
+  --risky-bg: rgb(254 242 242 / 0.7);
+  --risky-line: #fecaca;
+  --risky-badge-bg: #fee2e2;
+  --risky-badge-text: #b91c1c;
+  --risky-badge-line: #fca5a5;
+
+  --sans:
+    "urlvet Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "urlvet Instrument Serif", Georgia, serif;
+  --mono: "urlvet Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root,
+  :host {
+    --bg: #0f0d0b;
+    --surface: #1a1714;
+    --text: #f3ede2;
+    --soft: #d3cab9;
+    --muted: #a69c8c;
+    --faint: #7c7366;
+    --line: #2a2622;
+    --line-strong: #3f3a33;
+    --wordmark: #6e665a;
+    --accent: #8eb0ff;
+    --solid-bg: #f3ede2;
+    --solid-fg: #1a1714;
+    --solid-hover: #ffffff;
+    --ring-track: #2a2622;
+
+    --safe-text: #34d399;
+    --safe-bg: rgb(2 44 34 / 0.25);
+    --safe-line: rgb(6 78 59 / 0.7);
+    --safe-badge-bg: rgb(16 185 129 / 0.2);
+    --safe-badge-text: #6ee7b7;
+    --safe-badge-line: rgb(16 185 129 / 0.3);
+
+    --suspicious-text: #facc15;
+    --suspicious-bg: rgb(66 32 6 / 0.25);
+    --suspicious-line: rgb(113 63 18 / 0.7);
+    --suspicious-badge-bg: rgb(234 179 8 / 0.2);
+    --suspicious-badge-text: #fde047;
+    --suspicious-badge-line: rgb(234 179 8 / 0.3);
+
+    --risky-text: #f87171;
+    --risky-bg: rgb(69 10 10 / 0.25);
+    --risky-line: rgb(127 29 29 / 0.7);
+    --risky-badge-bg: rgb(239 68 68 / 0.2);
+    --risky-badge-text: #fca5a5;
+    --risky-badge-line: rgb(239 68 68 / 0.3);
+
+    color-scheme: dark;
+  }
+}
+
+/* ── Wordmark: "url" muted, the dot in the accent (or the verdict), "vet" dark ── */
+
+.wordmark {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wordmark .url {
+  color: var(--wordmark);
+}
+.wordmark .dot {
+  display: inline-block;
+  margin: 0 -0.045em;
+  color: var(--accent);
+  transform-origin: 50% 85%;
+  transition: color 0.5s;
+  animation: urlvet-breathe 3.2s ease-in-out infinite;
+}
+.wordmark .dot[data-state="scanning"] {
+  animation: urlvet-blink 0.7s ease-in-out infinite;
+}
+.wordmark .dot[data-state="Safe"] {
+  color: var(--safe);
+  animation: none;
+}
+.wordmark .dot[data-state="Suspicious"] {
+  color: var(--suspicious);
+  animation: none;
+}
+.wordmark .dot[data-state="Risky"] {
+  color: var(--risky);
+  animation: none;
+}
+@keyframes urlvet-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.8;
+  }
+}
+@keyframes urlvet-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ── Small type ── */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.mono {
+  font-family: var(--mono);
+}
+
+/* ── Pills (buttons) ── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: 500 13px/1 var(--sans);
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.pill:focus-visible {
+  outline: 2px solid var(--faint);
+  outline-offset: 2px;
+}
+.pill:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.pill-solid {
+  background: var(--solid-bg);
+  color: var(--solid-fg);
+}
+.pill-solid:hover:not(:disabled) {
+  background: var(--solid-hover);
+}
+.pill-outline {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--soft);
+}
+.pill-outline:hover:not(:disabled) {
+  border-color: var(--faint);
+  color: var(--text);
+}
+
+/* ── Verdict card: Instrument Serif verdict, mono badge, quip, score ring ── */
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.verdict[data-verdict="Safe"] {
+  border-color: var(--safe-line);
+  background: var(--safe-bg);
+  animation: urlvet-pulse-safe 0.7s ease-out 0.35s both;
+}
+.verdict[data-verdict="Suspicious"] {
+  border-color: var(--suspicious-line);
+  background: var(--suspicious-bg);
+  animation: urlvet-pulse-suspicious 0.7s ease-out 0.3s both;
+}
+.verdict[data-verdict="Risky"] {
+  border-color: var(--risky-line);
+  background: var(--risky-bg);
+  animation: urlvet-pulse-risky 0.7s ease-out 0.33s both;
+}
+.verdict-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.verdict-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  transform-origin: 30% 60%;
+}
+.verdict[data-verdict="Risky"] .verdict-line {
+  animation: urlvet-stamp-hard 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.1s both;
+}
+.verdict[data-verdict="Suspicious"] .verdict-line {
+  animation: urlvet-stamp-wobble 0.7s ease-out 0.1s both;
+}
+.verdict[data-verdict="Safe"] .verdict-line {
+  animation: urlvet-stamp-settle 0.5s ease-out 0.1s both;
+}
+.verdict-word {
+  font-family: var(--serif);
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font: 10.5px/1.3 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.verdict[data-verdict="Safe"] .badge {
+  background: var(--safe-badge-bg);
+  color: var(--safe-badge-text);
+  border-color: var(--safe-badge-line);
+}
+.verdict[data-verdict="Suspicious"] .badge {
+  background: var(--suspicious-badge-bg);
+  color: var(--suspicious-badge-text);
+  border-color: var(--suspicious-badge-line);
+}
+.verdict[data-verdict="Risky"] .badge {
+  background: var(--risky-badge-bg);
+  color: var(--risky-badge-text);
+  border-color: var(--risky-badge-line);
+}
+.quip {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--soft);
+}
+
+.ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 66px;
+  height: 66px;
+}
+.ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ring .track {
+  stroke: var(--ring-track);
+}
+.ring .arc {
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.verdict[data-verdict="Safe"] .arc {
+  stroke: var(--safe);
+}
+.verdict[data-verdict="Suspicious"] .arc {
+  stroke: var(--suspicious);
+}
+.verdict[data-verdict="Risky"] .arc {
+  stroke: var(--risky);
+}
+.ring .value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+.ring .score {
+  font: 500 19px/1 var(--sans);
+}
+.verdict[data-verdict="Safe"] .score {
+  color: var(--safe-text);
+}
+.verdict[data-verdict="Suspicious"] .score {
+  color: var(--suspicious-text);
+}
+.verdict[data-verdict="Risky"] .score {
+  color: var(--risky-text);
+}
+.ring .rule {
+  width: 16px;
+  margin: 3px 0 2px;
+  border-top: 1px solid var(--faint);
+}
+.ring .of {
+  font: 500 9px/1 var(--sans);
+  color: var(--muted);
+}
+
+/* ── Red / green flags ── */
+
+.flags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.flags-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 9px;
+}
+.flags-title::before,
+.flags li::before {
+  content: "";
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: currentColor;
+}
+.flags-title::before {
+  width: 6px;
+  height: 6px;
+}
+.flags-title.bad {
+  color: var(--risky-text);
+}
+.flags-title.good {
+  color: var(--safe-text);
+}
+.flags li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.flags li::before {
+  width: 4px;
+  height: 4px;
+  margin-top: 0.55em;
+}
+.flags.bad li::before {
+  color: var(--risky);
+}
+.flags.good li::before {
+  color: var(--safe);
+}
+
+.more {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Notes ── */
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.note::before {
+  content: "";
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 0.45em;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.note.warn::before {
+  background: var(--suspicious);
+}
+
+@keyframes urlvet-stamp-hard {
+  0% {
+    transform: scale(1.9) rotate(-9deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.94) rotate(-1deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.03) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes urlvet-stamp-wobble {
+  0% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1) rotate(-3deg);
+    opacity: 1;
+  }
+  60% {
+    transform: rotate(2.5deg);
+  }
+  80% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+@keyframes urlvet-stamp-settle {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes urlvet-pulse-safe {
+  0% {
+    box-shadow: 0 0 0 0 rgb(16 185 129 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgb(16 185 129 / 0);
+  }
+}
+@keyframes urlvet-pulse-suspicious {
+  0% {
+    box-shadow: 0 0 0 0 rgb(234 179 8 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgb(234 179 8 / 0);
+  }
+}
+@keyframes urlvet-pulse-risky {
+  0% {
+    box-shadow: 0 0 0 0 rgb(239 68 68 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgb(239 68 68 / 0);
+  }
+}
+@keyframes urlvet-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

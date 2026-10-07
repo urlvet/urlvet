@@ -1,0 +1,50 @@
+.blocked {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 14vh 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: urlvet-fade-in 0.4s ease-out both;
+}
+.blocked h1 {
+  margin: 6px 0 0;
+  font: 400 clamp(34px, 6vw, 52px) / 1.05 var(--serif);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.blocked h1 em {
+  font-style: italic;
+  color: var(--risky-text);
+}
+.why {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--soft);
+}
+.link {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--risky-line);
+  border-radius: 12px;
+  background: var(--risky-bg);
+  font: 13px/1.4 var(--mono);
+  overflow-wrap: anywhere;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.actions .pill {
+  height: 40px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+.continue {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}

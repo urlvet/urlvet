@@ -7,6 +7,7 @@
 # --- Project Paths ---
 BACKEND_DIR := server
 FRONTEND_DIR := web/website
+EXTENSION_DIR := web/chrome-extension
 
 # --- Docker Compose Files ---
 DOCKER_DEV  := docker/dev/docker-compose.dev.yml
@@ -200,7 +201,16 @@ check-frontend: ## Type-check frontend (svelte-check)
 test-frontend: ## Run frontend tests (vitest)
 	cd $(FRONTEND_DIR) && npm run test
 
-ci: tidy format format-frontend lint check-frontend test test-frontend ## Run all CI checks locally (backend + frontend)
+build-extension: ## Build the Chrome extension into web/chrome-extension/dist
+	cd $(EXTENSION_DIR) && npm install --silent && npm run build
+
+test-extension: ## Run Chrome extension unit tests (vitest)
+	cd $(EXTENSION_DIR) && npm run test
+
+test-extension-e2e: ## Run the Chrome extension in Chromium against the dev backend (needs make dev-up)
+	cd $(EXTENSION_DIR) && npm run test:e2e
+
+ci: tidy format format-frontend lint check-frontend test test-frontend test-extension ## Run all CI checks locally (backend + frontend + extension)
 
 
 # ============================================

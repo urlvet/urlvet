@@ -1,0 +1,19 @@
+{
+  "name": "urlvet-chrome-extension",
+  "private": true,
+  "version": "2.0.0",
+  "description": "url.vet for Chrome",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "test": "vitest run",
+    "test:e2e": "node build.mjs && node e2e/run.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.2",
+    "playwright-core": "^1.63.0",
+    "vitest": "^5.0.3"
+  }
+}
