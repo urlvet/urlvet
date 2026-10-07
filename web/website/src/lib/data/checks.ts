@@ -40,14 +40,17 @@ export const CHECK_GROUPS: CheckGroup[] = [
       risk('Letters from another alphabet that look the same'),
       risk('An unregulated ending'),
       risk('A very deep path'),
-      risk('A link shortener that hides the destination'),
+      risk("A short link we couldn't follow to where it leads"),
       risk('A high-risk ending, like .top or .zip'),
       risk('A very long link'),
       risk('More than two subdomains'),
       risk('Words like "login" or "verify" in the link'),
       trust('A verified ending, like .gov, .edu or .bank'),
+      info(
+        'Short links are followed, through any further short links, and the page they lead to is checked instead'
+      ),
     ],
-    against: '138 high-risk endings, 238 verified endings and 2,668 known link shorteners.',
+    against: '138 high-risk endings, 238 verified endings and 2,671 known link shorteners.',
   },
   {
     id: 'network',
@@ -81,9 +84,10 @@ export const CHECK_GROUPS: CheckGroup[] = [
     checks: 1,
     desc: "Reads the site's security certificate. A valid certificate proves the connection is private, not that the site is honest, so most of this is shown for you to read.",
     signals: [
+      risk('A certificate issued for a different address (browsers warn about it)'),
       risk('A password form on a page without HTTPS'),
       info('Who issued the certificate, and when it expires'),
-      info('Whether it matches the address and is publicly logged'),
+      info('Whether it is publicly logged'),
     ],
   },
   {
@@ -96,17 +100,20 @@ export const CHECK_GROUPS: CheckGroup[] = [
       risk('One or two letters away from a well-known site'),
       risk('Registered in the last 30 days'),
       risk("A brand's name inside someone else's address"),
-      risk('Registered less than a year ago'),
-      risk('Not among the top million sites'),
+      risk('Registered in the last 90 days'),
+      risk('Not among the top million sites, and new or of unknown age'),
       trust('Among the 10,000 most-visited sites'),
       trust('Among the 50,000 most-visited sites'),
       trust('Ranked, with lower traffic'),
-      trust('Registered more than five years ago'),
+      trust('Running for more than a year, more so after three and five'),
       trust('Signed DNS records (DNSSEC)'),
       info('How random the name looks'),
+      info(
+        "A site on a hosting service or site builder (github.io, vercel.app, weebly.com) is judged on its own, not on the host's reputation"
+      ),
     ],
     against:
-      'The top million sites for traffic rank, and the 5,000 most-visited for lookalike spellings.',
+      'The top million sites for traffic rank, the 5,000 most-visited for lookalike spellings, and 514 brands for names inside an address.',
   },
   {
     id: 'content',
@@ -121,18 +128,27 @@ export const CHECK_GROUPS: CheckGroup[] = [
       risk('A hidden frame loading another page'),
       risk('Card or payment fields'),
       risk('A form sends an email or username to another site'),
+      risk('Cloudflare or the host has flagged the page or taken it down'),
+      risk('The page sends you on by script, to a raw IP address or another site'),
+      risk('A page hidden in a WordPress system folder, a sign of a hacked site'),
+      risk('It downloads a program from an unknown site, or one any user could upload'),
       trust('It names a brand that does own the address'),
       info('Tracking pixels, and requests for personal details'),
     ],
-    against: '134 well-known brands and the addresses they really use.',
+    against:
+      '514 brands across banking, payments, crypto, shopping, delivery, telecoms, government and more, and the addresses they really use. Lookalike letters are read as the plain ones they imitate.',
   },
   {
     id: 'threats',
     title: 'Has anyone already reported it?',
     label: 'Threat feeds',
-    checks: 1,
-    desc: 'Asks PhishTank, a public list of phishing links reported and reviewed by volunteers.',
-    signals: [risk('Confirmed as phishing'), risk('Reported as phishing, not yet reviewed')],
+    checks: 4,
+    desc: 'Checks lists of links already reported as phishing or malware: PhishTank, URLhaus and Google Safe Browsing. The lists are kept on our server, and Google only ever sees short codes made from the link, never the link.',
+    signals: [
+      risk('On a list of confirmed phishing or malware links'),
+      risk('Other pages on the same site are on those lists'),
+      risk('Google lists it as dangerous'),
+    ],
   },
 ];
 

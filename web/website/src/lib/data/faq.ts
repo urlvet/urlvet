@@ -48,7 +48,7 @@ export const FAQ_GROUPS: { title: string; items: Faq[] }[] = [
       },
       {
         q: "Why does my result say some checks didn't finish?",
-        a: "Some checks depend on other services, like the site itself, its domain records or the PhishTank database, and those can be slow or unavailable. The result tells you which checks were missed. If a missed check could change the verdict, the result is marked incomplete and isn't saved, so scanning again a minute later retries it.",
+        a: "Some checks depend on other services, like the site itself, its domain records or Google Safe Browsing, and those can be slow or unavailable. The result tells you which checks were missed. If a missed check could change the verdict, the result is marked incomplete and isn't saved, so scanning again a minute later retries it.",
       },
       {
         q: 'Why did a site I trust come back Suspicious?',
@@ -81,7 +81,7 @@ export const FAQ_GROUPS: { title: string; items: Faq[] }[] = [
       },
       {
         q: 'Are shortened links like bit.ly or tinyurl safe?',
-        a: "A shortener isn't dangerous by itself, but it hides where the link really goes, which is why scammers like them. Paste the short link into url.vet: it follows every redirect and shows the full path to the page you would land on.",
+        a: "A shortener isn't dangerous by itself, but it hides where the link really goes, which is why scammers like them. Paste the short link into url.vet: it follows it, through any further short links, and checks the page you would actually land on. If it can't find where a short link leads, it says so and won't call it Safe.",
       },
       {
         q: 'Does the padlock or https mean a website is safe?',

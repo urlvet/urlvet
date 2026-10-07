@@ -47,6 +47,7 @@
       who: "Vercel, our host",
       what: "Hosts this website, so it sees your IP address and the page you open (for a share link, that includes the scanned link). It keeps request logs briefly.",
       href: "https://vercel.com/legal/privacy-policy",
+      linkText: "See Vercel's privacy policy",
     },
     {
       who: "The website you scan",
@@ -54,7 +55,13 @@
     },
     {
       who: "PhishTank",
-      what: "Receives the link, to check it against reported phishing.",
+      what: "Nothing, normally. We download its list of reported phishing every few hours and check your link against it on our server. Only if that list hasn't loaded yet do we send PhishTank the link.",
+    },
+    {
+      who: "Google Safe Browsing",
+      what: "A few short codes worked out from the link, never the link itself. Many different links share each code, so Google can't tell which one you checked. It sends back matches from its list of dangerous sites, and our server finishes the check.",
+      href: "https://policies.google.com/privacy",
+      linkText: "See Google's privacy policy",
     },
     {
       who: "DNS resolvers",
@@ -68,11 +75,26 @@
 </script>
 
 <svelte:head>
-  <title>Privacy — url.vet (URLvet)</title>
+  <title>Privacy | url.vet</title>
   <meta
     name="description"
-    content="What url.vet does with the links you scan: no accounts, no cookies, no analytics, no data sold, and no IP addresses in our logs."
+    content="We check the link, not you. No accounts, cookies or analytics, nothing sold, and no IP addresses in our logs."
   />
+  <meta property="og:title" content="Privacy | url.vet" />
+  <meta
+    property="og:description"
+    content="We check the link, not you. No accounts, cookies or analytics, nothing sold, and no IP addresses in our logs."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://url.vet/privacy" />
+  <meta property="og:image" content="https://url.vet/og" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Privacy | url.vet" />
+  <meta
+    name="twitter:description"
+    content="We check the link, not you. No accounts, cookies or analytics, nothing sold, and no IP addresses in our logs."
+  />
+  <meta name="twitter:image" content="https://url.vet/og" />
   <link rel="canonical" href="https://url.vet/privacy" />
 </svelte:head>
 
@@ -154,7 +176,7 @@
             {p.what}
             {#if p.href}
               <a href={p.href} target="_blank" rel="noopener noreferrer" class={LINK}
-                >See Vercel's privacy policy</a
+                >{p.linkText}</a
               >.
             {/if}
           </dd>
@@ -179,6 +201,17 @@
     <p class="mt-5 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
       Your browser remembers your light or dark theme and whether you've met or hidden Vetty. That
       stays on your device, and clearing your site data removes it.
+    </p>
+  </section>
+
+  <section class="mt-20">
+    <h2 class="font-serif text-3xl md:text-4xl tracking-[-0.01em]">The browser extension</h2>
+    <p class="mt-5 text-[17px] leading-relaxed text-gray-700 dark:text-gray-300">
+      It checks pages as you open them, by sending only the page's address, the same way as a scan
+      here. The 10,000 best-known sites are never sent: the extension keeps that list on your
+      device. Your settings and trusted sites are kept by your browser, and synced by it if you use
+      browser sync; url.vet never receives them. You can turn the automatic checks off in its
+      settings.
     </p>
   </section>
 

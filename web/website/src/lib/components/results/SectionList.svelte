@@ -58,7 +58,7 @@
     </AccordionSection>
   {/if}
 
-  {#if data.phishing}
+  {#if data.phishing || data.threat_feeds || data.web_risk || data.safe_browsing}
     <AccordionSection
       id="threatintel"
       learnMore="/how-it-works#check-threats"
@@ -68,7 +68,12 @@
       expanded={expanded.threatintel}
       onToggle={() => toggle("threatintel")}
     >
-      <ThreatIntelSection phishing={data.phishing} />
+      <ThreatIntelSection
+        phishing={data.phishing}
+        feeds={data.threat_feeds}
+        webRisk={data.web_risk ?? data.safe_browsing}
+        googleSource={data.web_risk ? "Google Web Risk" : "Google Safe Browsing"}
+      />
     </AccordionSection>
   {/if}
 

@@ -1,6 +1,8 @@
 // Plain words for checks that didn't finish, keyed by backend task name.
 const CHECK_NAMES: Record<string, string> = {
   phishtank_check: 'the phishing database (PhishTank)',
+  safe_browsing_check: 'Google Safe Browsing',
+  webrisk_check: 'Google Web Risk',
   content_check: 'the page itself',
   http_combined_check: 'redirects and HTTPS',
   tls_combined_check: 'the security certificate',

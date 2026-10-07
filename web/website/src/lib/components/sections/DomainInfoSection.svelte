@@ -3,6 +3,11 @@
   import TooltipIcon from "../TooltipIcon.svelte";
   export let domainInfo: any;
   export let rank: number | undefined;
+
+  // Some registries (.de, .eu, …) don't publish these dates; the API then
+  // sends Go's zero time, 0001-01-01.
+  const NOT_PUBLISHED = "Not published by the registry";
+  const hasDate = (d: string | undefined) => !!d && !d.startsWith("0001-");
 </script>
 
 {#if domainInfo}
@@ -59,7 +64,9 @@
             text="How long ago the domain was first registered. Older domains often suggest more established or legitimate websites."
           />
         </div>
-        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.age_human}</span>
+        <span class="font-medium text-gray-800 dark:text-white"
+          >{domainInfo.age_human || NOT_PUBLISHED}</span
+        >
       </div>
 
       <div
@@ -91,7 +98,9 @@
             text="The date when this domain was first registered and became active on the internet."
           />
         </div>
-        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.created}</span>
+        <span class="font-medium text-gray-800 dark:text-white"
+          >{hasDate(domainInfo.created) ? domainInfo.created : NOT_PUBLISHED}</span
+        >
       </div>
 
       <div
@@ -103,7 +112,9 @@
             text="The last date the domain registration information was modified (e.g., contact change or nameserver update)."
           />
         </div>
-        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.updated}</span>
+        <span class="font-medium text-gray-800 dark:text-white"
+          >{hasDate(domainInfo.updated) ? domainInfo.updated : NOT_PUBLISHED}</span
+        >
       </div>
 
       <div
@@ -115,7 +126,9 @@
             text="The date when this domain's registration will expire unless renewed by the owner."
           />
         </div>
-        <span class="font-medium text-gray-800 dark:text-white">{domainInfo.expiry}</span>
+        <span class="font-medium text-gray-800 dark:text-white"
+          >{hasDate(domainInfo.expiry) ? domainInfo.expiry : NOT_PUBLISHED}</span
+        >
       </div>
 
       {#if domainInfo.nameservers?.length}

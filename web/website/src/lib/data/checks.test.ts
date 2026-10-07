@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { CHECK_GROUPS, TOTAL_CHECKS } from './checks';
 
 describe('check groups', () => {
-  it('add up to the 18 checks the scanner runs', () => {
-    expect(TOTAL_CHECKS).toBe(18);
+  it('add up to the 21 checks the scanner runs', () => {
+    expect(TOTAL_CHECKS).toBe(21);
   });
 
   it('keep the ids that result sections link to', () => {
