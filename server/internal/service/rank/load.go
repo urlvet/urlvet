@@ -11,6 +11,12 @@ import (
 
 var domainRankMap map[string]int
 
+// topDomains holds the most popular domains in rank order (see TopDomains).
+var topDomains []string
+
+// topKept is how many of the most popular domains are kept in order.
+const topKept = 10000
+
 func LoadDomainRanks() error {
 	filePath := constants.DOMAIN_RANK_FILE_PATH
 	file, err := os.Open(filePath)
@@ -26,6 +32,7 @@ func LoadDomainRanks() error {
 	}
 
 	domainRankMap = make(map[string]int, len(records)-1)
+	top := make([]string, topKept+1)
 
 	for _, record := range records {
 		if len(record) < 2 {
@@ -40,6 +47,15 @@ func LoadDomainRanks() error {
 		}
 
 		domainRankMap[domain] = rank
+		if rank >= 1 && rank <= topKept {
+			top[rank] = domain
+		}
+	}
+	topDomains = topDomains[:0]
+	for _, d := range top[1:] {
+		if d != "" {
+			topDomains = append(topDomains, d)
+		}
 	}
 
 	return nil

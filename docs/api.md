@@ -70,26 +70,30 @@ The rest of the report is the raw evidence behind those reasons:
 
 | Field | What it holds |
 |---|---|
-| `url`, `domain` | The normalized URL that was scanned and its registrable domain |
+| `url`, `domain` | The normalized URL that was scanned and its registrable domain. For a short link, this is where it leads (see `short_link`) |
+| `redirected_from`, `origin` | Present only when the submitted link sent visitors on to another site. `redirected_from` has `url` (as submitted), `chain` and `target`; the rest of the report describes `target`. `origin` lists what the submitted link and the hops on the way add to the result (`bad_reasons`, `risk`, `confirmed`); these are already counted in `result` |
+| `short_link` | Present only when the submitted link was on a URL shortener: `url` (as submitted), `chain` (every link followed), `target` and `resolved`. When `resolved` is `true`, the rest of the report describes `target`; when `false`, the destination couldn't be found and the verdict is capped at `Suspicious` |
 | `features` | Popularity rank, TLD facts, and URL structure (shortener, raw IP, punycode, length, depth, subdomains, keywords, lookalike characters) |
 | `infrastructure` | Resolved IPs, nameservers, mail servers |
-| `domain_info` | Registration data from RDAP or WHOIS: registrar, created/expiry dates, age, DNSSEC. `null` if the lookup failed |
+| `domain_info` | Registration data from RDAP or WHOIS: registrar, created/expiry dates, age, DNSSEC. `null` if the lookup failed or the site sits on a hosting platform (`someone.github.io`). Some registries (.de, .eu) publish no creation date: then `age_known` is `false` and `age_days` is `null`, and `created` is the zero date `0001-01-01T00:00:00Z` |
 | `analysis` | Redirect chain (`chain`, `final_url`, `has_domain_jump`), HTTP status, HSTS |
 | `ssl_info`, `tls_info` | Certificate issuer, validity, age, Certificate Transparency, hostname match |
-| `content_data` | What the page contains: forms (login, payment, personal data), where they submit, hidden iframes, trackers, and whether the page claims to be a brand that doesn't own this domain (`brand_check`). `null` if the page couldn't be fetched |
+| `content_data` | What the page contains: forms (login, payment, personal data), where they submit, hidden iframes, trackers, and whether the page claims to be a brand that doesn't own this domain (`brand_check`). Also, when present: `script_redirect` (the page sends visitors on by script or meta refresh), `provider_block` (a host's or CDN's warning or takedown page, e.g. Cloudflare's phishing interstitial), and `content_type`/`file_name` for responses that aren't web pages, such as downloads. `null` if the page couldn't be fetched |
 | `domain_randomness` | How machine-generated the domain name looks |
 | `typosquat_result` | Whether the domain imitates a well-known one (`matched_domain`, `distance`) |
-| `phishing` | PhishTank lookup. `null` if the lookup didn't happen |
+| `threat_feeds` | Match against the phishing and malware lists the server keeps (PhishTank by default; URLhaus and OpenPhish when enabled): `listed`, `match` (`url` for this exact link, `host` for another page on the same single-owner host), `sources` and `checked` (the lists that were loaded) |
+| `safe_browsing`, `web_risk` | Google's verdict, when that service is configured: `listed` and `threat_types` (`SOCIAL_ENGINEERING`, `MALWARE`, `UNWANTED_SOFTWARE`, `POTENTIALLY_HARMFUL_APPLICATION`). Omitted when not configured. If you show Google's verdict, its terms require the attribution "Advisory provided by Google" |
+| `phishing` | PhishTank's live API. Only called while PhishTank's list isn't loaded, so usually `null`; `threat_feeds` carries the PhishTank result instead |
 | `performance` | Total time and per-check timings |
 
 ### Incomplete scans
 
-Some checks depend on other services (DNS, WHOIS/RDAP, the site itself, PhishTank) and can fail or time out.
+Some checks depend on other services (DNS, WHOIS/RDAP, the site itself, Google) and can fail or time out.
 
 | Field | Meaning |
 |---|---|
 | `incomplete` | `true` when a missing check could change the verdict. Treat the verdict with care and scan again later |
-| `incomplete_checks` | Names of the checks that didn't finish, e.g. `["whois_lookup"]`. Omitted when everything ran. Can be non-empty while `incomplete` is `false`: a PhishTank rate limit is listed but doesn't make the result incomplete |
+| `incomplete_checks` | Names of the checks that didn't finish, e.g. `["whois_lookup"]`. Omitted when everything ran. Can be non-empty while `incomplete` is `false`: a rate limit from PhishTank or Google is listed but doesn't make the result incomplete |
 | `errors` | The underlying error messages, for debugging. `null` when there were none |
 
 ### Caching
@@ -108,7 +112,7 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
   "url": "https://example.com",
   "domain": "example.com",
   "features": {
-    "rank": 175,
+    "rank": 167,
     "tld": {
       "tld": "com",
       "is_trusted_tld": false,
@@ -133,8 +137,8 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
   },
   "infrastructure": {
     "ip_addresses": [
-      "172.66.147.243",
       "104.20.23.154",
+      "172.66.147.243",
       "2606:4700:10::ac42:93f3",
       "2606:4700:10::6814:179a"
     ],
@@ -163,8 +167,9 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
       "client update prohibited"
     ],
     "dnssec": true,
+    "age_known": true,
     "age_human": "31 years 2 months",
-    "age_days": 11372,
+    "age_days": 11377,
     "raw": "…",
     "source": "RDAP"
   },
@@ -194,7 +199,7 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
     "Issuer": "Cloudflare TLS Issuing ECC CA 3",
     "NotBefore": "2026-09-26T22:49:11Z",
     "NotAfter": "2026-12-25T22:56:35Z",
-    "AgeDays": 5,
+    "AgeDays": 10,
     "Fingerprint": "85CA6AB068E9BCCE88B6C4AA3C47F7D17228134A457F870D3800E6223A0DF07A",
     "IsSuspicious": false,
     "Reasons": null,
@@ -204,7 +209,7 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
   "tls_info": {
     "Present": true,
     "Issuer": "SSL Corporation",
-    "AgeDays": 5,
+    "AgeDays": 10,
     "HostnameMismatch": false
   },
   "content_data": {
@@ -219,7 +224,7 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
     "iframes": null,
     "has_hidden_iframe": false,
     "has_tracking": false,
-    "fetch_duration": 233844276,
+    "fetch_duration": 204565569,
     "brand_check": {
       "brand_found": "",
       "is_mismatch": false,
@@ -230,9 +235,9 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
     "Domain": "example.com",
     "Label": "example",
     "Length": 7,
-    "Entropy": 2.5216406363433186,
-    "EntropyPerChar": 0.36023437662047403,
-    "NormalizedEntropy": 0.0605009236917598,
+    "Entropy": 2.521640636343318,
+    "EntropyPerChar": 0.3602343766204741,
+    "NormalizedEntropy": 0.06050092369175979,
     "VowelRatio": 0.42857142857142855,
     "DigitRatio": 0,
     "UniqueCharRatio": 0.8571428571428571,
@@ -245,31 +250,31 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
   "typosquat_result": {
     "is_suspicious": false
   },
-  "phishing": {
-    "in_database": true,
-    "phish_id": 7366538,
-    "phish_detail_page": "http://www.phishtank.com/phish_detail.php?phish_id=7366538",
-    "verified": false,
-    "verified_at": "",
-    "valid": false,
-    "target": "",
-    "source": "phishtank",
-    "from_cache": false
+  "phishing": null,
+  "threat_feeds": {
+    "listed": false,
+    "checked": [
+      "PhishTank",
+      "URLhaus"
+    ]
+  },
+  "safe_browsing": {
+    "listed": false
   },
   "performance": {
-    "total_time": "1.439368926s",
+    "total_time": "592.511205ms",
     "timings": [
       {
-        "task": "phishtank_check",
-        "time": "1.438956594s"
-      },
-      {
-        "task": "content_check",
-        "time": "234.59063ms"
+        "task": "safe_browsing_check",
+        "time": "590.676581ms"
       },
       {
         "task": "dns_validity_check",
-        "time": "234.104966ms"
+        "time": "234.826085ms"
+      },
+      {
+        "task": "whois_lookup",
+        "time": "228.641904ms"
       },
       {
         "task": "…",
@@ -288,7 +293,7 @@ Complete results are cached for 24 hours per normalized URL, so repeat scans are
         "No email server configured for this domain."
       ],
       "good_reasons": [
-        "Global Giant: Ranked #175 worldwide.",
+        "Global Giant: Ranked #167 worldwide.",
         "Long-standing domain history (31 years 2 months).",
         "Advanced DNS security enabled (DNSSEC)."
       ],
@@ -352,9 +357,18 @@ All endpoints are under `/api/v1/`. `GET` endpoints accept a `url` query paramet
 | `GET` | `/health` | Service liveness check |
 | `GET` | `/api/v1/health` | Same, versioned |
 | `GET` | `/api/v1/screenshot` | Headless screenshot of the URL |
-| `DELETE` | `/api/v1/cache` | Flush the Valkey cache |
+| `DELETE` | `/api/v1/admin/cache` | Flush the Valkey cache (admin Bearer token) |
 | `GET` | `/metrics` | Prometheus metrics scrape endpoint |
 | `GET` | `/swagger/*` | Swagger UI and spec |
+
+### Lists (for the browser extension)
+
+Both send an `ETag` and answer `304 Not Modified` to a matching `If-None-Match`, so clients only download a list when it changes.
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/v1/lists/threats` | Known phishing and malware links (PhishTank, URLhaus; never OpenPhish, whose terms forbid passing it on) as sorted 8-byte SHA-256 prefixes, base64 in `prefixes`. Each link is hashed in its normalized form: no scheme, lowercase host without `www.`, one trailing slash and the fragment removed, query kept. Clients hash a link the same way and look it up locally, so nothing is sent |
+| `GET` | `/api/v1/lists/known-sites` | The 10,000 most popular sites (`sites`), and the hosts on them where anyone can publish (`user_content`: Google Docs and Sites, GitHub Pages, cloud storage…), which clients should still check |
 
 ---
 

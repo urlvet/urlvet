@@ -64,11 +64,26 @@
 </script>
 
 <svelte:head>
-  <title>About — url.vet (URLvet)</title>
+  <title>About url.vet</title>
   <meta
     name="description"
-    content="url.vet (URLvet) tells you whether a link is safe, and why. Open source, private by design, and built for experts and everyone else."
+    content="url.vet tells you if a link is safe, and why. Free, open source and private by design."
   />
+  <meta property="og:title" content="About url.vet" />
+  <meta
+    property="og:description"
+    content="url.vet tells you if a link is safe, and why. Free, open source and private by design."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://url.vet/about" />
+  <meta property="og:image" content="https://url.vet/og" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="About url.vet" />
+  <meta
+    name="twitter:description"
+    content="url.vet tells you if a link is safe, and why. Free, open source and private by design."
+  />
+  <meta name="twitter:image" content="https://url.vet/og" />
   <link rel="canonical" href="https://url.vet/about" />
 </svelte:head>
 

@@ -194,28 +194,29 @@ func TestGenerateResult_Verdict(t *testing.T) {
 		{
 			name: "new domain (<=30 days)",
 			modify: func(r *Response) {
-				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: 10, AgeHuman: "10 days"}
+				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: days(10), CreatedDate: since(10), AgeHuman: "10 days"}
 			},
 			wantRiskMin: 25,
 		},
 		{
-			name: "young domain (<=365 days)",
+			name: "young domain (<=90 days)",
 			modify: func(r *Response) {
-				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: 200, AgeHuman: "6 months"}
+				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: days(60), CreatedDate: since(60), AgeHuman: "2 months"}
 			},
 			wantRiskMin: 15,
 		},
+
 		{
 			name: "old domain adds trust",
 			modify: func(r *Response) {
-				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: 3000, AgeHuman: "8 years"}
+				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: days(3000), CreatedDate: since(3000), AgeHuman: "8 years"}
 			},
 			wantTrustMin: 90,
 		},
 		{
 			name: "DNSSEC adds trust",
 			modify: func(r *Response) {
-				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: 3000, AgeHuman: "8 years", DNSSEC: true}
+				r.DomainInfo = &domaininfo.RegistrationData{AgeDays: days(3000), CreatedDate: since(3000), AgeHuman: "8 years", DNSSEC: true}
 			},
 			wantTrustMin: 100,
 		},

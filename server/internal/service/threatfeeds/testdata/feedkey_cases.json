@@ -1,0 +1,13 @@
+[
+  { "url": "https://www.Evil.example/Login/", "key": "evil.example/Login" },
+  { "url": "http://evil.example/login", "key": "evil.example/login" },
+  { "url": "https://evil.example/a?b=c", "key": "evil.example/a?b=c" },
+  { "url": "https://evil.example/path/?q=1", "key": "evil.example/path?q=1" },
+  { "url": "https://evil.example/x#frag", "key": "evil.example/x" },
+  { "url": "https://evil.example", "key": "evil.example" },
+  { "url": "https://evil.example/", "key": "evil.example" },
+  { "url": "https://EVIL.example:8080/p", "key": "evil.example/p" },
+  { "url": "https://evil.example/a%20b", "key": "evil.example/a%20b" },
+  { "url": "https://sub.www.evil.example/a", "key": "sub.www.evil.example/a" },
+  { "url": "http://175.167.87.144:56600/i", "key": "175.167.87.144/i" }
+]

@@ -24,4 +24,10 @@ describe('incompleteNote', () => {
       'DNS records and how popular the site is'
     );
   });
+
+  it('names the Google checks', () => {
+    expect(incompleteNote(['safe_browsing_check'], false)).toBe(
+      "Couldn't check Google Safe Browsing this time. Everything else ran normally."
+    );
+  });
 });

@@ -108,6 +108,7 @@
       <!-- Left: site links, then GitHub, then (if hidden) Vetty -->
       <nav
         aria-label="Footer"
+        data-guide="learn-more"
         class="flex flex-wrap items-center justify-center md:justify-start gap-x-5 sm:gap-x-4 gap-y-2"
       >
         {#each FOOTER_LINKS as link, i}

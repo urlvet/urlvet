@@ -6,3 +6,11 @@ func DomainRankLookup(domain string) int {
 	}
 	return 0
 }
+
+// TopDomains returns up to n of the most popular domains, most popular first.
+func TopDomains(n int) []string {
+	if n > len(topDomains) {
+		n = len(topDomains)
+	}
+	return topDomains[:n]
+}

@@ -80,7 +80,7 @@
 </script>
 
 <svelte:head>
-  <title>Admin — url.vet</title>
+  <title>Admin | url.vet</title>
   <meta name="robots" content="noindex, nofollow, noarchive" />
 </svelte:head>
 

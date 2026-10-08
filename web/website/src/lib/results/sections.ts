@@ -26,11 +26,17 @@ export function computeExpanded(d: AnalyzeResult | null): Record<string, boolean
       performance: false,
     };
   return {
-    domain: d.domain_info?.age_days !== undefined && d.domain_info.age_days < 365,
+    // age_days is null when the registry publishes no creation date, and
+    // null < 365 is true in JS, so check for it explicitly.
+    domain: d.domain_info?.age_days != null && d.domain_info.age_days < 365,
     analysis:
       !!d.analysis?.redirection_result?.has_domain_jump ||
       (d.analysis?.redirection_result?.chain_length ?? 0) > 3,
-    threatintel: !!d.phishing?.valid,
+    threatintel:
+      !!d.phishing?.valid ||
+      !!d.threat_feeds?.listed ||
+      !!d.web_risk?.listed ||
+      !!d.safe_browsing?.listed,
     security: !!(
       d.ssl_info?.IsSuspicious ||
       d.ssl_info?.KnownBadChain ||
@@ -64,7 +70,7 @@ export function computeExpanded(d: AnalyzeResult | null): Record<string, boolean
 
 // One-glance summary shown on each collapsed section header.
 export function sectionStatuses(d: AnalyzeResult): Record<SectionId, Status> {
-  const days: number | undefined = d.domain_info?.age_days;
+  const days: number | undefined = d.domain_info?.age_days ?? undefined;
   const redir = d.analysis?.redirection_result;
   const ssl = d.ssl_info;
   const c = d.content_data;
@@ -88,11 +94,18 @@ export function sectionStatuses(d: AnalyzeResult): Record<SectionId, Status> {
         : redir?.is_redirected
           ? { tone: 'neutral', label: 'Same-site redirect' }
           : { tone: 'good', label: 'No redirects' },
-    threatintel: d.phishing?.valid
-      ? d.phishing.verified
-        ? { tone: 'bad', label: 'Confirmed phishing' }
-        : { tone: 'bad', label: 'Reported phishing' }
-      : { tone: 'good', label: 'Not listed' },
+    threatintel:
+      d.web_risk?.listed || d.safe_browsing?.listed
+        ? { tone: 'bad', label: 'Listed by Google' }
+        : d.threat_feeds?.listed
+          ? d.threat_feeds.match === 'url'
+            ? { tone: 'bad', label: 'Listed as a threat' }
+            : { tone: 'bad', label: 'Site has listed pages' }
+          : d.phishing?.valid
+            ? d.phishing.verified
+              ? { tone: 'bad', label: 'Confirmed phishing' }
+              : { tone: 'bad', label: 'Reported phishing' }
+            : { tone: 'good', label: 'Not listed' },
     security:
       ssl && !ssl.HasTLS
         ? { tone: 'bad', label: 'No HTTPS' }

@@ -5,8 +5,8 @@ import type { AnalyzeResult } from '../../types';
 export const NAME = 'Vetty';
 
 export const INTRO = [
-  `Hi, I'm ${NAME}! I'm suspicious of everything. Professionally.`,
-  'Got a link from someone? Let me squint at it before you click.',
+  `Hi, I'm ${NAME}. Why click around when you can just ask me?`,
+  'Everything you need is right here.',
 ];
 
 /** Said when someone keeps tapping Vetty, one line per extra tap. */
@@ -17,11 +17,10 @@ export const POKES = [
   'Okay, that tickles.',
 ];
 
-/** Heading of the "More" list in Vetty's menu. */
-export const MORE_TITLE = "Here's everything else I can do.";
-
-export const NUDGE = 'Little overwhelmed with all these stuffs in here? I can help with that.';
-export const NUDGE_CTA = 'See what I can do';
+export const NUDGE = "Hi, I'm Vetty. Not sure what all this means? I can help.";
+/** The visitor's two replies to the nudge. */
+export const NUDGE_YES = 'What can you do?';
+export const NUDGE_NO = 'No thanks';
 
 /** Greeting when reopening Vetty, by page. */
 export const GREETINGS: Record<string, string[]> = {
@@ -112,10 +111,6 @@ export function warnMessage(verdict: string, domain: string, score: number, link
     return `I checked this link on url.vet. ${domain} looks suspicious (${score}/100), so better not to enter any details there.\n\nWhy: ${link}`;
   return `I checked this link on url.vet and ${domain} looks safe (${score}/100).\n\nDetails: ${link}`;
 }
-
-/** Said once, unprompted, when a result comes back Risky. */
-export const RISKY_ALERT = 'This one looks dangerous. Want me to warn whoever sent it?';
-export const RISKY_ALERT_CTA = 'Warn them';
 
 export const WARN_INTRO: Record<string, string> = {
   Risky: "Let's warn whoever sent it. Edit the message if you like:",

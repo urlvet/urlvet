@@ -22,6 +22,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,6 +34,7 @@ import (
 	"github.com/urlvet/urlvet/internal/logger"
 	"github.com/urlvet/urlvet/internal/service/rank"
 	"github.com/urlvet/urlvet/internal/service/screenshot"
+	"github.com/urlvet/urlvet/internal/service/threatfeeds"
 	"github.com/urlvet/urlvet/internal/service/typosquat"
 )
 
@@ -74,6 +76,11 @@ func main() {
 	if err := typosquat.LoadTopDomains(); err != nil {
 		logger.Fatal("failed to load top domains", "err", err)
 	}
+
+	// Phishing and malware lists, loaded from disk now and refreshed in the background.
+	feedsCtx, stopFeeds := context.WithCancel(context.Background())
+	defer stopFeeds()
+	threatfeeds.StartLocalFeeds(feedsCtx)
 
 	// Get port from environment variable, default to 8080
 	port := getEnv("PORT", "8080")

@@ -5,9 +5,80 @@ package constants
 // https://github.com/PeterDaveHello/url-shorteners
 // https://github.com/korlabsio/urlshortener
 
+// ShortLinkPaths are sites whose other pages are their own, but where links
+// under these paths only redirect: QR code services and the like.
+var ShortLinkPaths = map[string][]string{
+	"flowcode.com": {"/p/"}, // Flowcode QR codes
+	// Email click tracking: the newsletter service's own pages stay its own.
+	"list-manage.com":  {"/track/click"}, // Mailchimp
+	"awstrack.me":      {"/L0/"},         // Amazon SES
+	"rs6.net":          {"/tn.jsp"},      // Constant Contact
+	"mjt.lu":           {"/lnk/"},        // Mailjet
+	"sendibm3.com":     {"/mk/cl/"},      // Brevo
+	"elasticemail.com": {"/tracking/click"},
+	"soundestlink.com": {"/ce/c/"}, // Omnisend
+	"fdske.com":        {"/e/c/"},  // FreshMail
+}
+
+// UserPageHosts give each user a page under a path (linktr.ee/someone). The
+// page is the user's, so it doesn't borrow the service's rank.
+var UserPageHosts = map[string]string{
+	"linktr.ee":         "Linktree",
+	"linkin.bio":        "Later",
+	"flow.page":         "Flowcode",
+	"campsite.bio":      "Campsite",
+	"linqapp.com":       "Linq",
+	"keepo.io":          "Keepo",
+	"hipolink.net":      "Hipolink",
+	"msha.ke":           "Milkshake",
+	"mez.ink":           "Mez",
+	"hoo.be":            "Hoo.be",
+	"myurls.bio":        "MyURLs",
+	"lhub.to":           "LinkHub",
+	"portaly.cc":        "Portaly",
+	"unbouncepages.com": "Unbounce",
+	// Path-per-bucket storage on a ranked domain.
+	"storageapi.fleek.co": "Fleek Storage",
+}
+
 var URLShorteners = map[string]struct{}{
 
 	// Active
+	// Seen in phishing feeds, not yet on the upstream lists
+	"u.gy":        {},
+	"flyn.co":     {},
+	"s4w.in":      {},
+	"i.gal":       {},
+	"qr2.it":      {},
+	"rbcode.net":  {},
+	"slk.me":      {}, // Linklope
+	"lnk.ink":     {},
+	"y.hn":        {},
+	"tinylink.in": {},
+	"tsh.re":      {},
+	// Short link and QR code redirectors found in phishing feeds:
+	"q-r.to":           {},
+	"qr-codes.io":      {},
+	"bitly.cx":         {},
+	"scanned.page":     {},
+	"urlto.me":         {},
+	"hotm.art":         {},
+	"surl.lu":          {},
+	"qr.link":          {},
+	"goto.now":         {},
+	"lnk.ua":           {},
+	"qrto.org":         {},
+	"qr.codes":         {},
+	"taap.it":          {},
+	"abrir.link":       {},
+	"buly.kr":          {},
+	"me-qr.com":        {},
+	"zrr.kr":           {},
+	"scan.page":        {},
+	"hotm.io":          {},
+	"url-shortener.me": {},
+	"app.link":         {},
+	"onelink.me":       {},
 	// Source : https://raw.githubusercontent.com/PeterDaveHello/url-shorteners/master/list
 	"0.gp":                 {},
 	"02faq.com":            {},

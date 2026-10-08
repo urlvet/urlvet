@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>url.vet stopped this page</title>
+    <link rel="stylesheet" href="ui.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <link rel="stylesheet" href="blocked.css" />
+  </head>
+  <body>
+    <main class="blocked">
+      <span id="mark"></span>
+      <p class="eyebrow">Stopped before it loaded</p>
+      <h1>url.vet found this page <em>risky</em>.</h1>
+      <p class="why">
+        It was checked earlier and found risky, so it was stopped before it
+        could load again. Pages like this try to steal passwords and card
+        details, or install malware.
+      </p>
+      <p id="link" class="link"></p>
+      <div class="actions">
+        <button id="back" class="pill pill-solid" type="button">Go back</button>
+        <a
+          id="report"
+          class="pill pill-outline"
+          target="_blank"
+          rel="noopener noreferrer"
+          >See the full report</a
+        >
+      </div>
+      <p class="continue">
+        Know it's fine?
+        <button id="continue" class="text-btn" type="button">
+          Continue to the page anyway
+        </button>
+      </p>
+    </main>
+    <script type="module" src="blocked.js"></script>
+  </body>
+</html>

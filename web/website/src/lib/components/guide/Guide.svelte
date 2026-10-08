@@ -6,10 +6,10 @@
   import { EXAMPLES } from "../../data/examples";
   import { easterEgg } from "../../results/eastereggs";
   import { realSite } from "../../results/realsite";
+  import { PILL_OUTLINE, PILL_SOLID } from "../../ui/buttons";
   import { ICON } from "../../ui/icons";
   import { formatUrl, stripTrackers } from "../../utils";
   import Icon from "../Icon.svelte";
-  import { PILL_OUTLINE, PILL_SOLID } from "../../ui/buttons";
   import Bullets from "./Bullets.svelte";
   import CharacterClip from "./CharacterClip.svelte";
   import {
@@ -19,14 +19,12 @@
     HIDE_BYE,
     INTRO,
     MEET,
-    MORE_TITLE,
     NAME,
     NUDGE,
-    NUDGE_CTA,
+    NUDGE_NO,
+    NUDGE_YES,
     POKES,
     REAL_SITE,
-    RISKY_ALERT,
-    RISKY_ALERT_CTA,
     SCAN_FAILED,
     TIPS,
     TRY_EXAMPLE,
@@ -37,14 +35,13 @@
   } from "./messages";
   import type { Mood } from "./mood";
   import ScoreScale from "./ScoreScale.svelte";
-  import { scanState, seenRecently, vettyMemory } from "./store";
+  import { nudgeDeclined, scanState, seenRecently, vettyMemory } from "./store";
   import { availableSteps, type TourStep } from "./tour";
   import TourOverlay from "./TourOverlay.svelte";
 
   // Vetty: waits in the corner, opens a speech bubble on click, runs the tour.
   type View =
     | "menu"
-    | "more"
     | "scores"
     | "explain"
     | "failed"
@@ -55,7 +52,7 @@
     | "warn"
     | "clean"
     | "bye";
-  type Item = { label: string; run: () => void; group?: string };
+  type Item = { label: string; run: () => void };
 
   const NUDGE_AFTER_MS = 5000;
 
@@ -74,15 +71,27 @@
   /** An easter-egg line about the link just scanned (see results/eastereggs.ts). */
   let quip: string | null = null;
   let quipFor = "";
-  /** The one-time "warn whoever sent it?" prompt after a Risky result. */
-  let riskyAlert = false;
   let greeting = "";
   let tip = "";
   let waving = false;
   let bubbleEl: HTMLDivElement;
   let checkInput = "";
   /** Back from a view opened under "More" returns to "More". */
-  let cameFromMore = false;
+  const MORE_ROW =
+    "w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800";
+  /** Whether "More" is open below the first items. */
+  let showMore = false;
+  let lessRow: HTMLLIElement;
+
+  // Opens the rest of the menu below the first items. Where the bubble can't
+  // fit it all (phones), scroll so the new items come into view.
+  async function expandMore() {
+    showMore = true;
+    await tick();
+    if (bubbleEl && lessRow && bubbleEl.scrollHeight > bubbleEl.clientHeight) {
+      bubbleEl.scrollTo({ top: lessRow.offsetTop - 8, behavior: "smooth" });
+    }
+  }
   let checkEl: HTMLTextAreaElement;
   /** The warning message being edited, and the link in the search bar minus its trackers. */
   let warnText = "";
@@ -203,7 +212,6 @@
     if (pokeTimes.length < 3) return toggle();
     close();
     nudge = false;
-    riskyAlert = false;
     const line = POKES[Math.min(pokeStep, POKES.length - 1)];
     pokeStep++;
     quip = line;
@@ -320,11 +328,13 @@
     switch (context) {
       case "home":
         return {
+          // In the order a visitor goes: find their way round, try it, then
+          // check their own link (cleaning it first, when it has trackers).
           main: [
-            { label: "Check a link for me", run: () => (view = "check") },
-            { label: "Show me how to use this page", run: startTour },
+            { label: "Show me around", run: startTour },
             example,
             ...cleanItem("Remove trackers from my link"),
+            { label: "Check a link for me", run: () => (view = "check") },
           ],
           more: [howItWorks, whoMade, meetItem, hideItem],
         };
@@ -332,28 +342,24 @@
         return { main: [meetItem, hideItem], more: [] };
       case "result":
         return {
+          // In the order a visitor goes: find their way round the result,
+          // understand it, act on it, or say it's wrong. The rest is under More.
           main: [
+            { label: "Show me around", run: startTour },
             { label: "Explain this result simply", run: () => (view = "explain") },
             ...(real
               ? [{ label: `Take me to the real ${real.domain}`, run: () => (view = "real") }]
               : []),
-            {
-              label: verdict === "Safe" ? "Tell whoever sent it" : "Warn whoever sent it",
-              run: openWarn,
-            },
-            { label: "Check a different link", run: () => clickTarget("scan-another") },
+            { label: "Let the sender know", run: openWarn },
+            { label: "I think this result is wrong", run: () => clickTarget("report") },
           ],
           more: [
-            ...[
-              { label: "What does the score mean?", run: () => (view = "scores") },
-              { label: "Walk me through this page", run: startTour },
-              ...cleanItem("Copy the link without trackers"),
-              { label: "I think this result is wrong", run: () => clickTarget("report") },
-            ].map((item) => ({ ...item, group: "This result" })),
-            ...[howItWorks, whoMade, meetItem, hideItem].map((item) => ({
-              ...item,
-              group: "url.vet",
-            })),
+            { label: "Check a different link", run: () => clickTarget("scan-another") },
+            ...cleanItem("Copy the link without trackers"),
+            howItWorks,
+            whoMade,
+            meetItem,
+            hideItem,
           ],
         };
       case "error":
@@ -375,14 +381,18 @@
 
   $: explanation = result ? explain(result) : null;
 
+  function declineNudge() {
+    nudge = false;
+    vettyMemory.set({ nudgeDeclinedAt: Date.now() });
+  }
+
   // ── open / close ───────────────────────────────────────────────────────────
   async function toggle() {
     nudge = false;
     quip = null;
-    riskyAlert = false;
     if (open) return close();
     view = "menu";
-    cameFromMore = false;
+    showMore = false;
     // Trackers in whatever is in the search bar (the scanned link, on a result).
     const typed = (document.getElementById("url-input") as HTMLInputElement | null)?.value.trim();
     const stripped = typed ? stripTrackers(formatUrl(typed)) : null;
@@ -402,29 +412,18 @@
     view = "menu";
   }
 
-  async function warnFromAlert() {
-    await toggle();
-    openWarn();
-  }
-
-  // Once per result: Risky results (except the demo fakes) get the warn offer,
-  // special links a quip. If Vetty is hidden, the page shows the quip instead.
+  // Once per result, special links get a quip. Not Risky ones: a joke, or any
+  // pop-up, is the wrong note there (the demo fakes still get their joke). If
+  // Vetty is hidden, the page shows the quip instead.
   $: if (!result) {
     quip = null;
-    riskyAlert = false;
   }
   $: if (result && result.url !== quipFor && !$vettyMemory.hidden) {
     quipFor = result.url;
     const line = easterEgg(result.url);
     // The fake example chips are demos, not real threats: they get their joke.
     const demo = EXAMPLES.some((e) => e.hint === "Fake" && e.url === result.domain);
-    if (result.result?.verdict === "Risky" && !demo) {
-      later(() => {
-        if (open || tourSteps || $vettyMemory.hidden) return;
-        riskyAlert = true;
-        later(() => (riskyAlert = false), 15000);
-      }, 1100);
-    } else if (line) {
+    if (line && (result.result?.verdict !== "Risky" || demo)) {
       later(() => {
         if (open || tourSteps || $vettyMemory.hidden) return;
         quip = line;
@@ -458,12 +457,12 @@
     document.addEventListener("click", onClick, true);
 
     // Until Vetty has been opened (and again a day later), a nudge waits beside
-    // him. It has no dismiss button, so everyone sees what he can do.
-    if (!seenRecently($vettyMemory) && !$vettyMemory.hidden) {
+    // him, with two replies: open him, or "No thanks" (no nudge for a month).
+    const nudgeWanted = () =>
+      !$vettyMemory.hidden && !seenRecently($vettyMemory) && !nudgeDeclined($vettyMemory);
+    if (nudgeWanted()) {
       later(() => {
-        if (!open && !tourSteps && !$vettyMemory.hidden && !seenRecently($vettyMemory)) {
-          nudge = true;
-        }
+        if (!open && !tourSteps && nudgeWanted()) nudge = true;
       }, NUDGE_AFTER_MS);
     }
 
@@ -509,12 +508,8 @@
         </div>
 
         <div class="px-5 pb-5 pt-1 text-[15px] leading-relaxed text-gray-700 dark:text-gray-300">
-          {#if view === "menu" || view === "more"}
-            {#if view === "more"}
-              <p class={LEAD}>
-                {MORE_TITLE}
-              </p>
-            {:else if greeting}
+          {#if view === "menu"}
+            {#if greeting}
               <p class={LEAD}>
                 {greeting}
               </p>
@@ -527,23 +522,27 @@
             <ul
               class="mt-4 -mx-2 divide-y divide-gray-100 dark:divide-gray-800 border-y border-gray-100 dark:border-gray-800"
             >
-              {#each view === "more" ? menu.more : menu.main as item, i}
-                {@const list = view === "more" ? menu.more : menu.main}
-                {#if item.group && item.group !== list[i - 1]?.group}
-                  <li
-                    class="px-2 pt-4 pb-1.5 font-mono text-[11px] uppercase tracking-wider text-gray-500"
-                  >
-                    {item.group}
+              {#each showMore ? [...menu.main, ...menu.more] : menu.main as item, i}
+                {#if i === menu.main.length}
+                  <!-- "More" stays where it was, now as "Less", with the rest below it. -->
+                  <li bind:this={lessRow}>
+                    <button
+                      type="button"
+                      class={MORE_ROW}
+                      aria-expanded="true"
+                      on:click={() => (showMore = false)}
+                    >
+                      Less
+                      <Icon path={ICON.chevronDown} class="w-3.5 h-3.5 text-gray-400 rotate-180" />
+                    </button>
                   </li>
                 {/if}
+
                 <li>
                   <button
                     type="button"
                     class="group w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
-                    on:click={() => {
-                      cameFromMore = view === "more";
-                      item.run();
-                    }}
+                    on:click={item.run}
                   >
                     {item.label}
                     <Icon
@@ -553,23 +552,21 @@
                   </button>
                 </li>
               {/each}
-              {#if view === "menu" && menu.more.length}
+              {#if !showMore && menu.more.length}
                 <li>
                   <button
                     type="button"
-                    class="group w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
-                    on:click={() => (view = "more")}
+                    class={MORE_ROW}
+                    aria-expanded="false"
+                    on:click={expandMore}
                   >
                     More
-                    <Icon
-                      path={ICON.arrowRight}
-                      class="w-3.5 h-3.5 text-gray-400 group-hover:translate-x-0.5 transition-transform"
-                    />
+                    <Icon path={ICON.chevronDown} class="w-3.5 h-3.5 text-gray-400" />
                   </button>
                 </li>
               {/if}
             </ul>
-            {#if view === "menu" && (context === "home" || context === "result")}
+            {#if !showMore && (context === "home" || context === "result")}
               <p class="mt-3 text-xs text-gray-500">{tip}</p>
             {/if}
           {:else if view === "scores" && result}
@@ -729,44 +726,12 @@
             <button
               type="button"
               class="mt-4 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-              on:click={() => {
-                view = cameFromMore && view !== "more" ? "more" : "menu";
-                if (view === "menu") cameFromMore = false;
-              }}
+              on:click={() => (view = "menu")}
             >
               ← Back
             </button>
           {/if}
         </div>
-      </div>
-    {:else if riskyAlert}
-      <!-- Tapping it opens the warning message; the × just dismisses it. -->
-      <div
-        role="status"
-        transition:fly={{ y: 8, duration: 200 }}
-        class="bubble pointer-events-auto relative max-w-[280px] {BUBBLE} shadow-xl shadow-black/10"
-      >
-        <button
-          type="button"
-          class="group block w-full px-4 py-3 pr-9 text-left text-sm text-gray-700 dark:text-gray-300"
-          on:click={warnFromAlert}
-        >
-          {RISKY_ALERT}
-          <span class="mt-2 flex items-center gap-1.5 font-medium text-gray-900 dark:text-gray-100"
-            >{RISKY_ALERT_CTA}<Icon
-              path={ICON.arrowRight}
-              class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-            /></span
-          >
-        </button>
-        <button
-          type="button"
-          class="absolute right-1.5 top-1.5 p-1.5 rounded-md text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-          aria-label="Dismiss"
-          on:click={() => (riskyAlert = false)}
-        >
-          <Icon path={ICON.close} class="w-3 h-3" />
-        </button>
       </div>
     {:else if quip}
       <!-- An aside, not a question: no buttons. Tap it (or wait) to make it go away. -->
@@ -781,25 +746,31 @@
         </button>
       </div>
     {:else if nudge}
-      <!-- Stays until Vetty is opened; tapping it opens him. -->
-      <button
-        type="button"
+      <!-- Stays until answered: open Vetty, or "No thanks". -->
+      <div
+        role="status"
         transition:fly={{ y: 8, duration: 200 }}
-        class="bubble group pointer-events-auto relative max-w-[260px] {BUBBLE} shadow-xl shadow-black/10 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300"
-        on:click={toggle}
+        class="bubble pointer-events-auto relative max-w-[260px] {BUBBLE} shadow-xl shadow-black/10 px-4 py-3 text-sm text-gray-700 dark:text-gray-300"
       >
-        {NUDGE}
-        <span class="mt-2 flex items-center gap-1.5 font-medium text-gray-900 dark:text-gray-100"
-          >{NUDGE_CTA}<Icon
-            path={ICON.arrowRight}
-            class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-          /></span
-        >
-      </button>
+        <p>{NUDGE}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="rounded-full bg-gray-900 dark:bg-gray-100 px-3 py-1.5 text-xs font-medium text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
+            on:click={toggle}>{NUDGE_YES}</button
+          >
+          <button
+            type="button"
+            class="rounded-full border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400 transition-colors"
+            on:click={declineNudge}>{NUDGE_NO}</button
+          >
+        </div>
+      </div>
     {/if}
 
     <button
       type="button"
+      data-guide="vetty"
       class="vetty pointer-events-auto rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
       aria-label={open ? `Close ${NAME}` : `Open ${NAME}, the url.vet helper`}
       aria-expanded={open}

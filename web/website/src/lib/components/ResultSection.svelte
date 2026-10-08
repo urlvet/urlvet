@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import { EXAMPLES } from "../data/examples";
   import { easterEgg } from "../results/eastereggs";
   import { vettyMemory } from "./guide/store";
   import { incompleteNote } from "../results/incomplete";
+  import { redirectNote, shortLinkNote } from "../results/shortlink";
   import type { AnalyzeResult } from "../types";
   import { PILL_OUTLINE } from "../ui/buttons";
   import { ICON } from "../ui/icons";
@@ -27,8 +29,14 @@
 
   $: primary = data?.result;
   $: note = data ? incompleteNote(data.incomplete_checks, data.incomplete) : null;
+  $: shortNote = shortLinkNote(data?.short_link) ?? redirectNote(data?.redirected_from);
   // Vetty says this himself when he's around; otherwise it's a quiet line here.
-  $: egg = data && $vettyMemory.hidden ? easterEgg(data.url) : null;
+  // No joke on a Risky result, except the fake demo examples.
+  $: demo = !!data && EXAMPLES.some((e) => e.hint === "Fake" && e.url === data.domain);
+  $: egg =
+    data && $vettyMemory.hidden && (data.result?.verdict !== "Risky" || demo)
+      ? easterEgg(data.url)
+      : null;
 
   onDestroy(() => {
     if (screenshotUrl) URL.revokeObjectURL(screenshotUrl);
@@ -64,6 +72,16 @@
       verdict={primary?.verdict}
       score={primary?.final_score}
     />
+
+    {#if shortNote}
+      <p
+        class="-mb-2 flex items-start gap-2 text-[13px] leading-snug text-gray-600 dark:text-gray-400"
+        role="note"
+      >
+        <span class="mt-[0.45em] w-1.5 h-1.5 flex-shrink-0 rounded-full bg-sky-500"></span>
+        {shortNote}
+      </p>
+    {/if}
 
     <VerdictRow
       verdict={primary?.verdict}

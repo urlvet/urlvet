@@ -28,6 +28,10 @@
     if (link && originalIcon) link.href = originalIcon;
   });
 
+  const SITE_TITLE = "url.vet (URLvet): Is this link safe?";
+  const SITE_DESC =
+    "Paste any link to see if it's safe, suspicious or risky, and why. Free, no signup.";
+
   const dotIcon = (color: string) =>
     `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="${color}"/></svg>`)}`;
 
@@ -38,7 +42,7 @@
     alternateName: ["URLvet", "urlvet", "url vet"],
     url: "https://url.vet",
     description:
-      "Free real-time URL scanner for detecting phishing, typosquatting, and malicious links. Instant verdict with full signal breakdown — no signup required.",
+      "A free link checker that spots phishing, lookalike addresses and other risky links, and shows the reasons behind every verdict.",
     applicationCategory: "SecurityApplication",
     applicationSubCategory: "URL Scanner",
     operatingSystem: "Web",
@@ -72,15 +76,14 @@
 
 <svelte:head>
   {#if shareDomain}
-    {@const ogVerdict = verdict}
-    {@const ogScore = score}
-    {@const desc = ogVerdict
-      ? `${ogVerdict} — url.vet scanned ${shareDomain}. See the full breakdown.`
-      : `Sketchy link? url.vet scanned ${shareDomain} — check if it's actually safe to click.`}
-    {@const ogImage = `https://url.vet/og?domain=${encodeURIComponent(shareDomain)}${ogVerdict ? `&v=${encodeURIComponent(ogVerdict)}` : ""}${ogScore !== undefined ? `&s=${ogScore}` : ""}`}
-    <title>{liveTitle ?? `url.vet — is ${shareDomain} sus?`}</title>
+    {@const title = `Is ${shareDomain} safe? | url.vet`}
+    {@const desc = verdict
+      ? `url.vet rated ${shareDomain} ${verdict}. See why, or check another link for free.`
+      : `See if ${shareDomain} is safe to open, and why. Free, no signup.`}
+    {@const ogImage = `https://url.vet/og?domain=${encodeURIComponent(shareDomain)}${verdict ? `&v=${encodeURIComponent(verdict)}` : ""}${score !== undefined ? `&s=${score}` : ""}`}
+    <title>{liveTitle ?? title}</title>
     <meta name="description" content={desc} />
-    <meta property="og:title" content="url.vet — is {shareDomain} sus?" />
+    <meta property="og:title" content={title} />
     <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://url.vet" />
@@ -92,24 +95,14 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="url.vet — is {shareDomain} sus?" />
+    <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={desc} />
     <meta name="twitter:image" content={ogImage} />
   {:else}
-    <title>{liveTitle ?? "url.vet (URLvet) — sketchy link? just url.vet it"}</title>
-    <meta
-      name="description"
-      content="Got a sketchy link? url.vet it (URLvet) — free, instant phishing verdict with no signup needed."
-    />
-    <meta
-      name="keywords"
-      content="URLvet, urlvet, url.vet, URL scanner, phishing detection, link checker, safe link checker, phishing URL checker, link safety checker"
-    />
-    <meta property="og:title" content="url.vet (URLvet) — just url.vet it" />
-    <meta
-      property="og:description"
-      content="Sketchy link? Paste it. Get a verdict in seconds — safe, suspicious, or risky. Free & transparent."
-    />
+    <title>{liveTitle ?? SITE_TITLE}</title>
+    <meta name="description" content={SITE_DESC} />
+    <meta property="og:title" content={SITE_TITLE} />
+    <meta property="og:description" content={SITE_DESC} />
     <link rel="canonical" href="https://url.vet" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://url.vet" />
@@ -118,11 +111,8 @@
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://url.vet/og" />
-    <meta name="twitter:title" content="url.vet (URLvet) — just url.vet it" />
-    <meta
-      name="twitter:description"
-      content="Sketchy link? url.vet it. Free, instant, no signup."
-    />
+    <meta name="twitter:title" content={SITE_TITLE} />
+    <meta name="twitter:description" content={SITE_DESC} />
     {@html `<script type="application/ld+json">${JSON.stringify(schemaSoftwareApp)}</script>`}
   {/if}
 </svelte:head>

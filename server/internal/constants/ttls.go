@@ -32,5 +32,11 @@ const ContentAnalysisTTL = 3 * time.Hour
 // ScreenshotTTL - Page screenshots on disk are reused, then deleted, after this long
 const ScreenshotTTL = 24 * time.Hour
 
+// WebRiskTTL - Google Web Risk verdicts; Google's lists change by the hour
+const WebRiskTTL = time.Hour
+
+// SafeBrowsingTTL - Google Safe Browsing verdicts
+const SafeBrowsingTTL = time.Hour
+
 // AnalyzeResultTTL - Full scan result cache: avoids re-running all 17 tasks for the same URL
 const AnalyzeResultTTL = 24 * time.Hour

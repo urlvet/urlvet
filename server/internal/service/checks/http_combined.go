@@ -65,11 +65,28 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 	// this scan.
 	jar, _ := cookiejar.New(nil)
 
+	// HSTS is a property of the scanned site, so read it from the first HTTPS
+	// response on that site. The final hop may be a CDN or another domain
+	// entirely (github.com release downloads end on an Azure blob).
+	origDomain, _ := GetDomain(checkURL)
+	hstsKnown := false
+	noteHSTS := func(r *http.Response) {
+		if hstsKnown || r == nil || r.Request == nil || r.Request.URL.Scheme != "https" {
+			return
+		}
+		if d, _ := GetDomain(r.Request.URL.String()); !sameSite(d, origDomain) {
+			return
+		}
+		_, result.SupportsHSTS = r.Header["Strict-Transport-Security"]
+		hstsKnown = true
+	}
+
 	client := &http.Client{
 		Timeout:   5 * time.Second, // Overall timeout (shouldn't be reached with header timeout)
 		Transport: transport,
 		Jar:       jar,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			noteHSTS(req.Response)
 			redirects = append(redirects, req.URL.String())
 			if len(via) >= 10 { // Max 10 redirects
 				return errors.New("stopped after 10 redirects")
@@ -95,6 +112,8 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 		// failed HEAD attempt aren't counted twice.
 		usedGET = true
 		redirects = nil
+		hstsKnown = false
+		result.SupportsHSTS = false
 		req, err = http.NewRequestWithContext(ctx, "GET", checkURL, nil)
 		if err != nil {
 			return result, fmt.Errorf("failed to create GET request: %v", err)
@@ -119,7 +138,6 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 	finalURLHost, _ := GetHost(finalURL)
 
 	// Detect domain jumps
-	origDomain, _ := GetDomain(rawURL)
 	hasJump := false
 	for _, u := range chain[1:] {
 		urlDomain, _ := GetDomain(u)
@@ -145,11 +163,9 @@ func CheckHTTPCombined(rawURL string) (CombinedHTTPResult, error) {
 	result.StatusIsRedirect = resp.StatusCode >= 300 && resp.StatusCode < 400
 
 	// Check for HSTS header (only available over HTTPS)
-	finalParsedURL, _ := url.Parse(finalURL)
-	if finalParsedURL != nil && finalParsedURL.Scheme == "https" {
-		_, result.SupportsHSTS = resp.Header["Strict-Transport-Security"]
-	} else {
-		// If final URL is not HTTPS, check HSTS by making a separate HTTPS request
+	noteHSTS(resp)
+	if !hstsKnown {
+		// No HTTPS response from the scanned site itself, so ask it directly
 		// Use a separate client with very short timeout to avoid adding significant latency
 		// (matching behavior of original SupportsHSTS function)
 		domain, _ := GetDomain(rawURL)

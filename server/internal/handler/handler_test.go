@@ -206,3 +206,25 @@ func TestMetricsEndpoint(t *testing.T) {
 		t.Error("Content-Type header is empty")
 	}
 }
+
+func TestListEndpoints(t *testing.T) {
+	r := SetupRouter()
+	for _, path := range []string{"/api/v1/lists/threats", "/api/v1/lists/known-sites"} {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s: %d", path, w.Code)
+		}
+		etag := w.Header().Get("ETag")
+		if etag == "" {
+			t.Fatalf("%s: no ETag", path)
+		}
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		req.Header.Set("If-None-Match", etag)
+		w = httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusNotModified {
+			t.Errorf("%s with matching If-None-Match: %d, want 304", path, w.Code)
+		}
+	}
+}

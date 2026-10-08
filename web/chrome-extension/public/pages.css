@@ -1,0 +1,62 @@
+/* Fonts and base for extension pages (popup, blocked page). */
+@font-face {
+  font-family: "urlvet Geist";
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(fonts/geist-normal-latin.woff2) format("woff2");
+}
+@font-face {
+  font-family: "urlvet Geist Mono";
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(fonts/geist-mono-normal-latin.woff2) format("woff2");
+}
+@font-face {
+  font-family: "urlvet Instrument Serif";
+  font-display: swap;
+  src: url(fonts/instrument-serif-normal-latin.woff2) format("woff2");
+}
+@font-face {
+  font-family: "urlvet Instrument Serif";
+  font-style: italic;
+  font-display: swap;
+  src: url(fonts/instrument-serif-italic-latin.woff2) format("woff2");
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] {
+  display: none !important;
+}
+a {
+  color: inherit;
+}
+.text-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+.text-btn:hover {
+  color: var(--text);
+}
+.text-btn:focus-visible {
+  outline: 2px solid var(--faint);
+  outline-offset: 2px;
+}

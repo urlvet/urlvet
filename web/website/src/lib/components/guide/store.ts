@@ -15,10 +15,11 @@ export const scanState = writable<ScanState>({ status: 'idle' });
 type Memory = {
   hidden: boolean; // user tucked him away
   openedAt: number; // when he was last opened (ms); 0 = never
+  nudgeDeclinedAt: number; // when the visitor said "No thanks" to his nudge (ms); 0 = never
 };
 
 const KEY = 'vetty';
-const DEFAULTS: Memory = { hidden: false, openedAt: 0 };
+const DEFAULTS: Memory = { hidden: false, openedAt: 0, nudgeDeclinedAt: 0 };
 
 function load(): Memory {
   if (!browser) return DEFAULTS;
@@ -52,4 +53,12 @@ const REINTRODUCE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 export function seenRecently(m: { openedAt: number }): boolean {
   return m.openedAt > 0 && Date.now() - m.openedAt < REINTRODUCE_AFTER_MS;
+}
+
+/** After a "No thanks", Vetty doesn't nudge again for a month. */
+const NUDGE_DECLINED_FOR_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function nudgeDeclined(m: { nudgeDeclinedAt?: number }): boolean {
+  const at = m.nudgeDeclinedAt ?? 0;
+  return at > 0 && Date.now() - at < NUDGE_DECLINED_FOR_MS;
 }

@@ -8,7 +8,7 @@ Key architectural choices in url.vet and the reasoning behind them.
 
 **Decision:** The analysis server is written in Go.
 
-**Why:** The core bottleneck is I/O — DNS lookups, HTTP fetches, TLS handshakes, WHOIS queries. Go's goroutines make it trivial to run all 18 checks concurrently with a `sync.WaitGroup`. The result is 300–700ms median scan time with no async/await complexity and clean per-goroutine panic recovery. A Python or Node implementation would need explicit async machinery for the same concurrency and would carry more runtime overhead per request.
+**Why:** The core bottleneck is I/O — DNS lookups, HTTP fetches, TLS handshakes, WHOIS queries. Go's goroutines make it trivial to run all 21 checks concurrently with a `sync.WaitGroup`. The result is 300–700ms median scan time with no async/await complexity and clean per-goroutine panic recovery. A Python or Node implementation would need explicit async machinery for the same concurrency and would carry more runtime overhead per request.
 
 ---
 
@@ -22,7 +22,7 @@ This decision may be revisited. If added, ML would be a separate signal alongsid
 
 ---
 
-## 18 goroutines, all concurrent
+## 21 goroutines, all concurrent
 
 **Decision:** All checks launch simultaneously via `sync.WaitGroup`. No prioritization or staged execution.
 
@@ -47,6 +47,66 @@ Tradeoff: no persistent scan history, no queries across results. Scan history (f
 **Decision:** `httpCombinedTask` makes one HTTP request shared across three checks (redirects, HSTS header, status code) instead of three separate requests.
 
 **Why:** These three checks all need the same HTTP response. Before the optimization, `CheckRedirects` and `CheckHSTS` each made independent requests to the same URL. The combined task issues a single HEAD request (falling back to GET if needed), extracts all three results, and eliminates two redundant network round-trips.
+
+HSTS is read from the scanned site's own HTTPS response, not from the last hop: a github.com download ends on a storage host that doesn't send the header.
+
+---
+
+## Threat lists downloaded, not queried per scan
+
+**Decision:** PhishTank's list (and URLhaus and OpenPhish when enabled) is downloaded on a schedule and matched in memory. PhishTank's live API is only a fallback while its list isn't loaded.
+
+**Why:** Without an API key, PhishTank rate-limited about three out of four scans, so the check mostly didn't happen and every result carried a "couldn't check PhishTank" note. A local copy answers every scan instantly, sends no scanned URL anywhere, and costs about 10 MB. The cost is freshness (up to 6 hours old) and missing PhishTank's unverified reports.
+
+Only feeds whose terms allow url.vet's use are on by default: PhishTank allows commercial use; OpenPhish's free feed allows personal research only. See [configuration.md](configuration.md#threat-feeds-also-serverenv).
+
+---
+
+## Google Safe Browsing by hash prefix
+
+**Decision:** Safe Browsing uses v5 `hashes:search`, which sends Google 4-byte hash prefixes, rather than `urls:search`, which sends the URL.
+
+**Why:** The privacy page promises the scanned link only goes where it says. With hash prefixes, Google can't tell which link was checked; the full-hash match is made on our server. It needs more code (URL canonicalization and protobuf decoding, since v5 only answers in protobuf), but no third party learns what users scan.
+
+---
+
+## Short links: scan the destination
+
+**Decision:** A short link is followed, through any further short links, and the destination is scanned in its place. If the destination can't be found, the short link itself is scanned and capped at Suspicious.
+
+**Why:** A short link says nothing about itself, and the shortener's own reputation (bit.ly is a top-ranked site) would otherwise make any short link look safe. Some shorteners show an interstitial page instead of redirecting, so the resolver also reads meta refresh, script redirects and `data-url`-style attributes.
+
+---
+
+## Redirects: judge where the link lands
+
+**Decision:** When a link sends visitors on to another site, by HTTP redirect or a page that forwards straight away, the destination is scanned and the result describes it. Trust (rank, age, HSTS, a known brand) comes only from the destination. Risk comes from wherever it's found: the destination, the link as given (a lookalike or brand name, login words, a victim's address, an IP, a fresh or high-risk domain, a threat-list entry) and the hops in between (IP addresses, listed hosts), which are checked from local data only. A link a list names is Risky wherever it lands. Moves within one site or brand (http → https, zoom.us → zoom.com, a Blogspot page to research.google) aren't jumps. One exception: an unknown site (unranked, not on a restricted registry) landing on a well-known one isn't followed. That's how cloaking works: kits send scanners to google.com or the brand's real login and victims to the phishing page. The link is judged itself, and the jump counts against it. An unknown site sending visitors on to another unknown one is followed, and the bounce adds risk.
+
+**Why:** The visitor types their password on the page they land on, so that's whose reputation matters; google.com's rank says nothing about where `google.com/url?q=…` sends them. But a link that lies about itself is still a lie, and a clean destination shouldn't excuse it.
+
+---
+
+## Caps instead of risk points
+
+**Decision:** Two findings cap the verdict at Suspicious instead of adding risk: a program downloaded from a host anyone can upload to, and a short link that couldn't be followed.
+
+**Why:** In both, the host's reputation is high but says nothing about the content: an installer under `github.com/<anyone>/releases` is whoever uploaded it. github.com's trust alone saturates the score, so no reasonable risk weight would move it off Safe, while a cap states what's known: it can't be called safe.
+
+---
+
+## Hosting customers judged on their own
+
+**Decision:** A customer's subdomain on a hosting service or site builder (`*.github.io`, `*.vercel.app`, `*.weebly.com`, `*.godaddysites.com`) is treated as its own site: no rank or age from the provider, no penalty for missing DNS records, and its own name is what the typosquatting check compares.
+
+**Why:** Most of these providers aren't on the Public Suffix List, so by default `xfinitylogin.weebly.com` inherited Weebly's rank (#345) and 20-year age and scored Safe. The reverse holds too: a provider's reputation can't be lent to its customers, so `storage.googleapis.com/<bucket>` doesn't get Google's rank, while the bare endpoint does.
+
+---
+
+## Brand names: strict keywords and loose names
+
+**Decision:** Each brand has strict title keywords that count anywhere, and bare names that only count on a page asking for a login or payment, or on a hosting subdomain. Well-known sites (top 100,000) may mention brands, except on hosts anyone can publish on.
+
+**Why:** A bare name is both the strongest phishing tell ("Facebook" over a login form) and the commonest false positive ("Santander" is also a city, "Amazon" a rainforest, "Vodafone Shop Berlin" a real shop). Splitting them keeps the check sharp on pages that ask for something and quiet on everything else.
 
 ---
 

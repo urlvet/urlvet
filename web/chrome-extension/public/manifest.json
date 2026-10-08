@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "url.vet: check links before you click",
+  "short_name": "url.vet",
+  "version": "2.0.0",
+  "description": "Sketchy link? Check any link or page in seconds, with every reason explained. Free, open source, no account.",
+  "homepage_url": "https://url.vet",
+  "icons": {
+    "16": "icons/dot-brand-16.png",
+    "32": "icons/dot-brand-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "url.vet: check this page or a link",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/dot-brand-16.png",
+      "32": "icons/dot-brand-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "alarms",
+    "contextMenus",
+    "scripting",
+    "storage",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "https://api.url.vet/*",
+    "http://localhost:8080/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["fonts/*.woff2"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}
