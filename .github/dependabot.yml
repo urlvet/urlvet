@@ -51,8 +51,14 @@ updates:
       - /docker/dev
     schedule:
       interval: monthly
+    groups:
+      docker-images:
+        patterns: ['*']
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
