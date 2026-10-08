@@ -117,7 +117,7 @@
   </div>
 
   <!-- Circular Score Ring -->
-  <div class="flex flex-col items-center gap-1 flex-shrink-0">
+  <div class="flex flex-col items-center gap-1 shrink-0">
     <span
       class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1"
       >Trust Score</span

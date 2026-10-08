@@ -101,7 +101,7 @@
     tabindex="-1"
     role="dialog"
     aria-label="Tour step {index + 1} of {steps.length}"
-    class="absolute rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl shadow-black/20 dark:shadow-black/60 p-5 focus:outline-none"
+    class="absolute rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl shadow-black/20 dark:shadow-black/60 p-5 focus:outline-hidden"
     style="top:{card.top}px;left:{card.left}px;width:min({CARD_W}px, calc(100vw - 32px));transition:top .25s, left .25s"
   >
     <p class="font-mono text-[11px] uppercase tracking-wider text-gray-500">

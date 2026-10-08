@@ -96,12 +96,12 @@
       bind:value={filterText}
       type="search"
       placeholder="Search URL or comment…"
-      class="flex-1 min-w-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600"
+      class="flex-1 min-w-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-gray-400 dark:focus:border-gray-600"
     />
     <button
       type="button"
       on:click={() => (newestFirst = !newestFirst)}
-      class="{ACTION_OUTLINE} flex-shrink-0 justify-center px-4 py-2 text-sm"
+      class="{ACTION_OUTLINE} shrink-0 justify-center px-4 py-2 text-sm"
       aria-label="Toggle sort order"
     >
       {newestFirst ? "Newest" : "Oldest"}<span class="hidden sm:inline -ml-1">&nbsp;first</span>
@@ -160,7 +160,7 @@
               <p class="mt-0.5 font-mono text-xs text-gray-500 break-all">{r.url}</p>
             </div>
             <time
-              class="flex-shrink-0 font-mono text-[11px] text-gray-500 whitespace-nowrap pt-0.5"
+              class="shrink-0 font-mono text-[11px] text-gray-500 whitespace-nowrap pt-0.5"
               title="{r.time} IST">{age(r.time)}</time
             >
           </header>

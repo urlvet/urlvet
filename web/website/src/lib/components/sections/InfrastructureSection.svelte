@@ -25,7 +25,7 @@
           <div class="flex flex-wrap gap-2">
             {#each infrastructure.ip_addresses as ip}
               <span
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded text-xs break-all"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded-sm text-xs break-all"
                 >{ip}</span
               >
             {/each}
@@ -70,7 +70,7 @@
           <div class="flex flex-wrap gap-2">
             {#each infrastructure.ns_hosts as ns_host}
               <span
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded text-xs break-all"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded-sm text-xs break-all"
                 >{ns_host}</span
               >
             {/each}
@@ -115,7 +115,7 @@
           <div class="flex flex-wrap gap-2">
             {#each infrastructure.mx_hosts as mx_host}
               <span
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded text-xs break-all"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded-sm text-xs break-all"
                 >{mx_host}</span
               >
             {/each}

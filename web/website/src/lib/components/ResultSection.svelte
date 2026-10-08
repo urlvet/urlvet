@@ -78,7 +78,7 @@
         class="-mb-2 flex items-start gap-2 text-[13px] leading-snug text-gray-600 dark:text-gray-400"
         role="note"
       >
-        <span class="mt-[0.45em] w-1.5 h-1.5 flex-shrink-0 rounded-full bg-sky-500"></span>
+        <span class="mt-[0.45em] w-1.5 h-1.5 shrink-0 rounded-full bg-sky-500"></span>
         {shortNote}
       </p>
     {/if}
@@ -103,7 +103,7 @@
         class="-mt-4 flex items-start gap-2 text-[13px] leading-snug text-gray-600 dark:text-gray-400"
         role="note"
       >
-        <span class="mt-[0.45em] w-1.5 h-1.5 flex-shrink-0 rounded-full bg-yellow-500"></span>
+        <span class="mt-[0.45em] w-1.5 h-1.5 shrink-0 rounded-full bg-yellow-500"></span>
         {note}
       </p>
     {/if}

@@ -11,7 +11,7 @@
 <div class="flex flex-col items-center gap-2 pt-2">
   <button
     type="button"
-    class="inline-flex items-center gap-1.5 font-mono text-[11px] text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 transition-colors focus:outline-none"
+    class="inline-flex items-center gap-1.5 font-mono text-[11px] text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 transition-colors focus:outline-hidden"
     aria-expanded={open}
     on:click={() => (open = !open)}
   >

@@ -149,7 +149,7 @@
         <div
           class="flex flex-col sm:flex-row gap-1 sm:gap-6 py-5 border-t border-gray-200 dark:border-gray-800"
         >
-          <dt class="sm:w-44 flex-shrink-0">
+          <dt class="sm:w-44 shrink-0">
             <span class="block font-serif text-[1.3rem] leading-tight">{item.t}</span>
             <span class="mt-1 block font-mono text-[11px] uppercase tracking-wider text-gray-500"
               >{item.for}</span
@@ -171,7 +171,7 @@
         <div
           class="flex flex-col sm:flex-row gap-1 sm:gap-6 py-5 border-t border-gray-200 dark:border-gray-800"
         >
-          <dt class="sm:w-44 flex-shrink-0 font-serif text-[1.3rem] leading-tight">{p.who}</dt>
+          <dt class="sm:w-44 shrink-0 font-serif text-[1.3rem] leading-tight">{p.who}</dt>
           <dd class="text-[16px] leading-relaxed text-gray-700 dark:text-gray-300">
             {p.what}
             {#if p.href}

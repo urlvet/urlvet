@@ -140,7 +140,7 @@
           maxlength="1000"
           rows="3"
           placeholder="e.g. This is my bank's official site"
-          class="w-full resize-none rounded-xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
+          class="w-full resize-none rounded-xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
         ></textarea>
       </div>
 

@@ -161,7 +161,7 @@
           ></span>
         {/if}
         <span
-          class="relative flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 dark:border-gray-700 font-mono text-[13px] text-gray-700 dark:text-gray-300"
+          class="relative shrink-0 flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 dark:border-gray-700 font-mono text-[13px] text-gray-700 dark:text-gray-300"
           aria-hidden="true">{n + 1}</span
         >
         <div class="sm:mt-4 sm:pr-4">
@@ -209,7 +209,7 @@
         <ul class="mt-2 divide-y divide-gray-100 dark:divide-gray-800">
           {#each group.items as flag}
             <li class="flex gap-3 py-2.5 text-[15px] leading-snug text-gray-700 dark:text-gray-300">
-              <span class="mt-[0.45em] w-1.5 h-1.5 flex-shrink-0 rounded-full {group.dot}"></span>
+              <span class="mt-[0.45em] w-1.5 h-1.5 shrink-0 rounded-full {group.dot}"></span>
               <span class="flex-1">{flag}</span>
             </li>
           {/each}
@@ -265,7 +265,7 @@
 
           <details class="group mt-3">
             <summary
-              class="inline-flex items-center gap-1.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-[14px] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 rounded"
+              class="inline-flex items-center gap-1.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-[14px] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-400 rounded-sm"
             >
               <span
                 class="underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700"
@@ -282,7 +282,7 @@
                 >
                   <span class="flex items-baseline gap-2.5 text-gray-700 dark:text-gray-300">
                     <span
-                      class="relative top-[-1px] w-1.5 h-1.5 rounded-full flex-shrink-0 {signal.kind ===
+                      class="relative top-[-1px] w-1.5 h-1.5 rounded-full shrink-0 {signal.kind ===
                       'risk'
                         ? 'bg-red-500'
                         : signal.kind === 'trust'
@@ -293,7 +293,7 @@
                     {signal.text}
                   </span>
                   <span
-                    class="flex-shrink-0 font-mono text-[11px] whitespace-nowrap {signal.kind ===
+                    class="shrink-0 font-mono text-[11px] whitespace-nowrap {signal.kind ===
                     'risk'
                       ? 'text-red-600 dark:text-red-400'
                       : signal.kind === 'trust'
@@ -377,11 +377,11 @@
             {#each group.items as item}
               <details id={faqId(item.q)} name="faq" class="group scroll-mt-24">
                 <summary
-                  class="flex items-start justify-between gap-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 rounded"
+                  class="flex items-start justify-between gap-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-400 rounded-sm"
                 >
                   <span class="font-serif text-[1.3rem] leading-snug">{item.q}</span>
                   <span
-                    class="mt-1.5 flex-shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180"
+                    class="mt-1.5 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180"
                   >
                     <Icon path={ICON.chevronDown} />
                   </span>
@@ -393,7 +393,7 @@
                       {#each item.points as point}
                         <li class="flex gap-2.5">
                           <span
-                            class="mt-[0.6em] w-1 h-1 rounded-full bg-gray-400 flex-shrink-0"
+                            class="mt-[0.6em] w-1 h-1 rounded-full bg-gray-400 shrink-0"
                             aria-hidden="true"
                           ></span>
                           <span>{point}</span>

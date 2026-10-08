@@ -251,7 +251,7 @@
             >
             {#if domainRandomness.entropy > 3.8}
               <span
-                class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
+                class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-sm"
                 >High Entropy</span
               >
             {/if}

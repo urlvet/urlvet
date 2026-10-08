@@ -25,7 +25,7 @@
   {#if screenshotLoading || screenshotUrl}
     <div
       data-guide="screenshot"
-      class="md:w-56 md:flex-shrink-0 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 flex flex-col gap-2"
+      class="md:w-56 md:shrink-0 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 flex flex-col gap-2"
     >
       <p
         class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest"

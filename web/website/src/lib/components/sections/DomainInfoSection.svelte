@@ -144,7 +144,7 @@
           <div class="flex flex-wrap gap-2">
             {#each domainInfo.nameservers as ns}
               <span
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded text-xs"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded-sm text-xs"
                 >{ns}</span
               >
             {/each}
@@ -165,7 +165,7 @@
           <div class="flex flex-wrap gap-2">
             {#each domainInfo.status as st}
               <span
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded text-xs"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white rounded-sm text-xs"
                 >{st}</span
               >
             {/each}

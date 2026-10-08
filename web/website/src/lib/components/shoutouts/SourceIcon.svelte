@@ -3,7 +3,7 @@
 
   // Small mark in the corner of a testimonial card showing where it came from.
   export let type: ShoutoutType;
-  let className = "w-4 h-4 flex-shrink-0";
+  let className = "w-4 h-4 shrink-0";
   export { className as class };
 
   // Brand marks are filled; generic ones are outlines.

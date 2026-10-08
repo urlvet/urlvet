@@ -32,13 +32,13 @@
 <div id="section-{id}" class="scroll-mt-20">
   <button
     type="button"
-    class="group w-full flex items-center gap-3.5 px-5 py-4 text-left hover:bg-gray-100/70 dark:hover:bg-gray-800/40 transition-colors focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800/60"
+    class="group w-full flex items-center gap-3.5 px-5 py-4 text-left hover:bg-gray-100/70 dark:hover:bg-gray-800/40 transition-colors focus:outline-hidden focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800/60"
     aria-expanded={expanded}
     aria-controls="section-{id}-body"
     on:click={onToggle}
   >
     <svg
-      class="w-[18px] h-[18px] flex-shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors"
+      class="w-[18px] h-[18px] shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors"
       fill="none"
       stroke="currentColor"
       stroke-width="1.75"
@@ -47,7 +47,7 @@
     >
       <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
     </svg>
-    <span class="flex-shrink-0 text-[15px] font-medium text-gray-900 dark:text-gray-100"
+    <span class="shrink-0 text-[15px] font-medium text-gray-900 dark:text-gray-100"
       >{title}</span
     >
     <span class="flex-1 min-w-0 flex justify-end">
@@ -56,13 +56,13 @@
           class="min-w-0 inline-flex items-center gap-2 font-mono text-xs {TEXT[tone]}"
           title={status.label}
         >
-          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {DOT[tone]}"></span>
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {DOT[tone]}"></span>
           <span class="truncate">{status.label}</span>
         </span>
       {/if}
     </span>
     <svg
-      class="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-600 transition-transform duration-200 {expanded
+      class="w-4 h-4 shrink-0 text-gray-400 dark:text-gray-600 transition-transform duration-200 {expanded
         ? 'rotate-180'
         : ''}"
       viewBox="0 0 20 20"

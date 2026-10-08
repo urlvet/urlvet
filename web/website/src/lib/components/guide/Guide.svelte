@@ -78,7 +78,7 @@
   let checkInput = "";
   /** Back from a view opened under "More" returns to "More". */
   const MORE_ROW =
-    "w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800";
+    "w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-hidden focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800";
   /** Whether "More" is open below the first items. */
   let showMore = false;
   let lessRow: HTMLLIElement;
@@ -541,7 +541,7 @@
                 <li>
                   <button
                     type="button"
-                    class="group w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
+                    class="group w-full flex items-center justify-between px-2 py-2.5 text-left text-[15px] text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg focus:outline-hidden focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
                     on:click={item.run}
                   >
                     {item.label}
@@ -610,7 +610,7 @@
                 bind:value={checkInput}
                 rows="3"
                 placeholder="https://…"
-                class="mt-3 {FIELD} font-mono text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 dark:focus:border-gray-500"
+                class="mt-3 {FIELD} font-mono text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-hidden focus:border-gray-500 dark:focus:border-gray-500"
                 on:keydown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -651,7 +651,7 @@
               id="vetty-warn"
               bind:value={warnText}
               rows="6"
-              class="mt-3 {FIELD} text-sm leading-relaxed text-gray-900 dark:text-gray-100 focus:outline-none focus:border-gray-500"
+              class="mt-3 {FIELD} text-sm leading-relaxed text-gray-900 dark:text-gray-100 focus:outline-hidden focus:border-gray-500"
             ></textarea>
             <div class="mt-2 flex flex-wrap gap-2">
               <a
@@ -700,7 +700,7 @@
                 <li>
                   <button
                     type="button"
-                    class="w-full flex items-center gap-2.5 px-2 py-2.5 text-left rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
+                    class="w-full flex items-center gap-2.5 px-2 py-2.5 text-left rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-hidden focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800"
                     on:click={() => tryExample(ex.url)}
                   >
                     <span
@@ -771,7 +771,7 @@
     <button
       type="button"
       data-guide="vetty"
-      class="vetty pointer-events-auto rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+      class="vetty pointer-events-auto rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gray-400"
       aria-label={open ? `Close ${NAME}` : `Open ${NAME}, the url.vet helper`}
       aria-expanded={open}
       title="{NAME} (press ?)"

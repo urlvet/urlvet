@@ -67,7 +67,7 @@
       >
         <div class="flex items-center gap-3">
           <!-- Verdict dot -->
-          <span class="w-2 h-2 rounded-full flex-shrink-0 {verdictDot(scan.verdict)}"></span>
+          <span class="w-2 h-2 rounded-full shrink-0 {verdictDot(scan.verdict)}"></span>
 
           <!-- Domain -->
           <p class="flex-1 min-w-0 text-sm text-gray-800 dark:text-gray-200 font-mono truncate">
@@ -76,7 +76,7 @@
 
           <!-- Verdict badge -->
           <span
-            class="flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full border {verdictColor(
+            class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full border {verdictColor(
               scan.verdict
             )}"
           >
@@ -85,14 +85,14 @@
 
           <!-- Score -->
           <span
-            class="flex-shrink-0 text-sm font-bold tabular-nums {verdictTextColor(scan.verdict)}"
+            class="shrink-0 text-sm font-bold tabular-nums {verdictTextColor(scan.verdict)}"
             >{scan.score}</span
           >
 
           <!-- Copy link -->
           <button
             on:click={() => copyScanLink(scan)}
-            class="flex-shrink-0 p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="shrink-0 p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Copy URL"
             title="Copy URL"
           >
@@ -128,7 +128,7 @@
             href={shareLink(scan)}
             target="_blank"
             rel="noopener noreferrer"
-            class="flex-shrink-0 p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="shrink-0 p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Open scan in new tab"
             title="Open scan in new tab"
           >
@@ -157,18 +157,18 @@
           <!-- Cached badge -->
           {#if scan.cached}
             <span
-              class="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 font-mono"
+              class="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 font-mono"
               >cached</span
             >
           {/if}
 
           <!-- Duration -->
-          <span class="flex-shrink-0 text-gray-500 dark:text-gray-400 tabular-nums"
+          <span class="shrink-0 text-gray-500 dark:text-gray-400 tabular-nums"
             >{scan.duration}</span
           >
 
           <!-- Time -->
-          <span class="flex-shrink-0 text-gray-400 dark:text-gray-600 tabular-nums"
+          <span class="shrink-0 text-gray-400 dark:text-gray-600 tabular-nums"
             >{relativeTime(scan.time)}</span
           >
         </div>

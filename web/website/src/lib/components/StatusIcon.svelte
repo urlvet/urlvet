@@ -10,7 +10,7 @@
 </script>
 
 <svg
-  class="w-4 h-4 flex-shrink-0"
+  class="w-4 h-4 shrink-0"
   fill="none"
   stroke="currentColor"
   stroke-width="2"

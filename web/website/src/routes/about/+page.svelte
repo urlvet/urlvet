@@ -102,7 +102,7 @@
     <h2 class="mt-2 font-serif text-3xl md:text-4xl tracking-[-0.01em]">Why I built it</h2>
     <!-- A letter: straight into the words, signed once at the end. -->
     <figure
-      class="relative mt-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-7 md:px-10 md:py-9 shadow-sm shadow-black/[0.03]"
+      class="relative mt-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-7 md:px-10 md:py-9 shadow-xs shadow-black/[0.03]"
     >
       <span
         class="block h-9 font-serif text-[4.5rem] leading-none text-accent-light/40 dark:text-accent-dark/40 select-none"
@@ -144,7 +144,7 @@
           <img
             src="/team/abhizaik.jpg"
             alt=""
-            class="w-12 h-12 rounded-full flex-shrink-0 grayscale-[30%] group-hover:grayscale-0 transition"
+            class="w-12 h-12 rounded-full shrink-0 grayscale-[30%] group-hover:grayscale-0 transition"
             loading="lazy"
           />
           <span>
@@ -192,7 +192,7 @@
             {#each list.items as item}
               <li class="flex gap-2.5">
                 <span
-                  class="mt-[0.55em] w-1.5 h-1.5 rounded-full flex-shrink-0 {list.dot}"
+                  class="mt-[0.55em] w-1.5 h-1.5 rounded-full shrink-0 {list.dot}"
                   aria-hidden="true"
                 ></span>
                 <span>{item}</span>

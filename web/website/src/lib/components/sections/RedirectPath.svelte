@@ -93,7 +93,7 @@
       {/if}
 
       <span
-        class="relative mt-1.5 w-[11px] h-[11px] flex-shrink-0 rounded-full {last
+        class="relative mt-1.5 w-[11px] h-[11px] shrink-0 rounded-full {last
           ? (VERDICT_DOT[verdict ?? ''] ?? 'bg-gray-500')
           : hop.offSite
             ? 'bg-yellow-500'

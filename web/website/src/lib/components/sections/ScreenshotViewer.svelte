@@ -38,7 +38,7 @@
   {:else if screenshotUrl}
     <button
       type="button"
-      class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+      class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-hidden focus:ring-2 focus:ring-gray-400"
       on:click={() => (showModal = true)}
       aria-label="View full-size screenshot"
     >
@@ -79,7 +79,7 @@
       <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Website Screenshot</p>
       <div class="flex items-center gap-2 text-xs text-gray-500">
         <svg
-          class="w-3.5 h-3.5 flex-shrink-0"
+          class="w-3.5 h-3.5 shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -101,7 +101,7 @@
       <h4 class="text-sm font-semibold text-gray-300 mb-2">Website Screenshot</h4>
       <button
         type="button"
-        class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+        class="w-full p-0 border-0 bg-transparent cursor-pointer rounded-lg focus:outline-hidden focus:ring-2 focus:ring-gray-400"
         on:click={() => (showModal = true)}
         aria-label="View full-size screenshot"
       >
@@ -124,7 +124,7 @@
     on:click={() => (showModal = false)}
   >
     <button
-      class="fixed top-4 right-4 z-[10000] flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors backdrop-blur-sm"
+      class="fixed top-4 right-4 z-[10000] flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors backdrop-blur-xs"
       on:click={() => (showModal = false)}
       aria-label="Close screenshot"
     >

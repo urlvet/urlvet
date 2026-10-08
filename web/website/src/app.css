@@ -1,8 +1,50 @@
 @import './lib/styles/fonts.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Dark mode follows the .dark class on <html>, not the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Warm neutrals: cream paper in light mode, warm near-black in dark mode. */
+  --color-gray-50: #faf7f2;
+  --color-gray-100: #f3ede2;
+  --color-gray-200: #e6dfd2;
+  --color-gray-300: #d3cab9;
+  --color-gray-400: #a69c8c;
+  --color-gray-500: #7c7366;
+  --color-gray-600: #5c5449;
+  --color-gray-700: #3f3a33;
+  --color-gray-800: #2a2622;
+  --color-gray-900: #1a1714;
+  --color-gray-950: #0f0d0b;
+
+  /* Brand accent (logo dot, tagline underline, bullets). Muted blue that sits well on
+     the warm palette; green stays reserved for the "Safe" meaning. */
+  --color-accent-light: #3461c9;
+  --color-accent-dark: #8eb0ff;
+
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Handwriting, for the signature on the About page only. */
+  --font-signature: 'La Belle Aurore', 'Instrument Serif', cursive;
+}
+
+/* Tailwind v4 changed two defaults; keep the v3 behaviour the markup was written for. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 body {
   font-family:

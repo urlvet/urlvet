@@ -270,7 +270,7 @@
               >
                 <span class="flex-1 min-w-0 truncate">{link}</span>
                 <span
-                  class="flex-shrink-0 font-sans text-xs text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
+                  class="shrink-0 font-sans text-xs text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
                   >Check →</span
                 >
               </button>

@@ -36,7 +36,7 @@
           <ul class="mt-4 space-y-2.5 text-[15px] leading-snug text-gray-800 dark:text-gray-200">
             {#each g.items as r}
               <li class="flex items-start gap-3">
-                <span class="mt-[0.55em] h-1 w-1 rounded-full flex-shrink-0 {g.dot}"></span>
+                <span class="mt-[0.55em] h-1 w-1 rounded-full shrink-0 {g.dot}"></span>
                 <span class="break-words min-w-0">{r}</span>
               </li>
             {/each}

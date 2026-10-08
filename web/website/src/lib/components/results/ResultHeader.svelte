@@ -46,12 +46,12 @@
       <span
         class="min-w-0 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gray-300 dark:border-gray-800 font-mono text-[13px] text-gray-800 dark:text-gray-200"
       >
-        <Icon path={ICON.globe} class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+        <Icon path={ICON.globe} class="w-3.5 h-3.5 text-gray-400 shrink-0" />
         <span class="truncate">{domain}</span>
       </span>
     </div>
 
-    <div class="flex-shrink-0 flex items-center gap-2">
+    <div class="shrink-0 flex items-center gap-2">
       <button
         type="button"
         class="{PILL_OUTLINE} p-2.5 sm:px-4 sm:py-2 {reportOpen

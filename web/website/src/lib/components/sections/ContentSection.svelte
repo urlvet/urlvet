@@ -140,7 +140,7 @@
       {#if forms.length || iframes.length}
         <button
           type="button"
-          class="ml-auto inline-flex items-center gap-1 font-mono text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus-visible:underline"
+          class="ml-auto inline-flex items-center gap-1 font-mono text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-hidden focus-visible:underline"
           aria-expanded={showDetails}
           on:click={() => (showDetails = !showDetails)}
         >
@@ -175,7 +175,7 @@
                 >Form {i + 1}</span
               >
               <span
-                class="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold uppercase bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                class="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-semibold uppercase bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
                 >{form.method}</span
               >
               {#if form.is_hidden}
@@ -212,7 +212,7 @@
             <dl class="px-3 py-2.5 space-y-2 text-sm">
               <div class="flex flex-col sm:flex-row sm:gap-3">
                 <dt
-                  class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                  class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
                 >
                   Sends to
                 </dt>
@@ -233,14 +233,14 @@
               {#if form.submit_texts?.length}
                 <div class="flex flex-col sm:flex-row sm:gap-3">
                   <dt
-                    class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                    class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
                   >
                     Buttons
                   </dt>
                   <dd class="flex flex-wrap gap-1 min-w-0">
                     {#each form.submit_texts as text}
                       <span
-                        class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300 break-all"
+                        class="px-2 py-0.5 rounded-sm border border-gray-300 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300 break-all"
                         >{text}</span
                       >
                     {/each}
@@ -250,7 +250,7 @@
               {#if form.inputs?.length}
                 <div class="flex flex-col sm:flex-row sm:gap-3">
                   <dt
-                    class="sm:w-28 flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
+                    class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
                   >
                     Fields
                   </dt>

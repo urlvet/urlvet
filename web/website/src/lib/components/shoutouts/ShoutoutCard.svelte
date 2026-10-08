@@ -25,12 +25,12 @@
   draggable="false"
   class="group flex flex-col gap-3 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-left cursor-pointer {variant ===
   'ticker'
-    ? 'flex-shrink-0 w-72 hover:border-gray-400 dark:hover:border-gray-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30 transition-all duration-200'
+    ? 'shrink-0 w-72 hover:border-gray-400 dark:hover:border-gray-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30 transition-all duration-200'
     : 'w-full h-[230px]'}"
 >
   <div class="flex items-center gap-3">
     <!-- avatar: initial in a ringed circle, source badge on the corner -->
-    <div class="relative flex-shrink-0">
+    <div class="relative shrink-0">
       <div class="w-10 h-10 rounded-full p-[3px] ring-1 ring-gray-200 dark:ring-gray-800">
         <div
           class="w-full h-full rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-serif text-lg leading-none text-gray-700 dark:text-gray-300"

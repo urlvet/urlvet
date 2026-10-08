@@ -248,7 +248,7 @@
   }
   @keyframes checked {
     45% {
-      color: theme("colors.gray.700");
+      color: var(--color-gray-700);
     }
   }
   :global(.dark) .intro .url {
@@ -256,7 +256,7 @@
   }
   @keyframes checked-dark {
     45% {
-      color: theme("colors.gray.300");
+      color: var(--color-gray-300);
     }
   }
   @keyframes drop {

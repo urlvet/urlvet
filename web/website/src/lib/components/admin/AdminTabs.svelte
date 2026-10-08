@@ -28,7 +28,7 @@
       type="button"
       on:click={() => onSelect(tab.id)}
       aria-current={activeTab === tab.id ? "page" : undefined}
-      class="flex-shrink-0 inline-flex items-center gap-1 sm:gap-1.5 py-3 border-b-2 text-[13px] sm:text-sm whitespace-nowrap transition-colors {activeTab ===
+      class="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 py-3 border-b-2 text-[13px] sm:text-sm whitespace-nowrap transition-colors {activeTab ===
       tab.id
         ? 'border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100 font-medium'
         : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-gray-100'}"

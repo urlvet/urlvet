@@ -57,7 +57,7 @@
           placeholder="Admin password"
           autocomplete="current-password"
           disabled={loggingIn}
-          class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2.5 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 disabled:opacity-50"
+          class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2.5 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-hidden focus:border-gray-400 dark:focus:border-gray-600 disabled:opacity-50"
         />
       </div>
       <button

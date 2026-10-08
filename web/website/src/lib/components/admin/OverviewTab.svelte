@@ -122,7 +122,7 @@
         <div class="space-y-2.5">
           {#each stats.top_domains as item, i}
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-400 dark:text-gray-600 w-4 text-right flex-shrink-0"
+              <span class="text-xs text-gray-400 dark:text-gray-600 w-4 text-right shrink-0"
                 >{i + 1}</span
               >
               <div class="flex-1 min-w-0">
@@ -130,7 +130,7 @@
                   <span class="text-sm text-gray-700 dark:text-gray-300 font-mono truncate"
                     >{item.domain}</span
                   >
-                  <span class="text-xs text-gray-500 ml-2 flex-shrink-0">{item.count}</span>
+                  <span class="text-xs text-gray-500 ml-2 shrink-0">{item.count}</span>
                 </div>
                 <div class="h-1 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
                   <div

@@ -115,11 +115,11 @@
     <input
       bind:value={filterText}
       placeholder="Search keys…"
-      class="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600"
+      class="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-gray-400 dark:focus:border-gray-600"
     />
     <select
       bind:value={filterPrefix}
-      class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600"
+      class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full px-4 py-2 text-sm text-gray-900 dark:text-gray-200 focus:outline-hidden focus:border-gray-400 dark:focus:border-gray-600"
     >
       <option value="">All prefixes</option>
       {#each prefixes as p}
@@ -169,7 +169,7 @@
           <div class="flex items-center gap-3">
             <button
               on:click={() => toggleExpand(entry.key)}
-              class="flex-shrink-0 text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              class="shrink-0 text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               aria-label={expanded ? "Collapse" : "Expand"}
             >
               <svg
@@ -192,7 +192,7 @@
             <button
               on:click={() => deleteKey(entry.key)}
               disabled={deletingKey === entry.key}
-              class="flex-shrink-0 ml-1 p-1.5 rounded-md text-gray-300 dark:text-gray-700 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40"
+              class="shrink-0 ml-1 p-1.5 rounded-md text-gray-300 dark:text-gray-700 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40"
               aria-label="Delete key"
               title="Delete key"
             >
@@ -213,11 +213,11 @@
           </div>
           <div class="flex items-center gap-2 mt-1.5 pl-7">
             <span
-              class="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700"
+              class="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700"
               >{entry.prefix}</span
             >
             <span
-              class="flex-shrink-0 text-xs font-medium {ttlColor(entry.ttl_seconds)} tabular-nums"
+              class="shrink-0 text-xs font-medium {ttlColor(entry.ttl_seconds)} tabular-nums"
               >{formatTTL(entry.ttl_seconds)}</span
             >
           </div>

@@ -12,7 +12,7 @@
   <p class="font-serif text-3xl md:text-4xl tracking-[-0.01em] leading-tight">
     Got a link you're <span class="italic">unsure about?</span>
   </p>
-  <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto flex-shrink-0">
+  <a href="/" class="{PILL_SOLID} px-6 py-3 self-start sm:self-auto shrink-0">
     Check it now
     <Icon path={ICON.arrowRight} />
   </a>
