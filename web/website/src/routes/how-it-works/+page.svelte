@@ -293,8 +293,7 @@
                     {signal.text}
                   </span>
                   <span
-                    class="shrink-0 font-mono text-[11px] whitespace-nowrap {signal.kind ===
-                    'risk'
+                    class="shrink-0 font-mono text-[11px] whitespace-nowrap {signal.kind === 'risk'
                       ? 'text-red-600 dark:text-red-400'
                       : signal.kind === 'trust'
                         ? 'text-emerald-700 dark:text-emerald-400'

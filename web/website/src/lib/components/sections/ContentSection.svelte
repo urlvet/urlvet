@@ -211,9 +211,7 @@
             </div>
             <dl class="px-3 py-2.5 space-y-2 text-sm">
               <div class="flex flex-col sm:flex-row sm:gap-3">
-                <dt
-                  class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
-                >
+                <dt class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5">
                   Sends to
                 </dt>
                 <dd class="min-w-0">
@@ -232,9 +230,7 @@
               </div>
               {#if form.submit_texts?.length}
                 <div class="flex flex-col sm:flex-row sm:gap-3">
-                  <dt
-                    class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
-                  >
+                  <dt class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5">
                     Buttons
                   </dt>
                   <dd class="flex flex-wrap gap-1 min-w-0">
@@ -249,9 +245,7 @@
               {/if}
               {#if form.inputs?.length}
                 <div class="flex flex-col sm:flex-row sm:gap-3">
-                  <dt
-                    class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5"
-                  >
+                  <dt class="sm:w-28 shrink-0 text-xs text-gray-500 dark:text-gray-400 sm:pt-0.5">
                     Fields
                   </dt>
                   <dd class="flex flex-col gap-1 min-w-0">

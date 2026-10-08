@@ -216,8 +216,7 @@
               class="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700"
               >{entry.prefix}</span
             >
-            <span
-              class="shrink-0 text-xs font-medium {ttlColor(entry.ttl_seconds)} tabular-nums"
+            <span class="shrink-0 text-xs font-medium {ttlColor(entry.ttl_seconds)} tabular-nums"
               >{formatTTL(entry.ttl_seconds)}</span
             >
           </div>

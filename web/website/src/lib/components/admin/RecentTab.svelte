@@ -84,8 +84,7 @@
           </span>
 
           <!-- Score -->
-          <span
-            class="shrink-0 text-sm font-bold tabular-nums {verdictTextColor(scan.verdict)}"
+          <span class="shrink-0 text-sm font-bold tabular-nums {verdictTextColor(scan.verdict)}"
             >{scan.score}</span
           >
 
@@ -163,8 +162,7 @@
           {/if}
 
           <!-- Duration -->
-          <span class="shrink-0 text-gray-500 dark:text-gray-400 tabular-nums"
-            >{scan.duration}</span
+          <span class="shrink-0 text-gray-500 dark:text-gray-400 tabular-nums">{scan.duration}</span
           >
 
           <!-- Time -->

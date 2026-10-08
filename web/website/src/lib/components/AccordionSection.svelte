@@ -47,9 +47,7 @@
     >
       <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
     </svg>
-    <span class="shrink-0 text-[15px] font-medium text-gray-900 dark:text-gray-100"
-      >{title}</span
-    >
+    <span class="shrink-0 text-[15px] font-medium text-gray-900 dark:text-gray-100">{title}</span>
     <span class="flex-1 min-w-0 flex justify-end">
       {#if status}
         <span
