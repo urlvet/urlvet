@@ -13,11 +13,12 @@
   let cardHeight = 0;
   let cardEl: HTMLDivElement;
 
-  const PAD = 8;
+  const DEFAULT_PAD = 8;
   const CARD_W = 320;
   const GAP = 14;
 
   $: step = steps[index];
+  $: PAD = step?.pad ?? DEFAULT_PAD;
   $: last = index === steps.length - 1;
 
   function targetEl(): HTMLElement | null {

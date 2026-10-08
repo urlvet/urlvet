@@ -2,56 +2,82 @@
 // steps whose target isn't on the page right now are skipped.
 
 /** landing: before a scan. results: once a result is on screen. */
-export type TourStep = { target: string; title: string; text: string; on: 'landing' | 'results' };
+export type TourStep = {
+  target: string;
+  title: string;
+  text: string;
+  on: 'landing' | 'results';
+  /** Room around the highlight, in px (default 8); less where neighbours are close. */
+  pad?: number;
+};
 
 export const TOUR_STEPS: TourStep[] = [
   {
     target: 'search',
     on: 'landing',
     title: 'Paste the link here',
-    text: 'Full link, shortened link, or just a domain like example.com. I handle the formatting.',
+    text: 'A full link, a short link, or just a name like example.com. You can paste a whole message too, and I’ll find the links in it.',
   },
   {
     target: 'paste',
     on: 'landing',
-    title: 'Or let me paste it',
-    text: 'One click pastes whatever is on your clipboard. Then hit Scan.',
+    pad: 2, // Scan sits right beside it
+    title: 'Or paste in one click',
+    text: 'This pastes whatever you last copied.',
+  },
+  {
+    target: 'scan',
+    on: 'landing',
+    title: 'Then press Scan',
+    text: 'Pressing Enter works too. The check takes a few seconds.',
   },
   {
     target: 'examples',
     on: 'landing',
-    title: 'Not sure what to try?',
-    text: 'These run real scans. The red ones are lookalikes spelled with Cyrillic letters.',
+    title: 'Just want to try it?',
+    text: 'These check real sites. The red ones are fakes with lookalike letters.',
   },
   {
     target: 'verdict',
     on: 'results',
-    title: 'The verdict',
-    text: 'Safe, Suspicious or Risky, with a trust score from 0 to 100 and a live screenshot of the page.',
+    title: 'The answer',
+    text: 'Safe, Suspicious or Risky, with a score out of 100. Higher is safer.',
+  },
+  {
+    target: 'screenshot',
+    on: 'results',
+    title: 'What the page looks like',
+    text: 'A picture of the page, so you can see it without opening it yourself.',
   },
   {
     target: 'flags',
     on: 'results',
-    title: 'Why I said that',
-    text: 'Red flags pushed the score down, green flags pushed it up. Every reason is listed.',
+    title: 'Why',
+    text: 'Red flags are what worried me, green flags what reassured me.',
   },
   {
     target: 'sections',
     on: 'results',
-    title: 'The full breakdown',
-    text: 'Each section has a one-glance status on the right. Open any of them for the details.',
+    title: 'All the details',
+    text: 'Open any row to see exactly what I checked. The dot on the right is the short answer.',
   },
   {
     target: 'report',
     on: 'results',
     title: 'Think I got it wrong?',
-    text: 'Report it. A human reads every report, and it helps me get better.',
+    text: 'Tell us. A person reads every report.',
   },
   {
     target: 'share',
     on: 'results',
     title: 'Share the result',
-    text: 'Send it to whoever sent you the link. They will see the verdict without scanning again.',
+    text: 'Send it to whoever sent you the link, so they can see it too.',
+  },
+  {
+    target: 'learn-more',
+    on: 'landing',
+    title: 'Want to know more?',
+    text: '“How it works” explains every check. “Privacy” says what happens to the links you check.',
   },
 ];
 

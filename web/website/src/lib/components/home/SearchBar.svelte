@@ -14,7 +14,7 @@
 
   // The longest hint that fits the box in full; mentions whole messages when there's room.
   const HINTS = [
-    "Paste a link, or a whole WhatsApp message",
+    "Paste a link, or a whole message with links in it",
     "Paste a link or a message",
     "Paste link or message",
     "Paste a link",
@@ -122,6 +122,7 @@
     </button>
     <button
       type="submit"
+      data-guide="scan"
       class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 rounded-full bg-gray-900 dark:bg-gray-100 text-gray-50 dark:text-gray-900 text-sm font-medium hover:bg-gray-700 dark:hover:bg-white transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400 dark:focus-visible:ring-offset-gray-900"
       disabled={loading}
       aria-busy={loading}

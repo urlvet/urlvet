@@ -18,15 +18,13 @@
       : "Screenshot unavailable — the site may be blocking automated access or failed to respond.";
 </script>
 
-<div
-  data-guide="verdict"
-  class="flex flex-col md:flex-row gap-4 items-stretch animate-fadeIn delay-100"
->
-  <div class="flex-1 min-w-0">
+<div class="flex flex-col md:flex-row gap-4 items-stretch animate-fadeIn delay-100">
+  <div data-guide="verdict" class="flex-1 min-w-0">
     <VerdictCard {verdict} finalScore={score} {unreachable} />
   </div>
   {#if screenshotLoading || screenshotUrl}
     <div
+      data-guide="screenshot"
       class="md:w-56 md:flex-shrink-0 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 flex flex-col gap-2"
     >
       <p
