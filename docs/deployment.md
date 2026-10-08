@@ -39,6 +39,8 @@ LOG_TIMEZONE=UTC
 LOG_DIR=logs
 ```
 
+Threat feeds are optional and also set in `server/.env`. PhishTank's list is on with no key; `URLHAUS_AUTH_KEY` and `SAFE_BROWSING_API_KEY` are free and need no card. Each feed has its own licence, so check it fits your use: see [configuration.md](configuration.md#threat-feeds-also-serverenv). Downloaded lists are cached in `/app/data/feeds`, on the backend's data volume, so they survive restarts and rebuilds.
+
 Create the Compose env file (used for Valkey password substitution):
 
 ```bash

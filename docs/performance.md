@@ -2,7 +2,7 @@
 
 ## Scan latency
 
-A full analysis (`/api/v1/analyze`) runs 18 checks concurrently. Wall time is dominated by the slowest check in the batch.
+A full analysis (`/api/v1/analyze`) runs 21 checks concurrently. Wall time is dominated by the slowest check in the batch.
 
 | Scenario | Typical latency |
 |---|---|
@@ -11,6 +11,7 @@ A full analysis (`/api/v1/analyze`) runs 18 checks concurrently. Wall time is do
 | Cache miss — with DNS + TLS + WHOIS | 400–900 ms |
 | Cache miss — with content fetch + screenshot | 2–15 s |
 | Cache miss — with slow WHOIS server | up to 30 s |
+| Short link | + 0.5–8 s per hop to find the destination, then a full scan of it |
 
 Screenshot is the single biggest latency contributor. It runs headless Chrome, navigates to the page, and waits for network idle — this can take 5–30s on slow or complex pages.
 
@@ -18,9 +19,11 @@ Screenshot is the single biggest latency contributor. It runs headless Chrome, n
 
 ## Concurrency model
 
-18 goroutines launch simultaneously via `sync.WaitGroup`. Each goroutine is independent — a slow or hung check does not block others. Panics are recovered per-goroutine so one failing check does not abort the request.
+21 goroutines launch simultaneously via `sync.WaitGroup`. Each goroutine is independent — a slow or hung check does not block others. Panics are recovered per-goroutine so one failing check does not abort the request.
 
-Go goroutines are cheap (~2KB initial stack, grows on demand). 18 concurrent goroutines per request adds negligible scheduling overhead.
+Go goroutines are cheap (~2KB initial stack, grows on demand). 21 concurrent goroutines per request adds negligible scheduling overhead.
+
+Threat lists are matched in memory, so they add no per-scan network call. Google Safe Browsing is one HTTPS request per URL (cached for an hour).
 
 ---
 
@@ -42,7 +45,7 @@ At the 256MB Valkey memory limit with `allkeys-lru` eviction, the cache holds ro
 
 | Container | Typical RAM | CPU (idle) |
 |---|---|---|
-| `urlvet-backend` | 50–150 MB | < 1% |
+| `urlvet-backend` | 60–170 MB (the threat lists add about 10 MB for ~85,000 URLs) | < 1% |
 | `urlvet-web` | 20–50 MB (Nginx) | < 1% |
 | `urlvet-chrome` | 300–600 MB | < 1% |
 | `urlvet-valkey` | 10–256 MB (bounded by `maxmemory`) | < 1% |

@@ -4,10 +4,12 @@
 
 **sketchy link? just url.vet it**
 
+**Website: [url.vet](https://url.vet)**
+
 
 Open-source phishing detection engine for URLs and domains — paste any link and get a trust score, a fully explainable verdict, and a shareable security report with live page preview, all in real time. No black-box ML result. Every signal explained.
 
-**18 concurrent analyzers · 33 signals · DNS · TLS · domain info · typosquatting · redirect chains · content analysis · PhishTank · REST API · Chrome extension · Docker · self-hostable**
+**21 concurrent analyzers · 39 signals · DNS · TLS · domain info · typosquatting · redirect chains · short-link following · content analysis · threat feeds · REST API · Chrome extension · Docker · self-hostable**
 
 > Open-source self-hostable alternative to VirusTotal, CheckPhish, and URLScan.io
 
@@ -34,7 +36,7 @@ Open-source phishing detection engine for URLs and domains — paste any link an
 
 ![Phishing Detection Demo](assets/demo.gif)
 
-Live demo: https://url.vet &nbsp;_(urlvet)_
+Try it at [url.vet](https://url.vet), free and with no signup.
 
 
 ## Quick Start
@@ -54,7 +56,7 @@ Detailed setup guide: [docs/setup.md](docs/setup.md)
 ## At a Glance
 
 - Live scan, instant results
-- 18 analyzers, 33 signals, fully explainable
+- 21 analyzers, 39 signals, fully explainable
 - HTTP API + Web UI + Chrome extension
 - Explainable scoring (no black-box ML)
 - Simple Docker setup
@@ -72,10 +74,12 @@ Detailed setup guide: [docs/setup.md](docs/setup.md)
 | Detailed technical insights | ✅ | ❌ | ❌ | ✅ | Partial |
 | Live page preview | ✅ | ❌ | ❌ | ✅ | ✅ |
 | Detection using AI/ML | ❌ | ✅ | ✅ | Partial | ✅ |
-| Known phishing database coverage | Partial | ✅ | ✅ | Partial | Partial |
-| Scan multiple URLs at once | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Known phishing database coverage | ✅¹ | ✅ | ✅ | Partial | Partial |
+| Scan multiple URLs at once | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Browser protection | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Open source | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+¹ Checks PhishTank, URLhaus and Google Safe Browsing. On a self-hosted copy, URLhaus and Safe Browsing need free API keys.
 
 Fast scanners (like Google Safe Browsing) give you a verdict from database lookup with no explanation or live scanning. Deep crawlers (like URLScan.io) take too long. url.vet bridges the gap by doing live analysis with per-signal explanations in real time — and it's open-source.
 
@@ -84,6 +88,7 @@ Fast scanners (like Google Safe Browsing) give you a verdict from database looku
 ## Who This Is For
 
 - End users checking suspicious links
+- Privacy-conscious people: no accounts, cookies or trackers, and no IPs or scanned links in logs. The sites you check see our server, never you
 - Developers integrating URL analysis
 - Security teams building detection pipelines
 - Researchers
@@ -116,9 +121,11 @@ Full response schema → [docs/api.md#example](docs/api.md#example)
 
 ## Detection Engine
 
-**18 concurrent goroutines** run across **7 signal categories**, producing **33 individual signals**. Every check emits a reason string — good, bad, or neutral — so the final score is always fully explainable. No black-box verdicts.
+**21 concurrent goroutines** run across **7 signal categories**, producing **39 individual signals**. Every check emits a reason string — good, bad, or neutral — so the final score is always fully explainable. No black-box verdicts.
 
 Score formula: `finalScore = clamp(50 + (trustScore − riskScore) × 0.5)` → **Risky** < 30 · **Suspicious** 30–64 · **Safe** ≥ 65
+
+Short links are followed first (through any further short links) and the page they lead to is what gets scanned.
 
 > 50 is the neutral baseline — a URL with no signals scores exactly 50 (Suspicious), the right default for an unknown URL. Trust signals pull the score up, risk signals pull it down, each weighted at 0.5× so neither dominates alone. Both scores are individually clamped to 0–100 before the formula runs, preventing a single catastrophic signal from drowning all other context.
 
@@ -126,18 +133,18 @@ Score formula: `finalScore = clamp(50 + (trustScore − riskScore) × 0.5)` → 
 
 1. Raw IP address as hostname _(common evasion tactic)_
 2. Punycode / IDN encoding _(lookalike domain spoofing)_
-3. URL shortener _(hides the true destination)_
-4. Excessive URL length _(abnormally long URLs used to hide destination or confuse parsers)_
-5. Excessive URL path depth _(deeply nested paths used to obscure malicious endpoints)_
+3. URL shortener _(followed to its destination; one that can't be followed is capped at Suspicious)_
+4. Excessive URL length _(over 150 characters; not counted on well-known sites)_
+5. Excessive URL path depth _(over 6 path segments; not counted on well-known sites)_
 6. Phishing keywords in URL path _(login, verify, secure, update…)_
 7. Excessive subdomain count
 8. Non-ASCII Unicode characters in hostname _(IDN homograph attack, e.g. аpple.com with Cyrillic а)_
 
 **HTTP / Network** _(4 checks, single HTTP request)_
 
-9. Redirect chain hop count
-10. Cross-domain redirect _(final destination differs from source domain)_
-11. HSTS support
+9. Redirect chain hop count _(only when the chain leaves the site)_
+10. Cross-domain redirect _(final destination differs from source domain, unless it's the same brand)_
+11. HSTS support _(read from the scanned site itself, not the last hop)_
 12. HTTP status code
 
 **DNS** _(3 checks)_
@@ -148,33 +155,39 @@ Score formula: `finalScore = clamp(50 + (trustScore − riskScore) × 0.5)` → 
 
 **TLS / SSL** _(2 checks, single TLS handshake)_
 
-16. TLS presence and hostname mismatch
+16. TLS presence, and a certificate issued for a different hostname
 17. Certificate chain — validity, expiry, issuer, CT log status, known-bad fingerprints
 
 **Domain Intelligence** _(6 checks)_
 
 18. Domain rank _(position in top-1M global popularity list)_
-19. TLD trust / risk / ICANN status
-20. Domain age via WHOIS _(newly registered = high risk)_
+19. TLD trust / risk / ICANN status _(subdomains on hosting services and site builders are judged on their own, not on the host's reputation)_
+20. Domain age via RDAP/WHOIS _(under 90 days = risk; over 1, 3 and 5 years = growing trust)_
 21. DNSSEC _(cryptographic DNS response integrity)_
 22. Shannon entropy score _(flags algorithmically generated domains)_
-23. Typosquatting & combo-squatting across 500+ known brands
+23. Typosquatting _(5,000 most-visited sites)_ & combo-squatting _(514 curated brands)_
 
-**Content Analysis** _(8 checks)_
+**Content Analysis** _(12 checks)_
 
 24. Login form on unranked or newly registered domain
 25. Payment form _(credit card, CVV fields)_
 26. Personal information form
 27. Hidden `<iframe>` _(credential theft / clickjacking vector)_
 28. Tracking pixels _(1×1 hidden images)_
-29. Brand name in page content vs. hosting domain
+29. Brand claimed in the page title vs. hosting domain _(514 brands; lookalike letters folded)_
 30. Form submitting to an external domain
 31. Password field over unencrypted HTTP
+32. Script or meta-refresh redirect _(to a raw IP or another site)_
+33. Host or CDN warning page _(Cloudflare's phishing interstitial, 451 takedowns)_
+34. Page inside a WordPress system folder _(phishing kits on hacked sites)_
+35. Program download _(capped at Suspicious on hosts anyone can upload to)_
 
-**Threat Intelligence** _(2 checks)_
+**Threat Intelligence** _(4 checks)_
 
-32. PhishTank confirmed phishing _(community-verified)_
-33. PhishTank reported phishing _(awaiting verification, 3 h cache)_
+36. Locally held threat lists _(PhishTank by default; URLhaus, OpenPhish opt-in)_
+37. Other pages on the same single-owner host listed
+38. Google Safe Browsing / Web Risk _(opt-in; Safe Browsing sees only hash prefixes)_
+39. PhishTank API _(only while its list isn't loaded)_
 
 ![url.vet Analyzer Pipeline](assets/pipeline.png)
 
@@ -204,20 +217,21 @@ Four containerized services on a shared Docker bridge network. The Go backend is
 1. URL submitted via the UI or REST API
 2. Backend validates and normalizes the URL (scheme inferred if missing)
 3. Valkey cache checked — a hit returns the full result immediately, no re-analysis
-4. On miss: 18 goroutines launch concurrently via `sync.WaitGroup`; panics are recovered per-task without failing the request
-5. Results collected → score aggregated → verdict assigned
-6. Complete result cached in Valkey (24 h TTL) and logged to scan history
-7. Response returned — trust score, verdict, per-signal reasons, redirect chain, page screenshot, per-task timings
+4. Short links are followed to their destination, which is scanned instead
+5. On miss: 21 goroutines launch concurrently via `sync.WaitGroup`; panics are recovered per-task without failing the request
+6. Results collected → score aggregated → verdict assigned
+7. Complete result cached in Valkey (24 h TTL) and logged to scan history
+8. Response returned — trust score, verdict, per-signal reasons, redirect chain, page screenshot, per-task timings
 
 ```text
 server/
   cmd/urlvet/         entry point
   internal/analyzer/    goroutine runner, task definitions, score aggregation
   internal/service/
-    checks/             18 individual analyzer implementations
+    checks/             individual analyzer implementations
     screenshot/         headless Chrome integration
     cache/              Valkey client
-    threatfeeds/        PhishTank client
+    threatfeeds/        threat lists, PhishTank, Safe Browsing, Web Risk
     typosquat/          brand similarity engine
 web/website/            SvelteKit UI
 web/chrome-extension/   browser extension
