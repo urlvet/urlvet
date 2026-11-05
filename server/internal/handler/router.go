@@ -31,6 +31,9 @@ func SetupRouter() *gin.Engine {
 	// (the scanned URL), and its recovery dumps request headers.
 	r := gin.New()
 	r.Use(middleware.Recovery(), middleware.RequestLogger())
+	if warn := configureClientIP(r); warn != nil {
+		r.Use(warn)
+	}
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins(),
