@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"context"
+	neturl "net/url"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
@@ -59,14 +60,26 @@ func (ipCheckTask) Run(in *Input, out *Output) error {
 
 type ipResolveTask struct{}
 
+// ipLookupHost is the name whose addresses are shown: the host that was
+// scanned, not its registered domain. A subdomain can point somewhere else
+// entirely, and the registered domain may not resolve at all (the fake
+// mparivahan.ldop.com resolved while ldop.com had no address).
+func ipLookupHost(in *Input) string {
+	if u, err := neturl.Parse(in.URL); err == nil && u.Hostname() != "" {
+		return strings.ToLower(u.Hostname())
+	}
+	return in.Domain
+}
+
 func (ipResolveTask) Name() string { return "ip_resolution" }
 func (ipResolveTask) Run(in *Input, out *Output) error {
+	host := ipLookupHost(in)
 	_, err := cachedTask(
 		context.Background(),
 		in.Cache,
-		"ip_resolution:"+in.Domain,
+		"ip_resolution:"+host,
 		constants.IPResolutionTTL,
-		func() ([]string, error) { return checks.GetIPAddress(in.Domain) },
+		func() ([]string, error) { return checks.GetIPAddress(host) },
 		func(o *Output, ips []string) { o.IPs = ips },
 		out,
 	)
