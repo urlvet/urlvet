@@ -37,3 +37,4 @@ Not in scope:
 - Use the latest version from the `main` branch.
 - Keep the backend behind a reverse proxy, and don't expose ports `8080`, `6379` or `9222` to the internet. See [docs/deployment.md](../docs/deployment.md).
 - If a CDN or a proxy with a public IP connects straight to the backend, set `TRUSTED_PROXIES` or `TRUSTED_PLATFORM`. See [docs/configuration.md](../docs/configuration.md#client-ip-and-rate-limiting).
+- If you use `TRUSTED_PLATFORM`, make sure only that platform can reach the backend, for example with a firewall that allows only its IP ranges.

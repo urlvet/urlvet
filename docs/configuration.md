@@ -15,7 +15,7 @@ All configuration is via environment variables. Copy `server/.env.example` → `
 | `CORS_ALLOWED_ORIGINS` | No | Comma-separated allowed origins (default `*`) — e.g. `https://url.vet,https://www.url.vet` |
 | `PORT` | No | HTTP port (default `8080`) |
 | `TRUSTED_PROXIES` | No | Addresses whose `X-Forwarded-For` / `X-Real-IP` the backend believes: comma-separated IPs or CIDRs. Default: loopback and private networks, which fits a reverse proxy on the same host or Docker network. `none` ignores the headers; `all` trusts anyone (the old, spoofable behaviour). See [Client IP and rate limiting](#client-ip-and-rate-limiting) |
-| `TRUSTED_PLATFORM` | No | Header a CDN or platform sets to the client IP, read before anything else: `cloudflare`, `flyio`, `google-app-engine`, or a header name. Only for a platform that connects to the backend directly. See [Client IP and rate limiting](#client-ip-and-rate-limiting) |
+| `TRUSTED_PLATFORM` | No | Header a CDN or platform sets to the client IP, read before anything else: `cloudflare`, `flyio`, `google-app-engine`, or a header name. Only for a platform that connects to the backend directly, and only if nothing else can reach the backend (firewall it to the platform's IP ranges). See [Client IP and rate limiting](#client-ip-and-rate-limiting) |
 | `LOG_TIMEZONE` | No | IANA timezone for log timestamps (default `UTC`) — e.g. `Asia/Kolkata`, `America/New_York` |
 | `LOG_DIR` | No | Directory for rotating daily log files — e.g. `logs`. Leave empty to disable file logging |
 | `ADMIN_PASSWORD_HASH` | Yes | Argon2id hash of the admin password — see [security.md](security.md#setup) |
@@ -41,6 +41,8 @@ Setting `TRUSTED_PROXIES` replaces the default list, so include every proxy in t
 **If every user hits the limit together**, the backend is probably keying on your proxy's address rather than your users'. That happens when the proxy (or a CDN) connects from a public IP the backend doesn't trust, and the backend logs a warning the first time it sees such a request. Set `TRUSTED_PROXIES` or `TRUSTED_PLATFORM` for it as above. `TRUSTED_PROXIES=all` brings back the behaviour from before these settings existed, where any client can choose its own IP.
 
 **`TRUSTED_PLATFORM` is believed from any address**, so it is only safe when nothing but that platform can reach the backend. If clients can connect directly (for example, to the server's IP), they can set the header themselves. When a local proxy sits between the platform and the backend, leave `TRUSTED_PLATFORM` unset and configure the proxy instead.
+
+If you use `TRUSTED_PLATFORM`, make sure only that platform can reach the backend, for example with a firewall that allows only its IP ranges. On a VPS, use your provider's firewall (see [deployment.md](deployment.md#5-firewall)): Docker-published ports skip UFW.
 
 **Private ranges include your LAN.** A machine on the same private network can still set its own IP. If that matters, set `TRUSTED_PROXIES` to just your proxy's address.
 

@@ -56,7 +56,7 @@ func configureClientIP(r *gin.Engine) gin.HandlerFunc {
 			platform = header
 		}
 		r.TrustedPlatform = platform
-		logger.Info("client IP: reading platform header", "header", platform)
+		logger.Info("client IP: reading platform header; only the platform must be able to reach the backend (firewall it to the platform's IP ranges)", "header", platform)
 	}
 
 	raw := strings.TrimSpace(os.Getenv("TRUSTED_PROXIES"))

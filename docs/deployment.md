@@ -194,6 +194,8 @@ Only expose ports 80 and 443 to the internet. All other ports (8080, 3000, 6379,
 
 Docker-published ports (`8080` and `3000` in `docker-compose.prod.yml`) skip UFW's rules, because Docker writes its own iptables rules. Block them with your provider's firewall (e.g. a DigitalOcean Cloud Firewall), or publish them on localhost only (`"127.0.0.1:8080:8080"`), which still works with Caddy or nginx on the host. Rate limiting keeps working if the port is reachable, since direct requests are keyed on their own address, but nothing should reach the backend without going through the proxy.
 
+**If you use `TRUSTED_PLATFORM`, make sure only that platform can reach the backend, for example with a firewall that allows only its IP ranges.** This applies when a CDN such as Cloudflare connects straight to the backend with no local proxy. Otherwise anyone who finds the server's IP can send the platform's header themselves and pick their own rate-limit key. For Cloudflare, allow 80 and 443 only from [its ranges](https://www.cloudflare.com/ips/) in your provider's firewall (a DigitalOcean Cloud Firewall is free), keep SSH open for yourself, and leave outbound traffic allowed, since scans fetch other sites.
+
 ```bash
 # UFW example
 sudo ufw allow 22/tcp    # SSH
