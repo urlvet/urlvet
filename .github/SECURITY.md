@@ -1,31 +1,39 @@
 # Security Policy
 
+## Reporting a Vulnerability
 
-##  Reporting a Vulnerability
+Please report security issues privately. **Don't open a public issue or PR.**
 
-If you discover a security vulnerability in this project:
+- **Preferred:** [Report a vulnerability](https://github.com/urlvet/urlvet/security/advisories/new) on GitHub. Only maintainers can see it.
+- **Or email** [hi@url.vet](mailto:hi@url.vet) with "Security" in the subject. If you don't hear back within 3 days, check your spam folder and email again, or use the GitHub form.
 
-1. **Do not open a GitHub issue or PR**
-2. **Email us directly** at: [hi@url.vet](mailto:hi@url.vet)
-3. Include:
-   - A detailed description
-   - Steps to reproduce
-   - Proof-of-concept (if available)
-   - Your contact information for follow-up
+Include:
 
-We aim to respond within **24 hours**.
+- What the issue is and what an attacker could do with it
+- Steps to reproduce, and a proof of concept if you have one
+- The version or commit you tested, and how it was deployed (Docker, behind a proxy or CDN, etc.)
 
-##  Responsible Disclosure Process
+## What happens next
 
-- We will acknowledge the report
-- Investigate and verify the issue
-- Work on a fix and notify you of progress
-- Public disclosure after a patch is released
+1. We reply within 3 days to say we've got it.
+2. We check the report and tell you whether we can reproduce it.
+3. We fix it and keep you updated. We aim to release a fix within 30 days of confirming the issue.
+4. For confirmed issues, we publish a [GitHub Security Advisory](https://github.com/urlvet/urlvet/security/advisories) and request a CVE when it's warranted. We credit you unless you'd rather not be named.
 
-##  Best Practices for Users
+Please keep the details private until the advisory is published. After that, you're welcome to publish your own write-up.
 
-- Always use the latest stable version
-- Avoid using modified or unofficial builds
-- Don’t expose the app to the public internet unless needed
+## Scope
 
+In scope: the backend API, the website, the browser extension, and the Docker setup in this repository.
 
+Not in scope:
+
+- Values the website shows on purpose, such as `PUBLIC_*` settings in `/_app/env.js`
+- Problems that need a misconfigured deployment, unless our docs told you to configure it that way
+- Volumetric DoS, and reports from automated scanners without a working proof of concept
+
+## Running your own instance
+
+- Use the latest version from the `main` branch.
+- Keep the backend behind a reverse proxy, and don't expose ports `8080`, `6379` or `9222` to the internet. See [docs/deployment.md](../docs/deployment.md).
+- If a CDN or a proxy with a public IP connects straight to the backend, set `TRUSTED_PROXIES` or `TRUSTED_PLATFORM`. See [docs/configuration.md](../docs/configuration.md#client-ip-and-rate-limiting).
