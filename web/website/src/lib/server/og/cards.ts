@@ -146,6 +146,8 @@ export function resultCard(domain: string, verdict: string, score: number | null
       flexDirection: 'column',
       justifyContent: 'space-between',
       padding: '56px 72px',
+      // satori 0.63+ sizes boxes like CSS's default (padding outside the width).
+      boxSizing: 'border-box',
     },
     glow(tone.glow, 0.16),
     h(

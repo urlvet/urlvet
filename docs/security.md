@@ -38,3 +38,5 @@ ADMIN_JWT_SECRET=<output>
 ### Logging in
 
 Visit `/admin`, enter your password, and you'll get a session valid for 24 hours. Sessions are stored in the browser tab — closing the tab signs you out.
+
+Login allows 5 attempts a minute per IP, separate from the API's general limit of 20 a minute. After that, it returns `429` until the minute is up. Use a long password anyway: the limit slows guessing, it doesn't stop it.

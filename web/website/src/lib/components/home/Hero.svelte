@@ -113,9 +113,9 @@
   </h1>
 
   <p
-    class="font-serif italic [word-spacing:0.08em] text-gray-700 dark:text-gray-300 {isLanding
-      ? 'mt-5 text-xl md:text-2xl'
-      : 'mt-3 text-xl'}"
+    class="font-sans font-medium tracking-[-0.01em] text-gray-700 dark:text-gray-300 {isLanding
+      ? 'mt-5 text-lg md:text-xl'
+      : 'mt-3 text-base md:text-lg'}"
   >
     <span class="sr-only">sketchy link? just url.vet it</span>
     <span
@@ -127,9 +127,8 @@
           <span bind:offsetWidth={restingWidth}>sketchy link?</span>
           {#each EXAMPLES as example, i}
             <span bind:offsetWidth={exampleWidths[i]}
-              ><span class="not-italic font-mono text-[0.72em] tracking-tight">{example}</span><span
-                class="caret"
-              ></span></span
+              ><span class="font-mono font-normal text-[0.88em] tracking-tight">{example}</span
+              ><span class="caret"></span></span
             >
           {/each}
         </span>
@@ -143,8 +142,8 @@
           sketchy link?
         {:else}
           <span
-            class="not-italic font-mono tracking-tight text-gray-900 dark:text-gray-100"
-            style="font-size: {0.72 * scale}em">{typed}</span
+            class="font-mono font-normal tracking-tight text-gray-900 dark:text-gray-100"
+            style="font-size: {0.88 * scale}em">{typed}</span
           ><span class="caret" aria-hidden="true"></span>
         {/if}
       </span>
@@ -152,6 +151,7 @@
         just
         <span class="relative inline-block"
           >url.vet<svg
+            class:draw={isLanding}
             class="absolute left-0 -bottom-0.5 w-full h-[0.22em] overflow-visible text-accent-light dark:text-accent-dark"
             viewBox="0 0 100 8"
             preserveAspectRatio="none"
@@ -172,7 +172,7 @@
   </p>
   {#if isLanding}
     <p
-      class="mt-3 font-serif text-gray-600 dark:text-gray-400 text-base md:text-[17px] [text-wrap:balance]"
+      class="mt-2 font-sans text-gray-500 dark:text-gray-400 text-sm md:text-[15px] [text-wrap:balance]"
     >
       Vet any URL for phishing, scams & suspicious redirects
     </p>
@@ -270,6 +270,20 @@
     }
   }
 
+  /* The underline under "url.vet" is drawn in left to right, like a pen stroke, once the
+     page loads. A clip reveals it, because dash tricks don't scale with the stroke. */
+  .draw {
+    animation: draw-in 0.7s cubic-bezier(0.6, 0, 0.3, 1) 0.6s both;
+  }
+  @keyframes draw-in {
+    from {
+      clip-path: inset(-50% 100% -50% 0);
+    }
+    to {
+      clip-path: inset(-50% 0 -50% 0);
+    }
+  }
+
   .slot {
     transition: width 0.35s ease;
   }
@@ -289,6 +303,7 @@
     .intro .dot,
     .intro .url,
     .intro .url::after,
+    .draw,
     .caret {
       animation: none !important;
     }

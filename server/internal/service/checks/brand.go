@@ -45,6 +45,7 @@ func isBrandsOwn(domain string, entry constants.BrandEntry) bool {
 
 func CheckBrandMismatch(domain string, pageTitle string) BrandResult {
 	domain = strings.ToLower(domain)
+	rawTitle := strings.ToLower(strings.TrimSpace(pageTitle))
 	pageTitle = withoutOwnAddress(foldTitle(pageTitle), domain)
 
 	res := BrandResult{
@@ -52,22 +53,49 @@ func CheckBrandMismatch(domain string, pageTitle string) BrandResult {
 	}
 
 	for brand, entry := range constants.HighValueBrands {
+		matched := titlePatternMatch(brand, rawTitle)
 		for _, kw := range append(entry.TitleKeywords, exactTitle(pageTitle, entry.ExactTitles)...) {
-			if containsWord(pageTitle, foldTitle(kw)) {
-				res.DetectedNames = append(res.DetectedNames, brand)
-				if !isBrandsOwn(domain, entry) {
-					res.BrandFound = brand
-					res.IsMismatch = true
-					if len(entry.OfficialDomains) > 0 {
-						res.OfficialDomain = entry.OfficialDomains[0]
-					}
-				}
+			if matched {
 				break
+			}
+			matched = containsWord(pageTitle, foldTitle(kw))
+		}
+		if !matched {
+			continue
+		}
+		res.DetectedNames = append(res.DetectedNames, brand)
+		if !isBrandsOwn(domain, entry) {
+			res.BrandFound = brand
+			res.IsMismatch = true
+			if len(entry.OfficialDomains) > 0 {
+				res.OfficialDomain = entry.OfficialDomains[0]
 			}
 		}
 	}
 
 	return res
+}
+
+// titlePatterns holds each brand's compiled TitlePatterns.
+var titlePatterns = func() map[string][]*regexp.Regexp {
+	m := map[string][]*regexp.Regexp{}
+	for brand, entry := range constants.HighValueBrands {
+		for _, p := range entry.TitlePatterns {
+			m[brand] = append(m[brand], regexp.MustCompile(p))
+		}
+	}
+	return m
+}()
+
+// titlePatternMatch reports whether the lowercased title fits one of the
+// brand's TitlePatterns.
+func titlePatternMatch(brand, title string) bool {
+	for _, re := range titlePatterns[brand] {
+		if re.MatchString(title) {
+			return true
+		}
+	}
+	return false
 }
 
 // exactTitle returns the one of titles the whole page title is, if any.
@@ -148,12 +176,20 @@ func foldTitle(s string) string {
 	return strings.Join(strings.Fields(titleSeparators.ReplaceAllString(folded, " ")), " ")
 }
 
-var titleSeparators = regexp.MustCompile(`[^\p{L}\p{N}.&+'’\-\s]+`)
+// Spacing vowel signs (Hindi "ा" in "सरकार") are part of a word, not separators.
+var titleSeparators = regexp.MustCompile(`[^\p{L}\p{M}\p{N}.&+'’\-\s]+`)
 
 // containsWord reports whether kw appears in s as a whole word or phrase, so
 // "netbank" (Commonwealth Bank) doesn't match "NetBanking" on another bank's page.
 func containsWord(s, kw string) bool {
-	isWordChar := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) }
+	isWordChar := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsMark(r) }
+	// Chinese and Japanese don't put spaces between words ("TP钱包官网正版下载"),
+	// so a keyword ending in one of their characters needs no boundary there.
+	unspaced := func(r rune) bool {
+		return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana)
+	}
+	first, _ := utf8.DecodeRuneInString(kw)
+	last, _ := utf8.DecodeLastRuneInString(kw)
 	for i := 0; ; {
 		j := strings.Index(s[i:], kw)
 		if j < 0 {
@@ -162,7 +198,8 @@ func containsWord(s, kw string) bool {
 		start, end := i+j, i+j+len(kw)
 		before, _ := utf8.DecodeLastRuneInString(s[:start])
 		after, _ := utf8.DecodeRuneInString(s[end:])
-		if (start == 0 || !isWordChar(before)) && (end == len(s) || !isWordChar(after)) {
+		if (start == 0 || !isWordChar(before) || unspaced(first) || unspaced(before)) &&
+			(end == len(s) || !isWordChar(after) || unspaced(last) || unspaced(after)) {
 			return true
 		}
 		i = start + 1

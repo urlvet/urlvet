@@ -63,6 +63,14 @@ var CustomerSiteHosts = map[string]struct{}{
 	"squarespace.com":     {}, // its own subdomains: ProviderSubdomains
 	"systeme.io":          {}, // its own subdomains: ProviderSubdomains
 	"flazio.com":          {}, // its own subdomains: ProviderSubdomains
+	"flazio.online":       {},
+	"teleporthq.app":      {}, // TeleportHQ site builder
+	"xano.io":             {}, // Xano backend instances
+	"usrfiles.com":        {}, // Wix user files
+	"preview-domain.com":  {}, // hosting preview addresses
+	"builtwithrocket.new": {}, // Rocket site builder
+	"jkub.com":            {}, // free subdomains
+	"ezua.com":            {}, // free subdomains
 	"zapier.app":          {}, // Zapier Interfaces
 	"4everland.app":       {}, // 4EVERLAND (IPFS) hosting
 	"itempurl.com":        {}, // SmarterASP.NET free sites

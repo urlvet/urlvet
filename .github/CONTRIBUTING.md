@@ -98,6 +98,20 @@ Frontend tests live in `web/website/src/` as `*.test.ts` files.
 Run `make test-frontend` with `--ui` via `npm run test:ui` in `web/website/` for an interactive browser UI.
 
 
+## Versioning
+
+url.vet is in beta, so versions stay below 1.0 (`0.MINOR.PATCH`). After `0.9` comes `0.10`, not `1.0`.
+
+- **Patch** (`0.4.1`): bug fixes, detection tweaks, list updates, small features. Upgrading needs no changes from self-hosters.
+- **Minor** (`0.5.0`): released on a schedule, roughly every 3–6 months, bundling the work on `main` since the last one. Also used early when upgrading needs action from self-hosters, such as a changed default or a removed setting. The release notes say what to change.
+- **Pre-releases** (`0.5.0-beta.1`, `0.5.0-rc.1`): for testing a minor release before it ships.
+- **1.0** comes when the API response format, configuration and upgrade path are stable enough to promise not to break them. It isn't reached by counting.
+
+The hosted site at url.vet deploys from `main` and doesn't wait for releases.
+
+To release: update [CHANGELOG.md](../CHANGELOG.md), merge `dev` into `main`, tag the merge commit (`git tag -a v0.4.0 -m "v0.4.0 (beta)"`), push the tag, and create a GitHub Release marked as a pre-release.
+
+
 ## Reporting Bugs
 
 1. Search existing issues first

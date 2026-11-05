@@ -37,7 +37,7 @@ At the 256MB Valkey memory limit with `allkeys-lru` eviction, the cache holds ro
 
 ## Rate limiting
 
-20 requests per minute per IP, enforced in the `RateLimiter` middleware backed by Valkey. Applies to all `/api/v1/` endpoints. Returns `429 Too Many Requests` with `Retry-After` and `X-RateLimit-*` headers.
+20 requests per minute per IP, enforced in the `RateLimiter` middleware backed by Valkey. Applies to all `/api/v1/` endpoints. Sets `X-RateLimit-*` headers, and over the limit returns `429 Too Many Requests` with `retry_after` (seconds) in the JSON body. Behind a proxy, the client IP comes from `X-Forwarded-For` only when the proxy is trusted; see [configuration.md](configuration.md#client-ip-and-rate-limiting).
 
 ---
 

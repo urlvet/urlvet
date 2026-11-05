@@ -105,6 +105,38 @@ sudo systemctl reload caddy
 
 Caddy provisions TLS certificates from Let's Encrypt automatically.
 
+Caddy replaces any `X-Forwarded-For` the client sent with the client's real address, and the backend trusts it because Caddy connects from the Docker gateway, a private address. So rate limiting works per user with no extra settings. See [configuration.md](configuration.md#client-ip-and-rate-limiting).
+
+### Behind Cloudflare
+
+With Cloudflare's proxy on (orange cloud), Caddy sees Cloudflare's addresses, not your users'. Left as is, the backend rate-limits per Cloudflare server, so unrelated users share a limit. Tell Caddy (2.7 or later) to trust Cloudflare and read `CF-Connecting-IP`, then pass the result on:
+
+```
+{
+    servers {
+        # Cloudflare's ranges from https://www.cloudflare.com/ips/ (they rarely
+        # change; check that page when upgrading).
+        trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+        client_ip_headers CF-Connecting-IP
+    }
+}
+
+yourdomain.com {
+    reverse_proxy localhost:3000
+}
+
+api.yourdomain.com {
+    reverse_proxy localhost:8080 {
+        # {client_ip} is CF-Connecting-IP for requests from Cloudflare and
+        # the connecting address for anything else, so a request sent
+        # straight to the server can't claim another IP.
+        header_up X-Forwarded-For {client_ip}
+    }
+}
+```
+
+The backend needs no change. Don't set `TRUSTED_PLATFORM=cloudflare` here: the backend would then believe `CF-Connecting-IP` from anyone who reaches Caddy directly, not just Cloudflare. If you build Caddy with the [caddy-cloudflare-ip](https://github.com/WeidiDeng/caddy-cloudflare-ip) module, `trusted_proxies cloudflare` replaces the static list and keeps it up to date.
+
 ---
 
 ## 4. Nginx alternative
@@ -143,17 +175,24 @@ server {
         proxy_pass http://localhost:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        # Required: without it nginx passes on whatever X-Forwarded-For the
+        # client sent, and the backend reads that first.
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 ```
 
 Use Certbot for certificates: `sudo certbot --nginx -d yourdomain.com -d api.yourdomain.com`
 
+Behind Cloudflare, use nginx's [realip module](https://nginx.org/en/docs/http/ngx_http_realip_module.html) so `$remote_addr` is the user's address: one `set_real_ip_from` line per [Cloudflare range](https://www.cloudflare.com/ips/), then `real_ip_header CF-Connecting-IP;`.
+
 ---
 
 ## 5. Firewall
 
 Only expose ports 80 and 443 to the internet. All other ports (8080, 3000, 6379, 9222) must remain internal.
+
+Docker-published ports (`8080` and `3000` in `docker-compose.prod.yml`) skip UFW's rules, because Docker writes its own iptables rules. Block them with your provider's firewall (e.g. a DigitalOcean Cloud Firewall), or publish them on localhost only (`"127.0.0.1:8080:8080"`), which still works with Caddy or nginx on the host. Rate limiting keeps working if the port is reachable, since direct requests are keyed on their own address, but nothing should reach the backend without going through the proxy.
 
 ```bash
 # UFW example

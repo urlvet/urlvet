@@ -53,7 +53,10 @@ func redirectTarget(resp Response) string {
 // victims to the phishing page, so the destination's good name can't be
 // borrowed; the link is judged itself, and the jump counts against it.
 func worthFollowing(src Response, dest string) bool {
-	return src.Features.Rank > 0 || src.Features.TLD.IsTrusted || !isVouchedDestination(dest)
+	// A customer's subdomain on a hosting platform isn't the platform: its
+	// rank, if any, is the platform's.
+	ranked := src.Features.Rank > 0 && !src.Features.TLD.IsHostingPlatform
+	return ranked || src.Features.TLD.IsTrusted || !isVouchedDestination(dest)
 }
 
 // originFindings collects the risks of the submitted link itself: how it's

@@ -31,6 +31,9 @@ func SetupRouter() *gin.Engine {
 	// (the scanned URL), and its recovery dumps request headers.
 	r := gin.New()
 	r.Use(middleware.Recovery(), middleware.RequestLogger())
+	if warn := configureClientIP(r); warn != nil {
+		r.Use(warn)
+	}
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins(),
@@ -88,8 +91,9 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/lists/threats", ThreatListHandler)
 		v1.GET("/lists/known-sites", KnownSitesHandler)
 
-		// Admin login — issues a signed session token
-		v1.POST("/admin/login", AdminLoginHandler)
+		// Admin login — issues a signed session token. 5 attempts a minute
+		// per IP on top of the global limit, to slow password guessing.
+		v1.POST("/admin/login", middleware.LoginRateLimiter(5, time.Minute), AdminLoginHandler)
 
 		// Admin — all routes require a valid Bearer token
 		admin := v1.Group("/admin")

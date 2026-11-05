@@ -149,6 +149,18 @@ func CheckTyposquatting(domain string) TyposquatResult {
 		}
 	}
 
+	// Short brands (hsbc, dhl, ups) are too common inside other words to look
+	// for anywhere in a name, but as a whole word beside a security word
+	// (hsbc-sec, dhl-verify) they're impersonation.
+	if b, ok := shortBrandBesideSecurityWord(inputSLD); ok && !isOfficial(strings.ToLower(domain), b.officialDomains) {
+		return TyposquatResult{
+			IsSuspicious:  true,
+			MatchedDomain: b.officialDomains[0],
+			MatchedBrand:  b.sld,
+			IsComboSquat:  true,
+		}
+	}
+
 	return TyposquatResult{}
 }
 
@@ -181,6 +193,116 @@ var genericBrandNames = map[string]struct{}{
 }
 
 var comboBrands = buildComboBrands()
+
+// shortBrands are curated brand names too short for comboBrands.
+var shortBrands = buildShortBrands()
+
+// buildShortBrands collects short brand names from every brand's official
+// domains. A name can belong to several entries (dhl to DHL and Deutsche
+// Post, xbox to Xbox and Minecraft), so their domains are merged rather than
+// letting map order pick one. The domains of the entry named after the brand
+// (whose first official domain is dhl.com) come first, in that entry's order,
+// since the first one is reported as the match.
+func buildShortBrands() map[string]comboBrand {
+	names := make([]string, 0, len(constants.HighValueBrands))
+	for name := range constants.HighValueBrands {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	own := map[string][]string{}   // from the entry named after the brand
+	other := map[string][]string{} // from entries that also own the name
+	for _, name := range names {
+		entry := constants.HighValueBrands[name]
+		for _, d := range entry.OfficialDomains {
+			sld := extractSLD(d)
+			_, generic := genericBrandNames[sld]
+			_, word := shortEverydayWords[sld]
+			if generic || word || len(sld) < 3 || len(sld) >= minComboLen {
+				continue
+			}
+			if extractSLD(entry.OfficialDomains[0]) == sld {
+				own[sld] = append(own[sld], entry.Domains()...)
+			} else {
+				other[sld] = append(other[sld], entry.Domains()...)
+			}
+		}
+	}
+
+	out := map[string]comboBrand{}
+	for _, m := range []map[string][]string{own, other} {
+		for sld, list := range m {
+			b := out[sld]
+			b.sld = sld
+			b.officialDomains = append(b.officialDomains, list...)
+			out[sld] = b
+		}
+	}
+	for sld, b := range out {
+		b.officialDomains = dedupe(b.officialDomains)
+		out[sld] = b
+	}
+	return out
+}
+
+// dedupe drops repeats from list, keeping the first of each.
+func dedupe(list []string) []string {
+	seen := make(map[string]struct{}, len(list))
+	out := list[:0]
+	for _, s := range list {
+		if _, ok := seen[s]; !ok {
+			seen[s] = struct{}{}
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// shortEverydayWords are short brand names that are also ordinary words in
+// domain names (web-security, cloud-update, free-online). visa and axis also
+// name real businesses beside these words: visa agencies (uk-visa-services)
+// and Axis Security.
+var shortEverydayWords = map[string]struct{}{
+	"ants": {}, "axis": {}, "bell": {}, "box": {}, "cash": {}, "cloud": {}, "cms": {}, "com": {},
+	"delta": {}, "force": {}, "free": {}, "gate": {}, "globe": {}, "gov": {}, "gouv": {},
+	"grab": {}, "jet": {}, "key": {}, "line": {}, "lido": {}, "live": {}, "mail": {},
+	"match": {}, "max": {}, "nsw": {}, "post": {}, "sat": {}, "sky": {}, "trip": {},
+	"visa": {}, "web": {}, "wise": {},
+}
+
+// securityWords are what phishing pairs a brand with in a domain.
+var securityWords = map[string]struct{}{
+	"sec": {}, "secure": {}, "security": {}, "login": {}, "logon": {}, "signin": {},
+	"verify": {}, "verification": {}, "account": {}, "accounts": {}, "auth": {},
+	"update": {}, "support": {}, "help": {}, "service": {}, "services": {},
+	"online": {}, "web": {}, "portal": {}, "wallet": {}, "billing": {}, "pay": {},
+	"payment": {}, "unlock": {}, "recovery": {}, "alert": {}, "confirm": {},
+	"tracking": {}, "track": {}, "delivery": {}, "parcel": {}, "customs": {},
+}
+
+// shortBrandBesideSecurityWord finds a short brand as a whole word of a
+// hyphenated name with a security word beside it ("hsbc-sec", "verify-dhl").
+func shortBrandBesideSecurityWord(sld string) (comboBrand, bool) {
+	words := strings.Split(sld, "-")
+	if len(words) < 2 {
+		return comboBrand{}, false
+	}
+	for i, w := range words {
+		b, ok := shortBrands[w]
+		if !ok {
+			continue
+		}
+		for _, j := range []int{i - 1, i + 1} {
+			if j < 0 || j >= len(words) {
+				continue
+			}
+			if _, sec := securityWords[words[j]]; sec {
+				return b, true
+			}
+		}
+	}
+	return comboBrand{}, false
+}
 
 func buildComboBrands() []comboBrand {
 	seen := map[string]bool{}
