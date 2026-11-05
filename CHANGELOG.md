@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/). Versions
 ### Security
 - Rate-limit bypass with a fake `X-Forwarded-For`: the header is now trusted only from private networks. New `TRUSTED_PROXIES` and `TRUSTED_PLATFORM` settings (see docs/configuration.md)
 - Admin login limited to 5 attempts a minute per IP
+- Updated website dependencies with security fixes (undici, Vite, Vitest, Satori)
 
 ## [0.3.0] – 2026-10-08 – Beta
 
