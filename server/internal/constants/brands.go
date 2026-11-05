@@ -16,6 +16,11 @@ type BrandEntry struct {
 	// generic to match inside a longer title ("Sign in to your account" alone
 	// is Microsoft's; "Sign in to your account | Acme" is anyone's).
 	ExactTitles []string
+	// TitlePatterns are regular expressions for title shapes too loose as
+	// phrases: "<name> :: Steam Profile" is Steam's own, but "steam profile"
+	// alone is every how-to article's. They're matched against the lowercased
+	// title as written, separators included.
+	TitlePatterns []string
 	// AlsoOfficial are more domains the brand runs (research.google,
 	// primevideo.com). They're the brand's own in every check, but unlike
 	// OfficialDomains their names aren't looked for inside other domains, so
@@ -41,7 +46,8 @@ var HighValueBrands = map[string]BrandEntry{
 		OfficialDomains: []string{"gmail.com", "google.com"},
 	},
 	"Google": {
-		TitleKeywords:   []string{"google account", "google drive", "google workspace", "google sign in"},
+		// "Google Accounts" is the title of Google's own sign-in page, which kits copy whole.
+		TitleKeywords:   []string{"google account", "google accounts", "google drive", "google workspace", "google sign in"},
 		Names:           []string{"google"},
 		OfficialDomains: []string{"google.com", "gmail.com"},
 		AlsoOfficial: []string{
@@ -319,7 +325,10 @@ var HighValueBrands = map[string]BrandEntry{
 		OfficialDomains: []string{"wellsfargo.com"},
 	},
 	"Citibank": {
-		TitleKeywords:   []string{"citibank", "citi bank"},
+		// Citi's home page is titled "... Investing | Citi.com", copied whole on
+		// citi.youngcodelord.com. The bare "citi" is in too many other words.
+		TitleKeywords:   []string{"citibank", "citi bank", "citi.com"},
+		ExactTitles:     []string{"Online Banking, Mortgages, Personal Loans, Investing | Citi"},
 		OfficialDomains: []string{"citibank.com", "citi.com"},
 	},
 	"HSBC": {
@@ -409,8 +418,25 @@ var HighValueBrands = map[string]BrandEntry{
 		TitleKeywords:   []string{"okx", "okex"},
 		OfficialDomains: []string{"okx.com", "okex.com"},
 	},
+	"iTrustCapital": {
+		TitleKeywords:   []string{"itrustcapital", "itrust capital"},
+		Names:           []string{"itrustcapital"},
+		OfficialDomains: []string{"itrustcapital.com"},
+	},
+	"Sushi": {
+		// Not the bare name, which is every restaurant's. "Swap | Sushi" is the
+		// title of the exchange's own swap page, copied on sushiswap.xyz.
+		TitleKeywords:   []string{"sushiswap", "sushi swap"},
+		ExactTitles:     []string{"Swap | Sushi"},
+		OfficialDomains: []string{"sushi.com"},
+	},
+	"TokenPocket": {
+		// "TP钱包" (TP wallet) is how Chinese download pages name it.
+		TitleKeywords:   []string{"tokenpocket", "tp钱包"},
+		OfficialDomains: []string{"tokenpocket.pro"},
+	},
 	"Gemini": {
-		TitleKeywords:   []string{"gemini crypto", "gemini exchange", "gemini login", "gemini log in", "gemini sign in", "gemini wallet"},
+		TitleKeywords:   []string{"gemini crypto", "gemini exchange", "gemini activetrader", "gemini login", "gemini log in", "gemini sign in", "gemini wallet"},
 		OfficialDomains: []string{"gemini.com"},
 	},
 	"MetaMask": {
@@ -443,8 +469,15 @@ var HighValueBrands = map[string]BrandEntry{
 	},
 
 	// ── Gaming ────────────────────────────────────────────────────────────────
+	"Codashop": {
+		// Game top-up shop; clones sell Mobile Legends "diamonds" that never arrive.
+		TitleKeywords:   []string{"codashop"},
+		OfficialDomains: []string{"codashop.com"},
+	},
 	"Steam": {
-		TitleKeywords:   []string{"steam login", "steam sign in", "steam log in", "steam account", "steam verification"},
+		TitleKeywords: []string{"steam login", "steam sign in", "steam log in", "steam account", "steam verification"},
+		// Copied profile and community pages (securevalveengine.com).
+		TitlePatterns:   []string{`^.+ :: steam profile$`, `^steam community :: .+`},
 		Names:           []string{"steam"},
 		OfficialDomains: []string{"steampowered.com", "steamcommunity.com", "store.steampowered.com"},
 	},
@@ -469,8 +502,9 @@ var HighValueBrands = map[string]BrandEntry{
 		OfficialDomains: []string{"nintendo.com", "accounts.nintendo.com"},
 	},
 	"Roblox": {
-		TitleKeywords:   []string{"roblox", "roblox login"},
-		Names:           []string{"roblox"},
+		TitleKeywords: []string{"roblox", "roblox login"},
+		// Robux is Roblox's own currency; "Free Robux" pages are lures.
+		Names:           []string{"roblox", "robux"},
 		OfficialDomains: []string{"roblox.com"},
 	},
 	"Blizzard": {
@@ -628,6 +662,11 @@ var HighValueBrands = map[string]BrandEntry{
 		Names:           []string{"usps"},
 		OfficialDomains: []string{"usps.com"},
 	},
+	"CouriersPlease": {
+		TitleKeywords:   []string{"couriersplease", "couriers please"},
+		Names:           []string{"couriersplease"},
+		OfficialDomains: []string{"couriersplease.com.au"},
+	},
 	"Royal Mail": {
 		TitleKeywords:   []string{"royal mail", "royal mail tracking"},
 		Names:           []string{"royal mail"},
@@ -731,6 +770,12 @@ var HighValueBrands = map[string]BrandEntry{
 	},
 
 	// ── Webmail & Hosting Logins ──────────────────────────────────────────────
+	"AR24": {
+		// French registered email (lettre recommandée électronique).
+		TitleKeywords:   []string{"accueil ar24", "webmail ar24", "ar24 connexion", "service ar24", "espace ar24"},
+		Names:           []string{"ar24"},
+		OfficialDomains: []string{"ar24.fr"},
+	},
 	"ConstructConnect": {
 		// Construction bid invitations are a common lure for its login page.
 		TitleKeywords:   []string{"constructconnect"},
@@ -959,9 +1004,15 @@ var HighValueBrands = map[string]BrandEntry{
 		OfficialDomains: []string{"lidl.com", "lidl.de", "lidl.fr", "lidl.co.uk", "lidl.es", "lidl.it"},
 	},
 	"Aldi": {
-		TitleKeywords:   []string{"aldi login", "aldi log in", "aldi sign in", "aldi account", "aldi verification", "my aldi"},
-		Names:           []string{"aldi"},
-		OfficialDomains: []string{"aldi.com", "aldi.us", "aldi.co.uk", "aldi-nord.de", "aldi-sued.de"},
+		TitleKeywords: []string{"aldi login", "aldi log in", "aldi sign in", "aldi account", "aldi verification", "my aldi"},
+		Names:         []string{"aldi"},
+		// Fake shops are titled just "ALDI".
+		ExactTitles: []string{"aldi"},
+		OfficialDomains: []string{
+			"aldi.com", "aldi.us", "aldi.co.uk", "aldi-nord.de", "aldi-sued.de", "aldi.pl", "aldi.fr",
+			"aldi.es", "aldi.it", "aldi.nl", "aldi.be", "aldi.ie", "aldi.ch", "aldi.pt", "aldi.dk",
+			"aldi.com.au", "aldi.si", "aldi.hu", "hofer.at", "hofer.si",
+		},
 	},
 	"Nike": {
 		TitleKeywords:   []string{"nike login", "nike log in", "nike sign in", "nike account", "nike verification", "my nike"},
@@ -1296,6 +1347,21 @@ var HighValueBrands = map[string]BrandEntry{
 		TitleKeywords:   []string{"bank of ireland"},
 		OfficialDomains: []string{"bankofireland.com", "boi.com"},
 	},
+	"Irish Life": {
+		TitleKeywords:   []string{"irish life", "my irish life", "irishlife"},
+		Names:           []string{"irishlife"},
+		OfficialDomains: []string{"irishlife.ie"},
+		// Irish Life Health runs separately but under the same name.
+		AlsoOfficial: []string{"irishlifehealth.ie"},
+	},
+	"Banco Galicia": {
+		// Its login is titled just "Galicia"; the bare word also names the
+		// Spanish region (Xunta de Galicia), so only the whole title counts.
+		TitleKeywords:   []string{"banco galicia", "galicia office banking", "online banking galicia"},
+		ExactTitles:     []string{"Galicia"},
+		OfficialDomains: []string{"bancogalicia.com"},
+		AlsoOfficial:    []string{"galicia.ar", "bancogalicia.com.ar"},
+	},
 	"AIB": {
 		TitleKeywords:   []string{"aib internet banking", "allied irish"},
 		OfficialDomains: []string{"aib.ie"},
@@ -1586,6 +1652,14 @@ var HighValueBrands = map[string]BrandEntry{
 	},
 
 	// ── Crypto & Web3 (more) ──────────────────────────────────────────────────
+	"Netcoins": {
+		TitleKeywords:   []string{"netcoins"},
+		OfficialDomains: []string{"netcoins.com", "netcoins.ca", "netcoins.app"},
+	},
+	"BitMart": {
+		TitleKeywords:   []string{"bitmart"},
+		OfficialDomains: []string{"bitmart.com"},
+	},
 	"MoonPay": {
 		TitleKeywords:   []string{"moonpay"},
 		OfficialDomains: []string{"moonpay.com"},
@@ -1631,7 +1705,7 @@ var HighValueBrands = map[string]BrandEntry{
 		OfficialDomains: []string{"blockchain.com"},
 	},
 	"Trezor": {
-		TitleKeywords:   []string{"trezor suite", "trezor login", "trezor log in", "trezor sign in", "trezor account", "trezor verification", "my trezor"},
+		TitleKeywords:   []string{"trezor suite", "trezor login", "trezor log in", "trezor sign in", "trezor account", "trezor verification", "my trezor", "trezor.io/start"},
 		Names:           []string{"trezor"},
 		OfficialDomains: []string{"trezor.io"},
 	},
@@ -1703,6 +1777,16 @@ var HighValueBrands = map[string]BrandEntry{
 	},
 
 	// ── Telecom & Internet Providers ──────────────────────────────────────────
+	"TalkTalk": {
+		TitleKeywords:   []string{"talktalk login", "talktalk sign in", "my talktalk", "talktalk mail", "talktalk webmail"},
+		Names:           []string{"talktalk"},
+		OfficialDomains: []string{"talktalk.co.uk", "talktalk.net", "talktalkbusiness.co.uk"},
+	},
+	"UPC": {
+		// "UPC" alone is also a barcode; only its webmail titles count.
+		TitleKeywords:   []string{"upc webadmin", "upc webmail", "upc mail login", "hispeed mail"},
+		OfficialDomains: []string{"upc.ch", "sunrise.ch"},
+	},
 	"Xfinity": {
 		TitleKeywords:   []string{"xfinity login", "xfinity log in", "xfinity sign in", "xfinity account", "xfinity verification", "my xfinity", "comcast login", "comcast log in", "comcast sign in", "comcast account", "comcast verification", "my comcast"},
 		Names:           []string{"xfinity", "comcast"},
@@ -2122,6 +2206,14 @@ var HighValueBrands = map[string]BrandEntry{
 		TitleKeywords:   []string{"epfo", "uan member"},
 		OfficialDomains: []string{"epfindia.gov.in"},
 	},
+	"Parivahan": {
+		// India's vehicle and traffic-fine portal, impersonated by fake
+		// "pending e-challan" texts (mparivahan.ldop.com). The bare name is
+		// only a Name: news sites put "Parivahan" in ordinary headlines.
+		TitleKeywords:   []string{"mparivahan", "parivahan sewa", "parivahan seva", "parivahan e-challan", "parivahan echallan"},
+		Names:           []string{"parivahan"},
+		OfficialDomains: []string{"parivahan.gov.in"},
+	},
 	"DigiLocker": {
 		TitleKeywords:   []string{"digilocker"},
 		OfficialDomains: []string{"digilocker.gov.in"},
@@ -2138,12 +2230,26 @@ var HighValueBrands = map[string]BrandEntry{
 		TitleKeywords:   []string{"sars efiling"},
 		OfficialDomains: []string{"sars.gov.za"},
 	},
+	"Government of India": {
+		// Fake tax-penalty and challan notices are titled in Hindi: "कर दंड
+		// सूचना - भारत सरकार" (tax penalty notice, Government of India). Every
+		// government site is under gov.in or nic.in, so these are all its own;
+		// they're kept out of OfficialDomains so "gov" isn't hunted for in names.
+		TitleKeywords: []string{"भारत सरकार", "government of india", "आयकर विभाग"},
+		AlsoOfficial:  []string{"gov.in", "nic.in", "india.gov.in", "mygov.in"},
+	},
 	"MyGov India": {
 		TitleKeywords:   []string{"mygov india"},
 		OfficialDomains: []string{"mygov.in"},
 	},
 
 	// ── Travel & Transport ────────────────────────────────────────────────────
+	"Marriott": {
+		// Hotel names fill travel blogs' titles; only on a login or payment page.
+		TitleKeywords:   []string{"marriott bonvoy login", "marriott login", "marriott sign in"},
+		Names:           []string{"marriott", "ritz-carlton", "ritz carlton"},
+		OfficialDomains: []string{"marriott.com", "ritzcarlton.com", "marriott.co.uk"},
+	},
 	"Booking.com": {
 		TitleKeywords:   []string{"booking.com"},
 		OfficialDomains: []string{"booking.com"},
@@ -2240,6 +2346,16 @@ var HighValueBrands = map[string]BrandEntry{
 	},
 
 	// ── Gaming (more) ─────────────────────────────────────────────────────────
+	"bet365": {
+		// Tipster and affiliate sites name it too; the bare name only counts
+		// on a login or payment page.
+		TitleKeywords: []string{"bet365 login", "bet365 log in", "bet365 sign in"},
+		Names:         []string{"bet365"},
+		OfficialDomains: []string{
+			"bet365.com", "bet365.es", "bet365.it", "bet365.gr", "bet365.dk", "bet365.mx",
+			"bet365.com.au", "bet365.ca", "bet365.de", "bet365.bet.br",
+		},
+	},
 	"Minecraft": {
 		TitleKeywords:   []string{"minecraft login", "minecraft log in", "minecraft sign in", "minecraft account", "minecraft verification", "my minecraft"},
 		Names:           []string{"minecraft"},

@@ -141,6 +141,12 @@ func applyExceptions(in *Input, out *Output) {
 			sameBrand(in.Domain, out.RedirectionResult.FinalURLHost)) {
 		out.RedirectionResult.HasDomainJump = false
 	}
+	// One of a brand's own domains forwarding to another of them
+	// (bancogalicia.com → galicia.ar) is the brand's own move, ranked or not:
+	// both are domains we list for it.
+	if out.RedirectionResult.HasDomainJump && brandRuns(in.Domain, out.RedirectionResult.FinalURLHost) {
+		out.RedirectionResult.HasDomainJump = false
+	}
 	// Blogger moves a blog between its country addresses
 	// (sbdrg.blogspot.fi → sbdrg.blogspot.com): the same blog.
 	if out.RedirectionResult.HasDomainJump && sameBlog(hostOf(in.URL), out.RedirectionResult.FinalURLHost) {

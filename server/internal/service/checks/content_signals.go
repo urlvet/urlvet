@@ -143,8 +143,9 @@ type ProviderBlock struct {
 }
 
 // cloudflareWarningRe matches the title of Cloudflare's interstitial for sites
-// it has flagged: "Suspected Phishing | Cloudflare", "Suspected Malware | Cloudflare".
-var cloudflareWarningRe = regexp.MustCompile(`(?i)^suspected (phishing|malware)\s*\|\s*cloudflare$`)
+// it has flagged: "Suspected Phishing | Cloudflare", "Suspected Malware |
+// Cloudflare", "Suspected Misleading Website | Cloudflare".
+var cloudflareWarningRe = regexp.MustCompile(`(?i)^suspected (phishing|malware|misleading) ?(website)?\s*\|\s*cloudflare$`)
 
 // detectProviderBlock recognises a host's or CDN's own warning page in place
 // of the site. These come from the provider's abuse team, so they're a

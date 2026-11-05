@@ -37,6 +37,7 @@ var UserPageHosts = map[string]string{
 	"lhub.to":           "LinkHub",
 	"portaly.cc":        "Portaly",
 	"unbouncepages.com": "Unbounce",
+	"grade.us":          "Grade.us",
 	// Path-per-bucket storage on a ranked domain.
 	"storageapi.fleek.co": "Fleek Storage",
 }

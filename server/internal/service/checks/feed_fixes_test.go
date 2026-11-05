@@ -198,3 +198,75 @@ func TestBrandMismatch_ExactTitle(t *testing.T) {
 		t.Errorf("longer title flagged as %s", r.BrandFound)
 	}
 }
+
+func TestDetectProviderBlock_Misleading(t *testing.T) {
+	resp := &http.Response{StatusCode: 403, Header: http.Header{}}
+	if b := detectProviderBlock(resp, "Suspected Misleading Website | Cloudflare"); b == nil || b.Reason != "misleading" {
+		t.Errorf("Cloudflare misleading interstitial = %+v", b)
+	}
+}
+
+// OpenPhish, Nov 2026: titles that named a brand but weren't matched.
+func TestBrandMismatch_Nov2026Feed(t *testing.T) {
+	tests := []struct{ domain, title, want string }{
+		// Google's own sign-in page title; "google account" alone missed the plural.
+		{"digitalinv.aeronationaviation.com", "Sign in – Google Accounts", "Google"},
+		{"oats.gdmaoka.com", "TP钱包官网正版下载", "TokenPocket"},
+		{"muyiai.com", "कर दंड सूचना - भारत सरकार", "Government of India"},
+		{"sushiswap.xyz", "Swap | Sushi 🍣", "Sushi"},
+		// Combining marks between the letters.
+		{"loginitrusticapital.webador.com", "i̇T̲r̲u̲s̲t̲C̲a̲p̲i̲t̲a̲l̲ Login", "iTrustCapital"},
+		{"e1u-rldcirishlifed.cloudbasedsolutionz.com", "My Irish Life | Login", "Irish Life"},
+	}
+	for _, tc := range tests {
+		if r := CheckBrandMismatch(tc.domain, tc.title); !r.IsMismatch || r.BrandFound != tc.want {
+			t.Errorf("%s %q = %+v, want %s", tc.domain, tc.title, r, tc.want)
+		}
+	}
+	// The real sites, and words that only start the same.
+	for domain, title := range map[string]string{
+		"accounts.google.com":   "Sign in – Google Accounts",
+		"incometax.gov.in":      "आयकर विभाग, भारत सरकार",
+		"www.india.gov.in":      "National Portal of India | भारत सरकार",
+		"www.sushi.com":         "Swap | Sushi",
+		"www.sushi-bar.example": "Sushi Bar | Order online",
+	} {
+		if r := CheckBrandMismatch(domain, title); r.IsMismatch {
+			t.Errorf("%s %q flagged as %s", domain, title, r.BrandFound)
+		}
+	}
+	if r := CheckBrandMismatch("blog.example.in", "भारतीय सरकारी योजनाएँ"); r.IsMismatch {
+		t.Errorf("a longer Hindi word matched %s", r.BrandFound)
+	}
+}
+
+// OpenPhish, Nov 5 2026.
+func TestBrandMismatch_Nov5Feed(t *testing.T) {
+	tests := []struct{ domain, title, want string }{
+		{"citi.youngcodelord.com", "Online Banking, Mortgages, Personal Loans, Investing | Citi.com", "Citibank"},
+		{"citi-login.example", "Online Banking, Mortgages, Personal Loans, Investing | Citi", "Citibank"},
+		{"529motors.com", "Galicia", "Banco Galicia"},
+		{"shopmy.topup-diamonds.com", "Buy Mobile Legends | Up to 2x Bonus Diamonds | Codashop", "Codashop"},
+		{"www.securevalveengine.com", "ExtaZzZ :: Steam Profile", "Steam"},
+		{"steamcommunlty.example", "Steam Community :: ExtaZzZ", "Steam"},
+		{"couriersplease.addliib.com", "CouriersPlease - Track your parcel", "CouriersPlease"},
+	}
+	for _, tc := range tests {
+		if r := CheckBrandMismatch(tc.domain, tc.title); !r.IsMismatch || r.BrandFound != tc.want {
+			t.Errorf("%s %q = %+v, want %s", tc.domain, tc.title, r, tc.want)
+		}
+	}
+	for domain, title := range map[string]string{
+		"steamcommunity.com":        "Steam Community :: ExtaZzZ",
+		"blog.example":              "How to customize your Steam profile",
+		"news.example":              "Galicia travel guide: what to see",
+		"www.xunta.gal":             "Xunta de Galicia - Acceso",
+		"www.codashop.com":          "Buy Mobile Legends | Up to 2x Bonus Diamonds | Codashop",
+		"www.citi.com":              "Online Banking, Mortgages, Personal Loans, Investing | Citi.com",
+		"www.couriersplease.com.au": "CouriersPlease - Track your parcel",
+	} {
+		if r := CheckBrandMismatch(domain, title); r.IsMismatch {
+			t.Errorf("%s %q flagged as %s", domain, title, r.BrandFound)
+		}
+	}
+}

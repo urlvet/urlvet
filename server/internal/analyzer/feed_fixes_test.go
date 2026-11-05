@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -658,5 +659,231 @@ func TestRun6_KitLoginPath(t *testing.T) {
 	resp.DomainInfo = &domaininfo.RegistrationData{AgeDays: &days, AgeKnown: true, CreatedDate: time.Now().AddDate(0, 0, -days)}
 	if got := GenerateResult(resp); hasReason(got.Reasons.GoodReasons, "Long-standing") {
 		t.Errorf("age counted for a planted sign-in page: %v", got.Reasons.GoodReasons)
+	}
+}
+
+// Cases from the October 23 OpenPhish run.
+
+func TestRun11_AdobeBait(t *testing.T) {
+	page := func(url, title string, forms bool) Response {
+		resp := Response{URL: url}
+		resp.ContentData = &checks.PageFormResult{Title: title, HasForms: forms}
+		return resp
+	}
+	for _, tt := range []struct {
+		resp Response
+		want string
+	}{
+		{page("https://docsewallet.com/Adobe_Installer.html", "PDF Viewer", false), "titled as a PDF viewer"},
+		{page("https://danielnegru.com/adobekr.html", "미리보기 이미지", false), "named after Adobe"},
+		{page("https://example.org/share/view", "PDF Viewer", true), "with a form"},
+		{page("https://example.org/share/view", "PDF Viewer", false), ""},                   // a viewer page without a form
+		{page("https://helpx.adobe.com/acrobat/adobe-reader.html", "PDF Viewer", true), ""}, // Adobe's own
+		{page("https://blog.example/2024/how-we-use-adobe-tools", "Our design stack", false), ""},
+	} {
+		if got := adobeBait(tt.resp); (tt.want == "" && got != "") || (tt.want != "" && !strings.Contains(got, tt.want)) {
+			t.Errorf("adobeBait(%s, %q) = %q, want %q", tt.resp.URL, tt.resp.ContentData.Title, got, tt.want)
+		}
+	}
+}
+
+func TestRun11_HostingSubdomainIsNotRanked(t *testing.T) {
+	saved := rankLookupForVouch
+	rankLookupForVouch = func(d string) int { return map[string]int{"wikipedia.org": 30}[d] }
+	defer func() { rankLookupForVouch = saved }()
+	src := hostingBase("https://tasbxy-x8ki-letl-twmt.n7.xano.io/", "xano.io")
+	src.Features.Rank = 50810 // the platform's rank, before xano.io was a customer-site host
+	if worthFollowing(src, "https://www.wikipedia.org/") {
+		t.Error("a hosting subdomain landing on wikipedia.org was followed: that's cloaking")
+	}
+}
+
+func TestRun11_NewBrands(t *testing.T) {
+	for host, title := range map[string]string{
+		"nettcoinsloogie.webflow.io":       "Netcoins | Login _ Sign In",
+		"bitmmaertlogin.webflow.io":        "Bitmart® Login^%: Your Secure Access",
+		"gemxloginn.webflow.io":            "Gemini ActiveTrader® Crypto Trading Platform",
+		"trezo-started.teleporthq.app":     "Trézor.io/Start — Starting Up™ Your Device",
+		"accueilservicear24.jimdofree.com": "Accueil au service AR24 - Site",
+		"webs-serv-hisp-eed-ch.weebly.com": "UPC WebAdmin",
+	} {
+		if r := checks.CheckBrandMismatch(host, title); !r.IsMismatch {
+			t.Errorf("%q on %s not flagged", title, host)
+		}
+	}
+	if r := checks.CheckBrandNames("talktalk.kalpa.adametline.com", "TalkTalk"); !r.IsMismatch {
+		t.Error("TalkTalk login title not matched by name")
+	}
+	if r := checks.CheckBrandNames("rblx-robux-10k.blogspot.com", "Free Robux"); !r.IsMismatch || r.BrandFound != "Roblox" {
+		t.Errorf("Free Robux = %+v", r)
+	}
+	if r := checks.CheckBrandMismatch("www.talktalk.co.uk", "TalkTalk Login"); r.IsMismatch {
+		t.Error("TalkTalk's own login flagged")
+	}
+}
+
+// Cases from the October 23 multi-source run (OpenPhish, phishunt.io, CERT
+// Polska, Phishing.Database).
+
+func TestRun13_ShortBrandBesideSecurityWord(t *testing.T) {
+	for domain, want := range map[string]bool{
+		"hsbc-sec.com":      true,
+		"verify-dhl.net":    true,
+		"ups-tracking.info": true,
+		"ups-and-downs.com": false, // not a security word
+		"web-security.net":  false, // "web" is an everyday word
+		"hsbcsecure.com":    false, // not a whole word
+		"hsbc.com":          false, // the brand's own
+	} {
+		r := typosquat.CheckTyposquatting(domain)
+		if got := r.IsComboSquat; got != want {
+			t.Errorf("CheckTyposquatting(%q) combo = %v, want %v (%+v)", domain, got, want, r)
+		}
+	}
+}
+
+func TestRun13_Titles(t *testing.T) {
+	for title, want := range map[string]bool{
+		"Crescera — AI platform for automated trading":            true,
+		"Keenhaven Wealth — AI platform for systematic investing": true,
+		"AI platform for teams":                                   false, // no "Name —" template
+	} {
+		if got := aiPlatformTitle.MatchString(title); got != want {
+			t.Errorf("aiPlatformTitle(%q) = %v, want %v", title, got, want)
+		}
+	}
+	for title, want := range map[string]bool{
+		"谷歌浏览器下载中心":                               true,
+		"谷歌浏览器免费下载 - 官方原版高速下载 - Google Chrome":    true,
+		"Google Chrome官网 - Google Chrome 网络浏览器":   true,
+		"How to clear the cache in Google Chrome": false,
+	} {
+		if got := chromeDownloadTitle.MatchString(title); got != want {
+			t.Errorf("chromeDownloadTitle(%q) = %v, want %v", title, got, want)
+		}
+	}
+	if r := checks.CheckBrandMismatch("fakeshop.pl", "ALDI"); !r.IsMismatch || r.BrandFound != "Aldi" {
+		t.Errorf("ALDI fake shop = %+v", r)
+	}
+	if r := checks.CheckBrandMismatch("www.aldi.pl", "ALDI"); r.IsMismatch {
+		t.Error("aldi.pl flagged")
+	}
+	if r := checks.CheckBrandMismatch("recipes.example", "ALDI finds for this week"); r.IsMismatch {
+		t.Error("a longer title naming ALDI flagged")
+	}
+}
+
+func TestRun13_YoungAIPlatformOnly(t *testing.T) {
+	page := func(days int) Result {
+		resp := Response{URL: "https://crescera.example/"}
+		resp.DomainInfo = &domaininfo.RegistrationData{AgeDays: &days, AgeKnown: true, CreatedDate: time.Now().AddDate(0, 0, -days)}
+		resp.ContentData = &checks.PageFormResult{Title: "Crescera — AI platform for automated trading"}
+		return GenerateResult(resp)
+	}
+	if !hasReason(page(10).Reasons.BadReasons, "AI platform") {
+		t.Error("10-day-old AI platform scam not flagged")
+	}
+	if hasReason(page(800).Reasons.BadReasons, "AI platform") {
+		t.Error("an established AI startup flagged")
+	}
+}
+
+func TestRun13_VictimLoginLosesAge(t *testing.T) {
+	resp := Response{URL: "https://webactivity.report/TheCowboyBankofTexas/?email=Y2JyZXdzdGVyQGNvd2JveWJhbmsuY29t"}
+	days := 3400
+	resp.DomainInfo = &domaininfo.RegistrationData{AgeDays: &days, AgeKnown: true, CreatedDate: time.Now().AddDate(0, 0, -days)}
+	resp.ContentData = &checks.PageFormResult{Title: "Quarantine Portal", HasForms: true, HasLoginForm: true}
+	if got := GenerateResult(resp); hasReason(got.Reasons.GoodReasons, "Long-standing") {
+		t.Errorf("age counted for a login that greets its target: %v", got.Reasons.GoodReasons)
+	}
+}
+
+func TestRun13_CloudflareMisleading(t *testing.T) {
+	resp := hostingBase("https://sp15ct-zavqor-biz-kelun-mavix.pages.dev/", "pages.dev")
+	resp.ContentData = &checks.PageFormResult{ProviderBlock: &checks.ProviderBlock{Provider: "Cloudflare", Reason: "misleading"}}
+	if got := GenerateResult(resp); got.Verdict != "Risky" || !hasReason(got.Reasons.BadReasons, "suspected a misleading site") {
+		t.Errorf("%s %v", got.Verdict, got.Reasons.BadReasons)
+	}
+}
+
+// A fake mparivahan app download page: the subdomain resolved, its registered
+// domain ldop.com didn't, so looking up the domain hid the server's address.
+func TestIPLookupHost_UsesScannedHost(t *testing.T) {
+	tests := []struct{ url, domain, want string }{
+		{"https://mparivahan.ldop.com/362472/", "ldop.com", "mparivahan.ldop.com"},
+		{"https://WWW.Example.com/", "example.com", "www.example.com"},
+		{"http://192.0.2.10:8080/x", "192.0.2.10", "192.0.2.10"},
+		{"://bad", "example.com", "example.com"}, // unparsable: fall back to the domain
+	}
+	for _, tt := range tests {
+		if got := ipLookupHost(&Input{URL: tt.url, Domain: tt.domain}); got != tt.want {
+			t.Errorf("%s: got %q, want %q", tt.url, got, tt.want)
+		}
+	}
+}
+
+// Cases from the November 5 OpenPhish run.
+
+func TestNov5_FakeOWAPath(t *testing.T) {
+	for url, want := range map[string]bool{
+		"http://christianbased.org/owa.auth.logon.aspx/":             true,
+		"https://example.org/owa/auth/login.php":                     true,
+		"https://mail.contoso.example/owa/auth/logon.aspx?replace=1": false, // a real Exchange server
+		"https://example.org/blog/owa-tips":                          false,
+	} {
+		if got := fakeOWAPath(url); got != want {
+			t.Errorf("fakeOWAPath(%s) = %v, want %v", url, got, want)
+		}
+	}
+
+	resp := safeBase()
+	resp.URL = "http://christianbased.org/owa.auth.logon.aspx/"
+	resp.Features.Rank = 0
+	days := 7000
+	resp.DomainInfo = &domaininfo.RegistrationData{AgeDays: &days, AgeKnown: true, CreatedDate: time.Now().AddDate(0, 0, -days)}
+	resp.ContentData = &checks.PageFormResult{Title: "Sign in", HasLoginForm: true, HasForms: true}
+	got := GenerateResult(resp)
+	if !hasReason(got.Reasons.BadReasons, "Outlook") || hasReason(got.Reasons.GoodReasons, "Long-standing") {
+		t.Errorf("fake OWA page on an old domain: bad %v, good %v", got.Reasons.BadReasons, got.Reasons.GoodReasons)
+	}
+}
+
+// luredout.com, nearly 10 years old: Adobe_Installer-style file titled
+// "PDF Viewer". Both signs at once outweigh the domain's age.
+func TestNov5_AdobeBaitOnOldDomain(t *testing.T) {
+	resp := safeBase()
+	resp.URL = "https://luredout.com/carolinavet_adobeDocsInvite.html"
+	resp.Features.Rank = 0
+	days := 3600
+	resp.DomainInfo = &domaininfo.RegistrationData{AgeDays: &days, AgeKnown: true, CreatedDate: time.Now().AddDate(0, 0, -days)}
+	resp.ContentData = &checks.PageFormResult{Title: "PDF Viewer"}
+	if !adobeBaitStrong(resp) {
+		t.Fatal("adobeBaitStrong missed a named and titled Adobe page")
+	}
+	got := GenerateResult(resp)
+	if hasReason(got.Reasons.GoodReasons, "Long-standing") {
+		t.Errorf("age counted for a fake Adobe viewer: %v", got.Reasons.GoodReasons)
+	}
+	// One sign alone stays the milder case.
+	resp.ContentData.Title = "Download"
+	if adobeBaitStrong(resp) {
+		t.Error("a page only named after Adobe counted as the strong case")
+	}
+}
+
+// bancogalicia.com, unranked, forwards to galicia.ar: both are Banco Galicia's.
+// An unranked site forwarding to a brand it doesn't belong to still jumps.
+func TestNov5_OwnDomainRedirectUnranked(t *testing.T) {
+	jump := func(domain, final, host string) bool {
+		out := &Output{}
+		out.RedirectionResult = checks.RedirectionResult{IsRedirected: true, HasDomainJump: true, FinalURL: final, FinalURLHost: host}
+		applyExceptions(&Input{URL: "https://www." + domain + "/", Domain: domain}, out)
+		return out.RedirectionResult.HasDomainJump
+	}
+	if jump("bancogalicia.com", "https://www.galicia.ar/personas", "www.galicia.ar") {
+		t.Error("Banco Galicia's move to galicia.ar counted as a jump")
+	}
+	if !jump("galicia-clientes.example", "https://www.galicia.ar/personas", "www.galicia.ar") {
+		t.Error("an unrelated site forwarding to Galicia lost its jump")
 	}
 }

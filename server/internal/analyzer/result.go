@@ -195,10 +195,15 @@ func GenerateResult(resp Response) Result {
 			// Phishing domains are used within weeks of registration and burn
 			// out fast; one that has lasted a few months isn't that profile.
 			neutralReasons = append(neutralReasons, fmt.Sprintf("Fairly new domain (%s old).", ageHuman))
-		case (resp.Features.Rank == 0 || resp.Features.Rank > wellKnownRank) && kitLoginPath(resp.URL):
+		case (resp.Features.Rank == 0 || resp.Features.Rank > wellKnownRank) &&
+			(kitLoginPath(resp.URL) || (victimAddressInLink(resp.URL) && resp.ContentData != nil && resp.ContentData.HasLoginForm)):
 			// Hacked sites keep their age: a phishing kit dropped on an old
 			// domain borrows years of history it had no part in.
 			neutralReasons = append(neutralReasons, fmt.Sprintf("The domain is %s old, but this link is a sign-in page that looks planted in it, so its age isn't counted.", ageHuman))
+		case (resp.Features.Rank == 0 || resp.Features.Rank > wellKnownRank) && adobeBaitStrong(resp):
+			// Fake Adobe viewers are dropped on hacked sites the same way
+			// (luredout.com, nearly 10 years old).
+			neutralReasons = append(neutralReasons, fmt.Sprintf("The domain is %s old, but this page looks planted in it, so its age isn't counted.", ageHuman))
 		case age <= threeYearsDays:
 			goodReasons = append(goodReasons, fmt.Sprintf("Operational for %s.", ageHuman))
 			trustScore += 10
@@ -355,6 +360,35 @@ func GenerateResult(resp Response) Result {
 	}
 
 	// --- 11. Page Content & Phishing Signals ---
+	// Outlook's login address in a form the real Outlook never serves: on PHP,
+	// or with its folders run together into one name.
+	if (resp.Features.Rank == 0 || resp.Features.Rank > wellKnownRank) && fakeOWAPath(resp.URL) {
+		badReasons = append(badReasons, "The link imitates the address of Outlook's sign-in page, but real Outlook pages never look like this. Phishing kits use it to pass as a work email login.")
+		riskScore += 60
+	}
+	if why := adobeBait(resp); why != "" {
+		badReasons = append(badReasons, why)
+		riskScore += 40
+		if adobeBaitStrong(resp) {
+			riskScore += 30
+		}
+	}
+	// The template's newer wording ("Crescera — AI platform for automated
+	// trading") is also how real AI startups title their sites, so it only
+	// counts on a fresh, unknown domain.
+	if age, known := resp.DomainInfo.Age(); resp.ContentData != nil && resp.Features.Rank == 0 && known && age <= 90 &&
+		aiPlatformTitle.MatchString(resp.ContentData.Title) {
+		badReasons = append(badReasons, "A brand-new site titled as an \"AI platform\" for trading or investing, the template of a common investment scam.")
+		riskScore += 50
+	}
+	// A page claiming to be the official Chrome download on a site that isn't
+	// Google's ships a fake browser.
+	if resp.ContentData != nil && chromeDownloadTitle.MatchString(resp.ContentData.Title) &&
+		!(resp.Features.Rank > 0 && resp.Features.Rank <= wellKnownRank) &&
+		!hostInDomains(hostOf(resp.URL), constants.HighValueBrands["Google"].Domains()) {
+		badReasons = append(badReasons, "The page claims to be the official Google Chrome download, but this isn't Google's site.")
+		riskScore += 100
+	}
 	if resp.ContentData != nil && resp.Features.Rank == 0 && tradingScamTitle.MatchString(resp.ContentData.Title) {
 		badReasons = append(badReasons, "The page uses the title template of fake crypto trading platforms (\"AI Trading Platform | Official Website\"), a common investment scam.")
 		riskScore += 50
@@ -399,8 +433,12 @@ func GenerateResult(resp Response) Result {
 
 		if pb := resp.ContentData.ProviderBlock; pb != nil {
 			switch pb.Reason {
-			case "phishing", "malware":
-				badReasons = append(badReasons, fmt.Sprintf("%s has flagged this page as suspected %s and shows a warning instead of it.", pb.Provider, pb.Reason))
+			case "phishing", "malware", "misleading":
+				what := pb.Reason
+				if what == "misleading" {
+					what = "a misleading site"
+				}
+				badReasons = append(badReasons, fmt.Sprintf("%s has flagged this page as suspected %s and shows a warning instead of it.", pb.Provider, what))
 				riskScore += 100
 			default:
 				badReasons = append(badReasons, fmt.Sprintf("%s has taken this site down.", pb.Provider))
@@ -714,8 +752,16 @@ func brandPageIsBare(resp Response) string {
 // names on one template.
 var tradingScamTitle = regexp.MustCompile(`(?i)\btrading (platform|app|bot|software)\b.{0,20}\bofficial (website|site|gateway|page)\b|^immediate [a-z0-9 ]{2,20}(™|®)?\s*[|:-]\s*(the )?official\b`)
 
+// aiPlatformTitle matches the newer investment-scam template ("Keenhaven
+// Wealth — AI platform for systematic investing").
+var aiPlatformTitle = regexp.MustCompile(`(?i)\s[—–|-]\s*ai(-powered)? (trading |investment )?platform for\b`)
+
+// chromeDownloadTitle matches a title claiming the official Chrome download,
+// in Chinese (谷歌浏览器 官方/官网/下载) or English.
+var chromeDownloadTitle = regexp.MustCompile(`(?i)(谷歌浏览器|google ?chrome|chrome浏览器).{0,20}(官方|官网|下载)|(官方|官网).{0,10}(谷歌浏览器|google ?chrome)|^(download )?google chrome (official|download)`)
+
 // mailLoginTitle matches page titles of email sign-in pages.
-var mailLoginTitle = regexp.MustCompile(`(?i)\b(web ?mail|mail ?(authentication|verification|login|portal)|e-?mail (verification|authentication|login|sign[ -]?in|portal)|mailbox|password protect(ion|ed)|verify your (e-?mail|mailbox|account)|sign ?in ?to (your )?(web)?mail)\b`)
+var mailLoginTitle = regexp.MustCompile(`(?i)\b(web ?mail|mail ?(authentication|verification|login|portal)|e-?mail (verification|authentication|login|sign[ -]?in|portal)|mailbox|password protect(ion|ed)|verify your (e-?mail|mailbox|account)|sign ?in ?to (your )?(web)?mail|quarantine portal|e-?mail quarantine)\b`)
 
 // emailToken is a whole email address; mailMergeField is a mass mailer's
 // placeholder left unfilled ("#[[-Email-]]").
@@ -801,7 +847,17 @@ func hostingRegistration(resp Response) bool {
 var (
 	kitHexToken = regexp.MustCompile(`(?i)[0-9a-f]{16,}`)
 	owaOnPHP    = regexp.MustCompile(`(?i)/owa/.*\.php\b`)
+	// owaDotted is Outlook's login path written with dots as one folder name
+	// (christianbased.org/owa.auth.logon.aspx/). Real OWA is /owa/auth/logon.aspx.
+	owaDotted = regexp.MustCompile(`(?i)owa\.auth\.logon`)
 )
+
+// fakeOWAPath reports whether a link copies Outlook Web Access's login path in
+// a form real OWA never uses.
+func fakeOWAPath(rawURL string) bool {
+	u, err := neturl.Parse(rawURL)
+	return err == nil && (owaOnPHP.MatchString(u.Path) || owaDotted.MatchString(u.Path))
+}
 
 // kitLoginPath reports whether a link is a sign-in page that looks planted:
 // a sign-in path carrying a long hex token in the path or a session-style
@@ -812,7 +868,7 @@ func kitLoginPath(rawURL string) bool {
 	if err != nil {
 		return false
 	}
-	if owaOnPHP.MatchString(u.Path) {
+	if fakeOWAPath(rawURL) {
 		return true
 	}
 	if !loginPathWords.MatchString(u.Path) {
@@ -833,4 +889,59 @@ func kitLoginPath(rawURL string) bool {
 		}
 	}
 	return false
+}
+
+// adobeFile is a page file named after Adobe (Adobe_Installer.html,
+// adobekr.html); pdfViewerTitle is the title fake document viewers use.
+var (
+	adobeFile      = regexp.MustCompile(`(?i)adobe[^/]*\.(s?html?|php)$`)
+	pdfViewerTitle = regexp.MustCompile(`(?i)^\s*(adobe )?(pdf|document) ?viewer\s*$`)
+)
+
+// adobeSigns reports whether the page file is named after Adobe and whether
+// the page is titled as a PDF viewer.
+func adobeSigns(path string, resp Response) (named, titled bool) {
+	return adobeFile.MatchString(path), resp.ContentData != nil && pdfViewerTitle.MatchString(resp.ContentData.Title)
+}
+
+// adobeBaitStrong is adobeBait with both signs at once: a file named after
+// Adobe that is titled as a PDF viewer. Real sites don't name their pages
+// after Adobe's product and then pose as its viewer.
+func adobeBaitStrong(resp Response) bool {
+	if adobeBait(resp) == "" {
+		return false
+	}
+	u, err := neturl.Parse(resp.URL)
+	if err != nil {
+		return false
+	}
+	named, titled := adobeSigns(u.Path, resp)
+	return named && titled
+}
+
+// adobeBait describes a fake Adobe "PDF viewer" page, a common lure for a
+// login to "open the document": a page file named after Adobe, or titled
+// "PDF Viewer", on a little-known site that isn't Adobe's. "" otherwise.
+func adobeBait(resp Response) string {
+	if resp.Features.Rank > 0 && resp.Features.Rank <= wellKnownRank {
+		return ""
+	}
+	host := hostOf(resp.URL)
+	if hostInDomains(host, constants.HighValueBrands["Adobe"].Domains()) {
+		return ""
+	}
+	u, err := neturl.Parse(resp.URL)
+	if err != nil {
+		return ""
+	}
+	named, titled := adobeSigns(u.Path, resp)
+	switch {
+	case named && titled:
+		return "A page named after Adobe and titled as a PDF viewer, on a site that isn't Adobe's: a common lure to make you log in to \"open the document\"."
+	case named:
+		return "A page named after Adobe on a site that isn't Adobe's, a common lure (a fake PDF viewer or installer)."
+	case titled && resp.ContentData.HasForms:
+		return "A \"PDF viewer\" page with a form, on a little-known site: a common lure to make you log in to \"open the document\"."
+	}
+	return ""
 }
