@@ -50,16 +50,29 @@ func (h *ipHasher) key(ip string) string {
 // RateLimiter returns a Gin middleware that limits requests per client IP.
 // IPs are hashed before use; see ipHasher.
 func RateLimiter(limit int64, window time.Duration) gin.HandlerFunc {
+	return rateLimiter("", limit, window)
+}
+
+// LoginRateLimiter is a stricter, separate limit for the admin login, so the
+// password can't be guessed at the global rate. It counts every attempt,
+// successful or not, and doesn't share a counter with RateLimiter.
+func LoginRateLimiter(limit int64, window time.Duration) gin.HandlerFunc {
+	return rateLimiter("login:", limit, window)
+}
+
+// rateLimiter counts requests per client IP under keys starting with prefix,
+// so limiters on overlapping routes keep separate counts.
+func rateLimiter(prefix string, limit int64, window time.Duration) gin.HandlerFunc {
 	c, err := cache.New()
 	if err != nil {
-		logger.Warn("rate limiter cache unavailable, rate limiting disabled", "err", err)
+		logger.Warn("rate limiter cache unavailable, rate limiting disabled", "limiter", prefix, "err", err)
 		return func(ctx *gin.Context) { ctx.Next() }
 	}
 
 	hasher := newIPHasher()
 
 	return func(ctx *gin.Context) {
-		key := hasher.key(ctx.ClientIP())
+		key := prefix + hasher.key(ctx.ClientIP())
 
 		count, err := c.Increment(ctx, key)
 		if err != nil {

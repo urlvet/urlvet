@@ -91,8 +91,9 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/lists/threats", ThreatListHandler)
 		v1.GET("/lists/known-sites", KnownSitesHandler)
 
-		// Admin login — issues a signed session token
-		v1.POST("/admin/login", AdminLoginHandler)
+		// Admin login — issues a signed session token. 5 attempts a minute
+		// per IP on top of the global limit, to slow password guessing.
+		v1.POST("/admin/login", middleware.LoginRateLimiter(5, time.Minute), AdminLoginHandler)
 
 		// Admin — all routes require a valid Bearer token
 		admin := v1.Group("/admin")
