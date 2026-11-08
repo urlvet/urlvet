@@ -19,7 +19,7 @@ export const SHOUTOUTS: Shoutout[] = [
     handle: 'ijesr.org',
     date: 'Apr 26, 2025',
     text: 'An earlier version of this project was referenced and reproduced (👀) in an academic research paper.',
-    url: 'https://www.ijesr.org/index.php/ijesr/article/view/377',
+    url: 'https://ijesr.org/index.php/ijesr/article/view/377',
     flag: '🇮🇳',
   },
   {
