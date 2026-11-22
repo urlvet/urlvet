@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
+  import { browser } from "$app/env";
   import { replaceState } from "$app/navigation";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";

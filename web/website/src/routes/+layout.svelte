@@ -1,11 +1,11 @@
 <script lang="ts">
-  import ThemeToggle from "$lib/components/ThemeToggle.svelte";
-  import { page } from "$app/stores";
-  import Guide from "$lib/components/guide/Guide.svelte";
-  import { vettyMemory } from "$lib/components/guide/store";
-  import { theme } from "$lib/theme";
-  import { REPO } from "$lib/site";
-  import { GITHUB_LOGO } from "$lib/ui/icons";
+  import ThemeToggle from "#lib/components/ThemeToggle.svelte";
+  import { page } from "#lib/page.svelte";
+  import Guide from "#lib/components/guide/Guide.svelte";
+  import { vettyMemory } from "#lib/components/guide/store";
+  import { theme } from "#lib/theme";
+  import { REPO } from "#lib/site";
+  import { GITHUB_LOGO } from "#lib/ui/icons";
   import { onMount } from "svelte";
   import "../app.css";
 

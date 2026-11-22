@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import { formatUrl, getDomainFromUrl, formatUrlForShare, decodeVerdict } from '$lib/utils';
+import { formatUrl, getDomainFromUrl, formatUrlForShare, decodeVerdict } from '#lib/utils';
 
 // Runs on the server for every request, giving bots the correct OG meta tags.
 export const load: PageLoad = ({ url }) => {

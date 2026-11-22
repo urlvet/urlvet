@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
+  import { browser } from "$app/env";
   import { onDestroy } from "svelte";
   import { REPO } from "../../site";
   // <head> tags: per-scan share card when a domain is known, the site card otherwise.

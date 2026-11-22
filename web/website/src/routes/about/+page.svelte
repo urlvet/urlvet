@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { vettyMemory } from "$lib/components/guide/store";
-  import PageCta from "$lib/components/PageCta.svelte";
-  import { REPO } from "$lib/site";
-  import { PILL_OUTLINE } from "$lib/ui/buttons";
-  import { GITHUB_LOGO } from "$lib/ui/icons";
-  import { LINK } from "$lib/ui/text";
+  import { vettyMemory } from "#lib/components/guide/store";
+  import PageCta from "#lib/components/PageCta.svelte";
+  import { REPO } from "#lib/site";
+  import { PILL_OUTLINE } from "#lib/ui/buttons";
+  import { GITHUB_LOGO } from "#lib/ui/icons";
+  import { LINK } from "#lib/ui/text";
   import { tick } from "svelte";
 
   const VETTY = [

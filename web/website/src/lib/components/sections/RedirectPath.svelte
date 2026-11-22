@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
+  import { browser } from "$app/env";
   import { onMount } from "svelte";
 
   // The redirect chain drawn as a path: where you click, each hop, where you land.

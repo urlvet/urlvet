@@ -4,6 +4,14 @@ All notable changes to this project are listed here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/). Versions follow [Semantic Versioning](https://semver.org/); url.vet is in beta (0.x), see [Versioning](.github/CONTRIBUTING.md#versioning).
 
+## [Unreleased]
+
+### Added
+- llms.txt for AI search and assistants
+
+### Security
+- Updated SvelteKit to 3.4 and its adapters, fixing form-parsing DoS, redirect, XSS and route-config advisories
+
 ## [0.4.0] – 2026-11-05 – Beta
 
 ### Added

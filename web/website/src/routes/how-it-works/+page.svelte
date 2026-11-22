@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { env } from "$env/dynamic/public";
-  import Icon from "$lib/components/Icon.svelte";
-  import PageCta from "$lib/components/PageCta.svelte";
-  import { CHECK_GROUPS, TOTAL_CHECKS } from "$lib/data/checks";
-  import { FAQ_GROUPS, faqId, faqText } from "$lib/data/faq";
-  import { REPO } from "$lib/site";
-  import { ICON } from "$lib/ui/icons";
-  import { LINK } from "$lib/ui/text";
+  import { PUBLIC_BASE_URL as BASE_URL_ENV } from "$app/env/public";
+  import Icon from "#lib/components/Icon.svelte";
+  import PageCta from "#lib/components/PageCta.svelte";
+  import { CHECK_GROUPS, TOTAL_CHECKS } from "#lib/data/checks";
+  import { FAQ_GROUPS, faqId, faqText } from "#lib/data/faq";
+  import { REPO } from "#lib/site";
+  import { ICON } from "#lib/ui/icons";
+  import { LINK } from "#lib/ui/text";
   import { onMount } from "svelte";
 
   // Swagger UI is served by the API server itself, next to /api/v1.
   const API_ORIGIN = (() => {
     try {
-      return new URL(env.PUBLIC_BASE_URL || "http://localhost:8080/api/v1").origin;
+      return new URL(BASE_URL_ENV || "http://localhost:8080/api/v1").origin;
     } catch {
       return "http://localhost:8080";
     }

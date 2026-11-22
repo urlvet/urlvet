@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_BASE_URL as BASE_URL_ENV } from '$app/env/public';
 import type {
   ApiResponse,
   DepthResponse,
@@ -16,7 +16,7 @@ import type {
   WhoisResponse,
 } from './types';
 
-const PUBLIC_BASE_URL = env.PUBLIC_BASE_URL || 'http://localhost:8080/api/v1';
+const PUBLIC_BASE_URL = BASE_URL_ENV || 'http://localhost:8080/api/v1';
 
 async function makeRequest<T>(endpoint: string, url: string): Promise<ApiResponse<T>> {
   try {

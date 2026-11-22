@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import satori from 'satori';
 import sharp from 'sharp';
-import { resultCard, siteCard } from '$lib/server/og/cards';
-import { loadFonts } from '$lib/server/og/fonts';
-import { OG } from '$lib/server/og/theme';
+import { resultCard, siteCard } from '#lib/server/og/cards';
+import { loadFonts } from '#lib/server/og/fonts';
+import { OG } from '#lib/server/og/theme';
 
 // Social preview image.
 //   /og                              → site card

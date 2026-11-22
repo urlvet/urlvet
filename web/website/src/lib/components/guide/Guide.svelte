@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
+  import { page } from "#lib/page.svelte";
   import { onDestroy, onMount, tick } from "svelte";
   import { fly, scale } from "svelte/transition";
   import { EXAMPLES } from "../../data/examples";

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import PageCta from "$lib/components/PageCta.svelte";
-  import { REPO } from "$lib/site";
-  import { LINK } from "$lib/ui/text";
+  import PageCta from "#lib/components/PageCta.svelte";
+  import { REPO } from "#lib/site";
+  import { LINK } from "#lib/ui/text";
 
   // Plain-language privacy notice. Keep it in sync with what the server actually does:
   // logging (server/internal/logger, handler/middleware/request_log.go), rate limiting

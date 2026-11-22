@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
+  import { browser } from "$app/env";
   import { PILL_OUTLINE, PILL_SOLID } from "../../ui/buttons";
   import { ICON } from "../../ui/icons";
   import Icon from "../Icon.svelte";

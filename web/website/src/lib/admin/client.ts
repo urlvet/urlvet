@@ -1,7 +1,7 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_BASE_URL as BASE_URL_ENV } from '$app/env/public';
 import type { CacheEntry, ErrorRecord, ReportRecord, ScanRecord, Stats } from './types';
 
-const BASE = env.PUBLIC_BASE_URL || 'http://localhost:8080/api/v1';
+const BASE = BASE_URL_ENV || 'http://localhost:8080/api/v1';
 
 /** Thrown when the admin token is missing, expired or rejected. */
 export class UnauthorizedError extends Error {}
